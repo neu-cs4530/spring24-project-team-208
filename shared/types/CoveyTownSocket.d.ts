@@ -161,6 +161,71 @@ export type ConnectFourColIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export type ConnectFourColor = 'Red' | 'Yellow';
 
+/**
+ * Type for the state of a BattleShip game.
+ * The state of the game is represented as a list of moves, and the playerIDs of the players (blue and green)
+ */
+export interface BattleShipGameState extends WinnableGameState {
+  // The moves in this game
+  moves: ReadonlyArray<BattleShipGuess>;
+  // The playerID of the blue player, if any
+  blue?: PlayerID;
+  // The playerID of the green player, if any
+  green?: PlayerID;
+  // Whether the blue player has set up all ships and is ready to start game
+  blueReady?: boolean;
+  // Whether the green player has set up all ships and is ready to start game
+  greenReady?: boolean;
+  // The color of the player who will make the first move
+  firstPlayer: BattleShipColor;
+}
+
+/**
+ * Type for a move in BattleShip
+ * Columns are lettered A-J, with A being the leftmost column
+ * Rows are numbered 0-9, with 0 being the top row
+ */
+export interface BattleShipGuess {
+  boardColor: BattleShipColor;
+  col: BattleShipColIndex;
+  row: BattleShipRowIndex;
+}
+
+
+/**
+ * Type for repositioning a boat in BattleShip during pre-game phase
+ * Columns are lettered A-J, with A being the leftmost column
+ * Rows are numbered 0-9, with 0 being the top row
+ */
+export interface BattleShipReposition {
+  boardColor: BattleShipColor;
+  boat: BattleShipShipTypes;
+  col: BattleShipColIndex;
+  row: BattleShipRowIndex;
+}
+
+/**
+ * Row indices in BattleShip start at the top of the board and go down
+ */
+export type BattleShipRowIndex = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I'| 'J';
+
+/**
+ * Column indices in BattleShip start at the left of the board and go right
+ */
+export type BattleShipColIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+
+
+/**
+ * Colors for BattleShip are based on the board color of the user
+ */
+export type BattleShipColor = 'Blue' | 'Green';
+
+/**
+ * Different ship types that are possible to place on the board. Each
+ * ship has a different size.
+ */
+export type BattleShipShipTypes = 'Aircraft Carrier' | 'Battleship' | 'Cruiser' | 'Destroyer'| 'Frigate';
+
 export type InteractableID = string;
 export type GameInstanceID = string;
 
