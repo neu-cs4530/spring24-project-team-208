@@ -1,45 +1,47 @@
 import Player from '../../lib/Player';
 import {
-    BattleShipColor,
-    BattleShipGameState,
-    BattleShipGuess,
-    GameMove,
-    PlayerID,
+  BattleShipColor,
+  BattleShipGameState,
+  BattleShipGuess,
+  GameMove,
+  PlayerID,
 } from '../../types/CoveyTownSocket';
 import Game from './Game';
 
 function getOtherPlayerColor(color: BattleShipColor): BattleShipColor {
-    if (color === 'Green') {
-      return 'Blue';
-    }
-    return 'Green';
+  if (color === 'Green') {
+    return 'Blue';
   }
+  return 'Green';
+}
 /**
  * A BattleShipGame is a Game that implements the rules of Battleship.
  * @see https://en.wikipedia.org/wiki/Battleship_(game)#
  */
 
 export default class BattleShipGame extends Game<BattleShipGameState, BattleShipGuess> {
-    private _preferredBlue?: PlayerID;
+  private _preferredBlue?: PlayerID;
 
-    private _preferredGreen?: PlayerID;
-    /**
+  private _preferredGreen?: PlayerID;
+
+  /**
    * Creates a new ConnectFourGame.
    * @param priorGame If provided, the new game will be created such that if either player
    * from the prior game joins, they will be the same color. When the game begins, the default
    * first player is blue, but if either player from the prior game joins the new game
    * (and clicks "start"), the first player will be the other color.
    */
-    public constructor(priorGame?: BattleShipGame) {
-        super({
-            moves: [],
-            status: 'WAITING_FOR_PLAYERS',
-            firstPlayer: getOtherPlayerColor(priorGame?.state.firstPlayer || 'Green'),
-          });
-          this._preferredBlue = priorGame?.state.blue;
-          this._preferredGreen = priorGame?.state.green;
-        }
-    /**
+  public constructor(priorGame?: BattleShipGame) {
+    super({
+      moves: [],
+      status: 'WAITING_FOR_PLAYERS',
+      firstPlayer: getOtherPlayerColor(priorGame?.state.firstPlayer || 'Green'),
+    });
+    this._preferredBlue = priorGame?.state.blue;
+    this._preferredGreen = priorGame?.state.green;
+  }
+
+  /**
    * Joins a player to the game.
    * - Assigns the player to a color (blue or green). If the player was in the prior game, then attempts
    * to reuse the same color if it is not in use. Otherwise, assigns the player to the first
@@ -51,11 +53,11 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    *
    * @param player the player to join the game
    */
-    protected _join(player: Player): void {
-        throw new Error('Method not implemented.');
-    }
+  protected _join(player: Player): void {
+    throw new Error('Method not implemented.');
+  }
 
-    /**
+  /**
    * Indicates that a player is ready to start the game.
    *
    * Updates the game state to indicate that the player is ready to start the game.
@@ -72,11 +74,11 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    *
    * @param player The player who is ready to start the game
    */
-    public startGame(player: Player): void {
-        throw new Error('Method not implemented.');
-    }
+  public startGame(player: Player): void {
+    throw new Error('Method not implemented.');
+  }
 
-    /**
+  /**
    * Removes a player from the game.
    * Updates the game's state to reflect the player leaving.
    *
@@ -89,15 +91,15 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @param player The player to remove from the game
    * @throws InvalidParametersError if the player is not in the game (PLAYER_NOT_IN_GAME_MESSAGE)
    */
-    protected _leave(player: Player): void {
-        throw new Error('Method not implemented.');
-    }
+  protected _leave(player: Player): void {
+    throw new Error('Method not implemented.');
+  }
 
-    /**
-     * TODO: Specify and implement this method.
-     * @param move 
-     */
-    public applyMove(move: GameMove<BattleShipGuess>): void {
-        throw new Error('Method not implemented.');
-    }
+  /**
+   * TODO: Specify and implement this method.
+   * @param move
+   */
+  public applyMove(move: GameMove<BattleShipGuess>): void {
+    throw new Error('Method not implemented.');
+  }
 }

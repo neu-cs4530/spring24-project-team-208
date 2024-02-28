@@ -1,18 +1,22 @@
 import GameArea from './GameArea';
 import BattleShipGame from './BattleShipGame';
 import Player from '../../lib/Player';
-import { InteractableType, InteractableCommand, InteractableCommandReturnType } from '../../types/CoveyTownSocket';
+import {
+  InteractableType,
+  InteractableCommand,
+  InteractableCommandReturnType,
+} from '../../types/CoveyTownSocket';
 /**
  * A TicTacToeGameArea is a GameArea that hosts a TicTacToeGame.
  * @see BattleShipGame
  * @see GameArea
  */
 export default class BattleShipGameArea extends GameArea<BattleShipGame> {
-    protected getType(): InteractableType {
-        throw new Error('Method not implemented.');
-    }
-    
-    /**
+  protected getType(): InteractableType {
+    throw new Error('Method not implemented.');
+  }
+
+  /**
    * Handle a command from a player in this game area.
    * Supported commands:
    * - JoinGame (joins the game `this._game`, or creates a new one if none is in progress)
@@ -34,7 +38,10 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
    *        or gameID does not match the game in progress (GAME_ID_MISSMATCH_MESSAGE)
    *  - Any command besides LeaveGame, GameMove and JoinGame: INVALID_COMMAND_MESSAGE
    */
-    public handleCommand<CommandType extends InteractableCommand>(command: CommandType, player: Player): InteractableCommandReturnType<CommandType> {
-        throw new Error('Method not implemented.');
-    }
+  public handleCommand<CommandType extends InteractableCommand>(
+    command: CommandType,
+    player: Player,
+  ): InteractableCommandReturnType<CommandType> {
+    throw new Error('Method not implemented.');
+  }
 }
