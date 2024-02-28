@@ -221,10 +221,10 @@ export type BattleShipColIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 export type BattleShipColor = 'Blue' | 'Green';
 
 /**
- * Different ship types that are possible to place on the board. Each
- * ship has a different size.
+ * Different ship pieces that are possible to place on the board. A
+ * ship must start and end with a front and end piece.
  */
-export type BattleShipShipTypes = 'Aircraft Carrier' | 'Battleship' | 'Cruiser' | 'Destroyer'| 'Frigate';
+export type BattleShipPiece = 'Front' | 'Middle' | 'End';
 
 export type InteractableID = string;
 export type GameInstanceID = string;
