@@ -1,4 +1,3 @@
-import { Console } from 'console';
 import {
   BattleShipColIndex,
   BattleShipColor,
@@ -98,6 +97,133 @@ describe('BattleShipGame', () => {
   beforeEach(() => {
     game = new BattleShipGame();
   });
+  describe('removeBoat', () => {
+    const blue = createPlayerForTesting();
+    const green = createPlayerForTesting();
+    beforeEach(() => {
+      game.join(blue);
+      game.join(green);
+    });
+    describe('when given a valid removal', () => {
+      it.each([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])(
+        'should remove boat placement from the game state in row/column %d and not throw an error',
+        (idx: number) => {
+          game.placeBoat({
+            gameID: game.id,
+            playerID: blue.id,
+            move: {
+              boardColor: 'Blue',
+              boat: 'End',
+              col: idx as BattleShipColIndex,
+              row: idx as BattleShipRowIndex,
+            },
+          });
+          game.removeBoat({
+            gameID: game.id,
+            playerID: blue.id,
+            move: {
+              boardColor: 'Blue',
+              boat: 'End',
+              col: idx as BattleShipColIndex,
+              row: idx as BattleShipRowIndex,
+            },
+          });
+          expect(game.state.blueBoard.length).toEqual(0);
+        },
+      );
+      it.each(['Front' as BattleShipPiece, 'Middle' as BattleShipPiece, 'End' as BattleShipPiece])(
+        'should remove piece regardless of given boat type for removal',
+        (boatType: BattleShipPiece) => {
+          game.placeBoat({
+            gameID: game.id,
+            playerID: blue.id,
+            move: {
+              boardColor: 'Blue',
+              boat: 'End',
+              col: 0,
+              row: 0,
+            },
+          });
+          game.removeBoat({
+            gameID: game.id,
+            playerID: blue.id,
+            move: {
+              boardColor: 'Blue',
+              boat: boatType,
+              col: 0,
+              row: 0,
+            },
+          });
+          expect(game.state.blueBoard.length).toEqual(0);
+        },
+      );
+      it('should not throw an error if there is no boat in the requested removal space', () => {
+        game.removeBoat({
+          gameID: game.id,
+          playerID: blue.id,
+          move: { boardColor: 'Blue', boat: 'Middle', col: 0, row: 0 },
+        });
+        expect(game.state.blueBoard.length).toEqual(0);
+      });
+    });
+  });
+  describe('when given an invlaid removal request', () => {
+    it('should throw an error if the game is not waiting to start', () => {
+      const player = createPlayerForTesting();
+      game.join(player);
+
+      expect(() =>
+        game.removeBoat({
+          gameID: game.id,
+          playerID: player.id,
+          move: { boardColor: 'Blue', boat: 'End', col: 0, row: 0 },
+        }),
+      ).toThrowError(GAME_NOT_WAITING_TO_START_MESSAGE);
+    });
+    it('should throw an error if the player is not in game', () => {
+      const player = createPlayerForTesting();
+      const blue = createPlayerForTesting();
+      const green = createPlayerForTesting();
+      game.join(blue);
+      game.join(green);
+
+      expect(() =>
+        game.removeBoat({
+          gameID: game.id,
+          playerID: player.id,
+          move: { boardColor: 'Blue', boat: 'End', col: 0, row: 0 },
+        }),
+      ).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
+    });
+    it('should throw an error if blue tries to remove a piece on the green board', () => {
+      const blue = createPlayerForTesting();
+      const green = createPlayerForTesting();
+      game.join(blue);
+      game.join(green);
+
+      expect(() =>
+        game.removeBoat({
+          gameID: game.id,
+          playerID: blue.id,
+          move: { boardColor: 'Green', boat: 'End', col: 0, row: 0 },
+        }),
+      ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
+    });
+    it('should throw an error if green tries to remove a piece on the blue board', () => {
+      const blue = createPlayerForTesting();
+      const green = createPlayerForTesting();
+      game.join(blue);
+      game.join(green);
+
+      expect(() =>
+        game.removeBoat({
+          gameID: game.id,
+          playerID: green.id,
+          move: { boardColor: 'Blue', boat: 'End', col: 0, row: 0 },
+        }),
+      ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
+    });
+  });
   describe('placeBoat', () => {
     const blue = createPlayerForTesting();
     const green = createPlayerForTesting();
@@ -106,19 +232,27 @@ describe('BattleShipGame', () => {
       game.join(green);
     });
     describe('when given a valid move', () => {
-      it('should place the boat in the game state', () => {
-        game.placeBoat({
-          gameID: game.id,
-          playerID: blue.id,
-          move: { boardColor: 'Blue', boat: 'End', col: 0, row: 0 },
-        });
-        expect(game.state.blueBoard[0]).toEqual({
-          boardColor: 'Blue',
-          boat: 'End',
-          col: 0,
-          row: 0,
-        });
-      });
+      it.each([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])(
+        'should add boat placement to the game state in row/column %d and not throw an error',
+        (idx: number) => {
+          game.placeBoat({
+            gameID: game.id,
+            playerID: blue.id,
+            move: {
+              boardColor: 'Blue',
+              boat: 'End',
+              col: idx as BattleShipColIndex,
+              row: idx as BattleShipRowIndex,
+            },
+          });
+          expect(game.state.blueBoard[0]).toEqual({
+            boardColor: 'Blue',
+            boat: 'End',
+            col: idx as BattleShipRowIndex,
+            row: idx as BattleShipColIndex,
+          });
+        },
+      );
       it('should place max boat pieces in game state without throwing an error', () => {
         createBoatPlacementsFromPattern(
           game,

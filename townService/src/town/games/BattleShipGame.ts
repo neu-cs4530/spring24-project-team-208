@@ -218,6 +218,43 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
   }
 
   /**
+   * Removes a boat piece from a board
+   * @param placement
+   */
+  protected _remove(removal: BattleShipPlacement) {
+    let board;
+    if (removal.boardColor === 'Blue') {
+      board = this.state.blueBoard;
+    } else {
+      board = this.state.greenBoard;
+    }
+    const updatedBoard = board.filter(p => p.col !== removal.col && p.row !== removal.row);
+    const newState: BattleShipGameState = {
+      ...this.state,
+      ...(removal.boardColor === 'Blue' && { blueBoard: updatedBoard }),
+      ...(removal.boardColor === 'Green' && { greenBoard: updatedBoard }),
+    };
+    this.state = newState;
+  }
+
+  /**
+   * Removes a ship piece (if possible) from the board based on a given BattleShipPlacement.
+   * Uses player’s ID to determine which color board they are playing as. If no boat is available
+   * to be removed, ignores player's request.
+   * (ignores move.gamePiece and position.boat).
+   *
+   * @param position The reposition attempt to apply, from leftmost corner
+   *
+   * @throws InvalidParametersError if the game is not in WAITING_TO_START mode (GAME_NOT_IN_WAITING_TO_START_MESSAGE)
+   * @throws InvalidParametersError if the player is not in the game (PLAYER_NOT_IN_GAME_MESSAGE)
+   * @throws InvalidParametersError if trying to place on board that isn't theirs (NOT_YOUR_BOARD_MESSAGE)
+   */
+  public removeBoat(position: GameMove<BattleShipPlacement>): void {
+    const newPlacement = this._createBattleShipPlacement(position);
+    this._remove(newPlacement);
+  }
+
+  /**
    * Removes a player from the game.
    * Updates the game's state to reflect the player leaving.
    *
