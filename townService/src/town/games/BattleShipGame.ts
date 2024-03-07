@@ -1,12 +1,22 @@
+import InvalidParametersError, {
+  BOARD_POSITION_NOT_VALID_MESSAGE,
+  GAME_FULL_MESSAGE,
+  PLAYER_ALREADY_IN_GAME_MESSAGE,
+  PLAYER_NOT_IN_GAME_MESSAGE,
+} from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
 import {
   BattleShipColor,
   BattleShipGameState,
   BattleShipGuess,
+  BattleShipPlacement,
   GameMove,
   PlayerID,
 } from '../../types/CoveyTownSocket';
 import Game from './Game';
+
+const GAME_NOT_WAITING_TO_START_MESSAGE = 'Game is not in waiting to start mode';
+const NOT_YOUR_BOARD_MESSAGE = 'Not your board';
 
 function getOtherPlayerColor(color: BattleShipColor): BattleShipColor {
   if (color === 'Green') {
@@ -34,6 +44,8 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
   public constructor(priorGame?: BattleShipGame) {
     super({
       moves: [],
+      blueBoard: [],
+      greenBoard: [],
       status: 'WAITING_FOR_PLAYERS',
       firstPlayer: getOtherPlayerColor(priorGame?.state.firstPlayer || 'Green'),
     });
@@ -53,8 +65,32 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    *
    * @param player the player to join the game
    */
+  // TODO: currently no first player logic implemented. Only basic functionality implemented
+  // so place boats and start game can be tested. Add first player + any other additional functionality
+  // later
   protected _join(player: Player): void {
-    throw new Error('Method not implemented.');
+    if (this.state.blue === player.id || this.state.green === player.id) {
+      throw new InvalidParametersError(PLAYER_ALREADY_IN_GAME_MESSAGE);
+    }
+    if (!this.state.blue) {
+      this.state = {
+        ...this.state,
+        status: 'WAITING_FOR_PLAYERS',
+        blue: player.id,
+      };
+    } else if (!this.state.green) {
+      this.state = {
+        ...this.state,
+        status: 'WAITING_FOR_PLAYERS',
+        green: player.id,
+      };
+    } else {
+      throw new InvalidParametersError(GAME_FULL_MESSAGE);
+    }
+
+    if (this.state.blue && this.state.green) {
+      this.state.status = 'WAITING_TO_START';
+    }
   }
 
   /**
@@ -71,11 +107,114 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    *
    * @throws InvalidParametersError if the player is not in the game (PLAYER_NOT_IN_GAME_MESSAGE)
    * @throws InvalidParametersError if the game is not in the ARRANGING_BOATS state (GAME_NOT_STARTABLE_MESSAGE)
+   * @throws InvalidParametersError if player has not placed all boats yet during pre-game phase (GAME_NOT_STARTABLE_MESSAGE)
    *
    * @param player The player who is ready to start the game
    */
   public startGame(player: Player): void {
     throw new Error('Method not implemented.');
+  }
+
+  /**
+   * Ensures that boat placement is valid given the current state of the game
+   * Follows the rules of "Battle Ship"
+   * @param placement
+   */
+  protected _validatePlacement(placement: BattleShipPlacement): void {
+    const maxBoatPieces = 18;
+    let board;
+    if (placement.boardColor === 'Blue') {
+      board = this.state.blueBoard;
+    } else {
+      board = this.state.greenBoard;
+    }
+
+    // A placement is invalid if the maximum number of boat pieces have been placed
+    if (board.length >= maxBoatPieces) {
+      throw new InvalidParametersError(BOARD_POSITION_NOT_VALID_MESSAGE);
+    }
+    // A placement is invalid if the given position (row, col) is full
+    if (board.filter(p => p.col === placement.col && p.row === placement.row).length > 0) {
+      throw new InvalidParametersError(BOARD_POSITION_NOT_VALID_MESSAGE);
+    }
+  }
+
+  /**
+   * Places a boat piece onto a board
+   * @param placement
+   */
+  protected _place(placement: BattleShipPlacement) {
+    let board;
+    if (placement.boardColor === 'Blue') {
+      board = this.state.blueBoard;
+    } else {
+      board = this.state.greenBoard;
+    }
+    const newPlacement = [...board, placement];
+    const newState: BattleShipGameState = {
+      ...this.state,
+      ...(placement.boardColor === 'Blue' && { blueBoard: newPlacement }),
+      ...(placement.boardColor === 'Green' && { greenBoard: newPlacement }),
+    };
+    this.state = newState;
+  }
+
+  /**
+   * Creates a new battle ship placement, if possible. Throws errors if invalid.
+   *
+   * @param position
+   * @returns newPlacement
+   */
+  protected _createBattleShipPlacement(position: GameMove<BattleShipPlacement>) {
+    if (this.state.status !== 'WAITING_TO_START') {
+      throw new InvalidParametersError(GAME_NOT_WAITING_TO_START_MESSAGE);
+    }
+    if (
+      (position.playerID === this.state.blue && position.move.boardColor !== 'Blue') ||
+      (position.playerID === this.state.green && position.move.boardColor !== 'Green')
+    ) {
+      throw new InvalidParametersError(NOT_YOUR_BOARD_MESSAGE);
+    }
+
+    let gamePiece: BattleShipColor;
+    if (position.playerID === this.state.blue) {
+      gamePiece = 'Blue';
+    } else if (position.playerID === this.state.green) {
+      gamePiece = 'Green';
+    } else {
+      throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
+    }
+
+    const newPlacement = {
+      boardColor: gamePiece,
+      boat: position.move.boat,
+      col: position.move.col,
+      row: position.move.row,
+    };
+
+    return newPlacement;
+  }
+
+  /**
+   * Places a ship piece on the board based on a given BattleShipPlacement.
+   * Uses player’s ID to determine which color board they are playing as
+   * (ignores move.gamePiece).
+   *
+   * Validates the position (valid boat is handled in start game), and, if
+   * it is valid, applies it to the board.
+   *
+   * @param position The position attempt to apply, from leftmost corner
+   *
+   * @throws InvalidParametersError if the game is not in WAITING_TO_START mode (GAME_NOT_IN_WAITING_TO_START_MESSAGE)
+   * @throws InvalidParametersError if the player is not in the game (PLAYER_NOT_IN_GAME_MESSAGE)
+   * @throws InvalidParametersError if the position is invalid per the rules of BattleShip (BOARD_POSITION_NOT_VALID_MESSAGE)
+   * @throws InvalidParametersError if the maximum number of boat pieces has been added to the board (BOARD_POSITION_NOT_VALID_MESSAGE)
+   * @throws InvalidParametersError if trying to place on board that isn't theirs (NOT_YOUR_BOARD_MESSAGE)
+   */
+  public placeBoat(position: GameMove<BattleShipPlacement>): void {
+    const newPlacement = this._createBattleShipPlacement(position);
+    this._validatePlacement(newPlacement);
+    this._place(newPlacement);
   }
 
   /**
