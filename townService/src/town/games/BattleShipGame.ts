@@ -106,7 +106,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     const numRows = 10;
     const numCols = 10;
 
-    const currBoard: BattleShipPiece[][] = new Array(numRows);
+    const currBoard: (BattleShipPiece | undefined)[][] = new Array(numRows);
     for (let i = 0; i < currBoard.length; i++) {
       currBoard[i] = new Array(numCols).fill(undefined);
     }
@@ -116,29 +116,55 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       currBoard[piece.row][piece.col] = piece.boat;
     }
 
-    // check if all horizontal boats have a front and end piece
-    const stack: BattleShipPiece[] = [];
-    for (let row = 0; row < currBoard.length; row++) {
-      for (let col = 0; col < currBoard[row].length; col++) {
-        if (currBoard[row][col] === 'End') {
-          if (stack.length === 0 || stack.pop() !== 'Front') {
-            return false;
-          }
-        } else if (currBoard[row][col] === 'Front') {
-          stack.push(currBoard[row][col]);
-        }
-      }
-    }
-
+    let isFront = false;
     // check if all vertical boats have a front and end piece
     for (let col = 0; col < currBoard[0].length; col++) {
-      for (let row = 0; row < currBoard.length; row++) {
-        if (currBoard[row][col] === 'End') {
-          if (stack.length === 0 || stack.pop() !== 'Front') {
-            return false;
-          }
-        } else if (currBoard[row][col] === 'Front') {
-          stack.push(currBoard[row][col]);
+      for (let row = 0; row < currBoard.length - 1; row++) {
+        if (isFront && currBoard[row][col] === undefined) {
+          isFront = false;
+        }
+        if (currBoard[row][col] === 'Front' && currBoard[row + 1][col] !== undefined) {
+          currBoard[row][col] = undefined;
+          isFront = true;
+        }
+        if (isFront && currBoard[row][col] === 'End') {
+          currBoard[row][col] = undefined;
+          isFront = false;
+        }
+        if (isFront && currBoard[row][col] === 'Middle') {
+          currBoard[row][col] = undefined;
+        }
+      }
+      isFront = false;
+    }
+
+    // check if all horizontal boats have a front and end piece
+    isFront = false;
+    for (let row = 0; row < currBoard.length; row++) {
+      for (let col = 0; col < currBoard[row].length - 1; col++) {
+        if (isFront && currBoard[row][col] === undefined) {
+          isFront = false;
+        }
+        if (currBoard[row][col] === 'Front' && currBoard[row][col + 1] !== undefined) {
+          currBoard[row][col] = undefined;
+          isFront = true;
+        }
+        if (isFront && currBoard[row][col] === 'End') {
+          currBoard[row][col] = undefined;
+          isFront = false;
+        }
+        if (isFront && currBoard[row][col] === 'Middle') {
+          currBoard[row][col] = undefined;
+        }
+      }
+      isFront = false;
+    }
+
+    for (let row = 0; row < currBoard.length; row++) {
+      for (let col = 0; col < currBoard[row].length; col++) {
+        // return false if there are any non-undefined pieces left
+        if (currBoard[row][col] !== undefined) {
+          return false;
         }
       }
     }
