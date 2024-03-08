@@ -204,7 +204,7 @@ describe('BattleShipGame', () => {
 
       expect(() => game.startGame(blue)).toThrowError(GAME_NOT_STARTABLE_MESSAGE);
     });
-    test('if a horizontal and vertical boat intersect, it should not throw an error', () => {
+    test('if overlapping boats, it should not throw an error', () => {
       const blue = createPlayerForTesting();
       const green = createPlayerForTesting();
       game.join(blue);

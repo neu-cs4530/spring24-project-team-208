@@ -97,81 +97,86 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
   }
 
   /**
+   * Removes valid boats if they are in the correct order (contain a front and end
+   * piece from left to right or from top to bottom).
+   *
+   * @param hasFront
+   * @param row
+   * @param col
+   * @param nextRow
+   * @param nextCol
+   * @param board
+   */
+  private _removeValidBoats(
+    hasFront: boolean,
+    row: number,
+    col: number,
+    nextRow: number,
+    nextCol: number,
+    board: (BattleShipPiece | undefined)[][],
+  ): boolean {
+    const currPiece = board[row][col];
+    if (hasFront && currPiece === undefined) {
+      hasFront = false;
+    }
+    if (currPiece === 'Front' && board[nextRow][nextCol] !== undefined) {
+      board[row][col] = undefined;
+      hasFront = true;
+    }
+    if (hasFront && currPiece === 'End') {
+      board[row][col] = undefined;
+      hasFront = false;
+    }
+    if (hasFront && currPiece === 'Middle') {
+      board[row][col] = undefined;
+    }
+    return hasFront;
+  }
+
+  /**
    * Determines if the finalized pre-game board consists of only valid boats.
    * A board is valid if it has a start and end piece for every boat and
    * has the correct number of boat pieces. If incorrect, player will have
    * to reposition their boats to start the game
    */
-  protected _isValidBoard(board: BattleShipPlacement[]): boolean {
+  protected _isValidBoard(boardPlacements: BattleShipPlacement[]): boolean {
     const numRows = 10;
     const numCols = 10;
 
-    const currBoard: (BattleShipPiece | undefined)[][] = new Array(numRows);
-    for (let i = 0; i < currBoard.length; i++) {
-      currBoard[i] = new Array(numCols).fill(undefined);
-    }
-
     // Convert pieces to board
-    for (const piece of board) {
-      currBoard[piece.row][piece.col] = piece.boat;
+    const board: (BattleShipPiece | undefined)[][] = new Array(numRows);
+    for (let i = 0; i < board.length; i++) {
+      board[i] = new Array(numCols).fill(undefined);
     }
 
-    let isFront = false;
+    for (const piece of boardPlacements) {
+      board[piece.row][piece.col] = piece.boat;
+    }
+
+    let hasFront = false;
     // check if all vertical boats have a front and end piece
-    for (let col = 0; col < currBoard[0].length; col++) {
-      for (let row = 0; row < currBoard.length - 1; row++) {
-        if (isFront && currBoard[row][col] === undefined) {
-          isFront = false;
-        }
-        if (currBoard[row][col] === 'Front' && currBoard[row + 1][col] !== undefined) {
-          currBoard[row][col] = undefined;
-          isFront = true;
-        }
-        if (isFront && currBoard[row][col] === 'End') {
-          currBoard[row][col] = undefined;
-          isFront = false;
-        }
-        if (isFront && currBoard[row][col] === 'Middle') {
-          currBoard[row][col] = undefined;
-        }
+    for (let col = 0; col < board[0].length; col++) {
+      for (let row = 0; row < board.length - 1; row++) {
+        hasFront = this._removeValidBoats(hasFront, row, col, row + 1, col, board);
       }
-      isFront = false;
+      hasFront = false;
     }
 
     // check if all horizontal boats have a front and end piece
-    isFront = false;
-    for (let row = 0; row < currBoard.length; row++) {
-      for (let col = 0; col < currBoard[row].length - 1; col++) {
-        if (isFront && currBoard[row][col] === undefined) {
-          isFront = false;
-        }
-        if (currBoard[row][col] === 'Front' && currBoard[row][col + 1] !== undefined) {
-          currBoard[row][col] = undefined;
-          isFront = true;
-        }
-        if (isFront && currBoard[row][col] === 'End') {
-          currBoard[row][col] = undefined;
-          isFront = false;
-        }
-        if (isFront && currBoard[row][col] === 'Middle') {
-          currBoard[row][col] = undefined;
-        }
+    for (let row = 0; row < board.length; row++) {
+      for (let col = 0; col < board[row].length - 1; col++) {
+        hasFront = this._removeValidBoats(hasFront, row, col, row, col + 1, board);
       }
-      isFront = false;
+      hasFront = false;
     }
 
-    for (let row = 0; row < currBoard.length; row++) {
-      for (let col = 0; col < currBoard[row].length; col++) {
-        // return false if there are any non-undefined pieces left
-        if (currBoard[row][col] !== undefined) {
-          return false;
-        }
-      }
-    }
+    console.log(board);
 
-    // if all checks are valid, returns true if the max number of boat pieces
-    // is correct
-    return board.length === MAX_BOAT_PIECES;
+    // false if there are any non-undefined pieces left or if number of boat pieces is incorrect
+    return (
+      board.every(row => row.every(col => col === undefined)) &&
+      boardPlacements.length === MAX_BOAT_PIECES
+    );
   }
 
   /**
