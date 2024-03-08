@@ -170,8 +170,6 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       hasFront = false;
     }
 
-    console.log(board);
-
     // false if there are any non-undefined pieces left or if number of boat pieces is incorrect
     return (
       board.every(row => row.every(col => col === undefined)) &&
@@ -334,15 +332,14 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
   protected _remove(removal: BattleShipPlacement) {
     let board;
     if (removal.boardColor === 'Blue') {
-      board = this.state.blueBoard;
+      board = this.state.blueBoard.filter(p => p.col !== removal.col || p.row !== removal.row);
     } else {
-      board = this.state.greenBoard;
+      board = this.state.greenBoard.filter(p => p.col !== removal.col || p.row !== removal.row);
     }
-    const updatedBoard = board.filter(p => p.col !== removal.col && p.row !== removal.row);
     const newState: BattleShipGameState = {
       ...this.state,
-      ...(removal.boardColor === 'Blue' && { blueBoard: updatedBoard }),
-      ...(removal.boardColor === 'Green' && { greenBoard: updatedBoard }),
+      ...(removal.boardColor === 'Blue' && { blueBoard: board }),
+      ...(removal.boardColor === 'Green' && { greenBoard: board }),
     };
     this.state = newState;
   }

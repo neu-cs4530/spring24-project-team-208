@@ -282,6 +282,84 @@ describe('BattleShipGame', () => {
       );
       expect(() => game.startGame(green)).toThrowError(GAME_NOT_STARTABLE_MESSAGE);
     });
+    test('if blue board has incorrect vertical boats and repositions, does not throw error twice after fix', () => {
+      const blue = createPlayerForTesting();
+      const green = createPlayerForTesting();
+      game.join(blue);
+      game.join(green);
+      createBoatPlacementsFromPattern(
+        game,
+        'Blue',
+        [
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
+          ['_', 'F', 'M', 'M', 'M', 'E', '_', '_', '_', 'M'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
+          ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
+          ['_', 'F', 'M', 'M', 'M', 'E', '_', 'M', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+        ],
+        blue.id,
+        green.id,
+      );
+      game.removeBoat({
+        gameID: game.id,
+        playerID: blue.id,
+        move: { boardColor: 'Blue', boat: 'End', col: 7, row: 7 },
+      });
+      game.placeBoat({
+        gameID: game.id,
+        playerID: blue.id,
+        move: { boardColor: 'Blue', boat: 'End', col: 7, row: 7 },
+      });
+
+      game.startGame(blue);
+      expect(game.state.blueReady).toBe(true);
+      expect(game.state.greenReady).toBeFalsy();
+      expect(game.state.status).toBe('WAITING_TO_START');
+    });
+    test('if green board has incorrect vertical boats and repositions, does not throw error twice after fix', () => {
+      const blue = createPlayerForTesting();
+      const green = createPlayerForTesting();
+      game.join(blue);
+      game.join(green);
+      createBoatPlacementsFromPattern(
+        game,
+        'Green',
+        [
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
+          ['_', 'F', 'M', 'M', 'M', 'E', '_', '_', '_', 'M'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
+          ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
+          ['_', 'F', 'M', 'M', 'M', 'E', '_', 'M', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+        ],
+        blue.id,
+        green.id,
+      );
+      game.removeBoat({
+        gameID: game.id,
+        playerID: green.id,
+        move: { boardColor: 'Green', boat: 'End', col: 7, row: 3 },
+      });
+      game.placeBoat({
+        gameID: game.id,
+        playerID: green.id,
+        move: { boardColor: 'Green', boat: 'Front', col: 7, row: 3 },
+      });
+
+      game.startGame(green);
+      expect(game.state.blueReady).toBeFalsy();
+      expect(game.state.greenReady).toBe(true);
+      expect(game.state.status).toBe('WAITING_TO_START');
+    });
     describe('if the player is in the game', () => {
       const blue = createPlayerForTesting();
       const green = createPlayerForTesting();
