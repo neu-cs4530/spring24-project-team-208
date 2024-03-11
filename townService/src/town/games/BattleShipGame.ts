@@ -107,7 +107,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @param nextCol
    * @param board
    */
-  private _removeValidBoats(
+  private _isValidBoat(
     hasFront: boolean,
     row: number,
     col: number,
@@ -157,7 +157,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     // check if all vertical boats have a front and end piece
     for (let col = 0; col < board[0].length; col++) {
       for (let row = 0; row < board.length - 1; row++) {
-        hasFront = this._removeValidBoats(hasFront, row, col, row + 1, col, board);
+        hasFront = this._isValidBoat(hasFront, row, col, row + 1, col, board);
       }
       hasFront = false;
     }
@@ -165,7 +165,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     // check if all horizontal boats have a front and end piece
     for (let row = 0; row < board.length; row++) {
       for (let col = 0; col < board[row].length - 1; col++) {
-        hasFront = this._removeValidBoats(hasFront, row, col, row, col + 1, board);
+        hasFront = this._isValidBoat(hasFront, row, col, row, col + 1, board);
       }
       hasFront = false;
     }
@@ -273,7 +273,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @param position
    * @returns newPlacement
    */
-  protected _createBattleShipPlacement(position: GameMove<BattleShipPlacement>) {
+  protected _battleShipPlacement(position: GameMove<BattleShipPlacement>) {
     if (this.state.status !== 'WAITING_TO_START') {
       throw new InvalidParametersError(GAME_NOT_WAITING_TO_START_MESSAGE);
     }
@@ -320,7 +320,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @throws InvalidParametersError if trying to place on board that isn't theirs (NOT_YOUR_BOARD_MESSAGE)
    */
   public placeBoat(position: GameMove<BattleShipPlacement>): void {
-    const newPlacement = this._createBattleShipPlacement(position);
+    const newPlacement = this._battleShipPlacement(position);
     this._validatePlacement(newPlacement);
     this._place(newPlacement);
   }
@@ -357,7 +357,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @param position The reposition attempt to apply, from leftmost corner
    */
   public removeBoat(position: GameMove<BattleShipPlacement>): void {
-    const newPlacement = this._createBattleShipPlacement(position);
+    const newPlacement = this._battleShipPlacement(position);
     this._remove(newPlacement);
   }
 
