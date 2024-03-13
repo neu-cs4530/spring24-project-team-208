@@ -50,7 +50,7 @@ describe('BattleShipGame', () => {
           expect(game.state.green).toBe(green.id);
           expect(game.state.blueReady).toBeFalsy();
           expect(game.state.greenReady).toBeFalsy();
-          expect(game.state.status).toBe('ARRANGING_BOATS');
+          expect(game.state.status).toBe('WAITING_TO_START');
         });
       });
       describe('if the player was green in the last game', () => {
@@ -73,12 +73,12 @@ describe('BattleShipGame', () => {
           expect(secondGame.state.blue).toBe(newBlue.id);
         });
       });
-      it('should set the status to ARRANGING_BOATS if both players are present', () => {
+      it('should set the status to WAITING_TO_START if both players are present', () => {
         const blue = createPlayerForTesting();
         const green = createPlayerForTesting();
         game.join(blue);
         game.join(green);
-        expect(game.state.status).toBe('ARRANGING_BOATS');
+        expect(game.state.status).toBe('WAITING_TO_START');
         expect(game.state.blueReady).toBeFalsy();
         expect(game.state.greenReady).toBeFalsy();
       });
@@ -132,7 +132,7 @@ describe('BattleShipGame', () => {
         game.leave(green);
         expect(game.state).toEqual(stateBeforeLeaving);
       });
-      describe('when the game is waiting to start, with status ARRANGING_BOATS', () => {
+      describe('when the game is waiting to start, with status WAITING_TO_START', () => {
         test('if the player is blue, it sets blue to undefined and status to WAITING_FOR_PLAYERS', () => {
           const blue = createPlayerForTesting();
           const green = createPlayerForTesting();
@@ -169,7 +169,7 @@ describe('BattleShipGame', () => {
           expect(game.state.green).toBe(green.id);
           expect(game.state.blueReady).toBeFalsy();
           expect(game.state.greenReady).toBeFalsy();
-          expect(game.state.status).toBe('ARRANGING_BOATS');
+          expect(game.state.status).toBe('WAITING_TO_START');
 
           const secondGame = new BattleShipGame(game);
           expect(secondGame.state.blue).toBeUndefined();

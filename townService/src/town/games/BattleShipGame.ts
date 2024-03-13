@@ -52,7 +52,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * - Assigns the player to a color (blue or green). If the player was in the prior game, then attempts
    * to reuse the same color if it is not in use. Otherwise, assigns the player to the first
    * available color (blue, then green).
-   * - If both players are now assigned, updates the game status to ARRANGING_BOATS.
+   * - If both players are now assigned, updates the game status to WAITING_TO_START.
    *
    * @throws InvalidParametersError if the player is already in the game (PLAYER_ALREADY_IN_GAME_MESSAGE)
    * @throws InvalidParametersError if the game is full (GAME_FULL_MESSAGE)
@@ -91,7 +91,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       throw new InvalidParametersError(GAME_FULL_MESSAGE);
     }
     if (this.state.blue && this.state.green) {
-      this.state.status = 'ARRANGING_BOATS';
+      this.state.status = 'WAITING_TO_START';
     }
   }
 
@@ -108,7 +108,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    *   - If a player from the last game *left* the game and then joined this one, they will be treated as a new player (not given the same color by preference).   *
    *
    * @throws InvalidParametersError if the player is not in the game (PLAYER_NOT_IN_GAME_MESSAGE)
-   * @throws InvalidParametersError if the game is not in the ARRANGING_BOATS state (GAME_NOT_STARTABLE_MESSAGE)
+   * @throws InvalidParametersError if the game is not in the WAITING_TO_START state (GAME_NOT_STARTABLE_MESSAGE)
    *
    * @param player The player who is ready to start the game
    */
@@ -122,7 +122,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    *
    * If the game state is currently "IN_PROGRESS", updates the game's status to OVER and sets the winner to the other player.
    *
-   * If the game state is currently "ARRANGING_BOATS", updates the game's status to WAITING_FOR_PLAYERS.
+   * If the game state is currently "WAITING_TO_START", updates the game's status to WAITING_FOR_PLAYERS.
    *
    * If the game state is currently "WAITING_FOR_PLAYERS" or "OVER", the game state is unchanged.
    *
@@ -154,7 +154,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     };
     const color = removePlayer(player.id);
     switch (this.state.status) {
-      case 'ARRANGING_BOATS':
+      case 'WAITING_TO_START':
       case 'WAITING_FOR_PLAYERS':
         // no-ops: nothing needs to happen here
         this.state.status = 'WAITING_FOR_PLAYERS';
