@@ -2,6 +2,7 @@ import InvalidParametersError, {
   GAME_FULL_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
+  MOVE_NOT_YOUR_TURN_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
 import {
@@ -168,6 +169,24 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       default:
         // This behavior can be undefined :)
         throw new Error(`Unexpected game status: ${this.state.status}`);
+    }
+  }
+
+  /**
+   * Ensures that "guess" is valid given the current state of the game
+   * Follows the rules of "Battleship"
+   * @param move
+   */
+  protected _validateGuess(move: BattleShipGuess): void {
+    // A guess is invalid if the player is not the current player
+    let nextPlayer: BattleShipColor;
+    if (this.state.firstPlayer === 'Blue') {
+      nextPlayer = this.state.moves.length % 2 === 0 ? 'Blue' : 'Green';
+    } else {
+      nextPlayer = this.state.moves.length % 2 === 0 ? 'Green' : 'Blue';
+    }
+    if (move.boardColor !== nextPlayer) {
+      throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
     }
   }
 
