@@ -302,6 +302,8 @@ describe('BattleShipGame', () => {
           expect(secondGame.state.status).toBe('WAITING_FOR_PLAYERS');
         });
       });
+    });
+  });
   describe('_startGame', () => {
     test('if the status is not WAITING_TO_START, it throws an error', () => {
       const player = createPlayerForTesting();
