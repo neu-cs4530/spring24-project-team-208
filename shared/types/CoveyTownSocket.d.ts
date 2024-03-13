@@ -168,6 +168,10 @@ export type ConnectFourColor = 'Red' | 'Yellow';
 export interface BattleShipGameState extends WinnableGameState {
   // The moves in this game
   moves: ReadonlyArray<BattleShipGuess>;
+  // The blue player's board
+  blueBoard: Array<BattleShipPlacement>;
+  // The green player's board
+  greenBoard: Array<BattleShipPlacement>;
   // The playerID of the blue player, if any
   blue?: PlayerID;
   // The playerID of the green player, if any
@@ -197,17 +201,18 @@ export interface BattleShipGuess {
  * Columns are lettered A-J, with A being the leftmost column
  * Rows are numbered 0-9, with 0 being the top row
  */
-export interface BattleShipReposition {
+export interface BattleShipPlacement {
   boardColor: BattleShipColor;
-  boat: BattleShipShipTypes;
+  boat: BattleShipPiece;
   col: BattleShipColIndex;
   row: BattleShipRowIndex;
 }
 
 /**
- * Row indices in BattleShip start at the top of the board and go down
+ * Row indices in BattleShip start at the top of the board and go down.
+ * Represented as A-J to users.
  */
-export type BattleShipRowIndex = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I'| 'J';
+export type BattleShipRowIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 /**
  * Column indices in BattleShip start at the left of the board and go right
