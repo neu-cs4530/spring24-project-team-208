@@ -79,7 +79,7 @@ export type GameStatus = 'IN_PROGRESS' | 'WAITING_TO_START' | 'OVER' | 'WAITING_
  * Base type for the state of a game
  */
 export interface GameState {
-  status: GameStatus;0
+  status: GameStatus;
 } 
 
 /**
