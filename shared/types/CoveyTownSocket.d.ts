@@ -74,7 +74,7 @@ export interface ViewingArea extends Interactable {
   elapsedTimeSec: number;
 }
 
-export type GameStatus = 'IN_PROGRESS' | 'WAITING_TO_START' | 'OVER' | 'WAITING_FOR_PLAYERS';
+export type GameStatus = 'IN_PROGRESS' | 'WAITING_TO_START' | 'OVER' | 'WAITING_FOR_PLAYERS' | 'ARRANGING_BOATS';
 /**
  * Base type for the state of a game
  */
