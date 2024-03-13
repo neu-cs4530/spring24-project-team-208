@@ -3,6 +3,7 @@ import {
   BattleShipColor,
   BattleShipPiece,
   BattleShipRowIndex,
+  Player,
 } from '../../types/CoveyTownSocket';
 import BattleShipGame from './BattleShipGame';
 import { createPlayerForTesting } from '../../TestUtils';
@@ -95,6 +96,49 @@ function createBoatPlacementsFromPattern(
   }
 }
 
+/**
+ * A helper function that creates a placement of boat pieces for
+ * both green and blue boards.
+ */
+function createValidGame(game: BattleShipGame, blue: Player, green: Player) {
+  createBoatPlacementsFromPattern(
+    game,
+    'Blue',
+    [
+      ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
+      ['_', 'F', 'M', 'M', 'M', 'E', '_', '_', '_', 'M'],
+      ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
+      ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
+      ['_', 'F', 'M', 'M', 'M', 'E', '_', 'M', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+    ],
+    blue.id,
+    green.id,
+  );
+  createBoatPlacementsFromPattern(
+    game,
+    'Green',
+    [
+      ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
+      ['_', 'F', 'M', 'E', '_', 'F', 'E', '_', '_', 'M'],
+      ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
+      ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
+      ['_', 'F', 'M', 'M', 'M', 'E', '_', 'M', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+      ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+    ],
+    blue.id,
+    green.id,
+  );
+}
+
 describe('BattleShipGame', () => {
   let game: BattleShipGame;
   beforeEach(() => {
@@ -183,11 +227,14 @@ describe('BattleShipGame', () => {
     describe('when the player is in the game', () => {
       // NOTE: Below tests are meant to pass but currently fail because startGame not implemented yet
       describe('when the game is in progress', () => {
-        test('if the player is blue, it sets the winner to green and status to OVER', () => {
-          const blue = createPlayerForTesting();
-          const green = createPlayerForTesting();
+        const blue = createPlayerForTesting();
+        const green = createPlayerForTesting();
+        beforeEach(() => {
           game.join(blue);
           game.join(green);
+          createValidGame(game, blue, green);
+        });
+        test('if the player is blue, it sets the winner to green and status to OVER', () => {
           game.startGame(blue);
           game.startGame(green);
           game.leave(blue);
@@ -195,10 +242,6 @@ describe('BattleShipGame', () => {
           expect(game.state.status).toBe('OVER');
         });
         test('if the player is green, it sets the winner to blue and status to OVER', () => {
-          const blue = createPlayerForTesting();
-          const green = createPlayerForTesting();
-          game.join(blue);
-          game.join(green);
           game.startGame(blue);
           game.startGame(green);
           game.leave(green);
@@ -211,6 +254,7 @@ describe('BattleShipGame', () => {
         const green = createPlayerForTesting();
         game.join(blue);
         game.join(green);
+        createValidGame(game, blue, green);
         game.startGame(blue);
         game.startGame(green);
         expect(game.state.green).toBe(green.id);
@@ -222,12 +266,30 @@ describe('BattleShipGame', () => {
         expect(game.state).toEqual(stateBeforeLeaving);
       });
       describe('when the game is waiting to start, with status WAITING_TO_START', () => {
+        const blue = createPlayerForTesting();
+        const green = createPlayerForTesting();
         test('if the player is blue, it sets blue to undefined and status to WAITING_FOR_PLAYERS', () => {
-          const blue = createPlayerForTesting();
-          const green = createPlayerForTesting();
           game.join(blue);
           expect(game.state.blueReady).toBeFalsy();
           game.join(green);
+          createBoatPlacementsFromPattern(
+            game,
+            'Blue',
+            [
+              ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
+              ['_', 'F', 'M', 'M', 'M', 'E', '_', '_', '_', 'M'],
+              ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
+              ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
+              ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
+              ['_', 'F', 'M', 'M', 'M', 'E', '_', 'M', '_', '_'],
+              ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
+              ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
+              ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+              ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ],
+            blue.id,
+            green.id,
+          );
           game.startGame(blue);
           expect(game.state.blueReady).toBeTruthy();
           game.leave(blue);
@@ -236,11 +298,27 @@ describe('BattleShipGame', () => {
           expect(game.state.status).toBe('WAITING_FOR_PLAYERS');
         });
         test('if the player is green, it sets green to undefined and status to WAITING_FOR_PLAYERS', () => {
-          const blue = createPlayerForTesting();
-          const green = createPlayerForTesting();
           game.join(blue);
           game.join(green);
           expect(game.state.greenReady).toBeFalsy();
+          createBoatPlacementsFromPattern(
+            game,
+            'Green',
+            [
+              ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
+              ['_', 'F', 'M', 'E', '_', 'F', 'E', '_', '_', 'M'],
+              ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
+              ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
+              ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
+              ['_', 'F', 'M', 'M', 'M', 'E', '_', 'M', '_', '_'],
+              ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
+              ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
+              ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+              ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ],
+            blue.id,
+            green.id,
+          );
           game.startGame(green);
           expect(game.state.greenReady).toBeTruthy();
           game.leave(green);
@@ -249,8 +327,6 @@ describe('BattleShipGame', () => {
           expect(game.state.status).toBe('WAITING_FOR_PLAYERS');
         });
         test('if the player is blue, and the "preferblue green" player joins, it should add the player as blue', () => {
-          const blue = createPlayerForTesting();
-          const green = createPlayerForTesting();
           game.join(blue);
           game.join(green);
 
@@ -572,42 +648,7 @@ describe('BattleShipGame', () => {
       beforeEach(() => {
         game.join(blue);
         game.join(green);
-        createBoatPlacementsFromPattern(
-          game,
-          'Blue',
-          [
-            ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
-            ['_', 'F', 'M', 'M', 'M', 'E', '_', '_', '_', 'M'],
-            ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
-            ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
-            ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-            ['_', 'F', 'M', 'M', 'M', 'E', '_', 'M', '_', '_'],
-            ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-            ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
-            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ],
-          blue.id,
-          green.id,
-        );
-        createBoatPlacementsFromPattern(
-          game,
-          'Green',
-          [
-            ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
-            ['_', 'F', 'M', 'E', '_', 'F', 'E', '_', '_', 'M'],
-            ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
-            ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
-            ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-            ['_', 'F', 'M', 'M', 'M', 'E', '_', 'M', '_', '_'],
-            ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-            ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
-            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ],
-          blue.id,
-          green.id,
-        );
+        createValidGame(game, blue, green);
       });
       test('if the player is blue, it sets blueReady to true', () => {
         game.startGame(blue);
