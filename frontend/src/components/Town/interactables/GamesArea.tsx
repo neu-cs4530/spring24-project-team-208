@@ -40,7 +40,7 @@ export const INVALID_GAME_AREA_TYPE_MESSAGE = 'Invalid game area type';
  * It renders the following:
  *  - A leaderboard of the game results
  *  - A list of observers' usernames (in a list with the aria-label 'list of observers in the game')
- *  - The game area component (either ConnectFourArea or TicTacToeArea). If the game area is NOT a ConnectFourArea or TicTacToeArea, then the message INVALID_GAME_AREA_TYPE_MESSAGE appears within the component
+ *  - The game area component (either ConnectFourArea, TicTacToeArea, or BattleShipArea). If the game area is NOT a ConnectFourArea, TicTacToeArea, or BattleShipArea, then the message INVALID_GAME_AREA_TYPE_MESSAGE appears within the component
  *  - A chat channel for the game area (@see ChatChannel.tsx), with the property interactableID set to the interactableID of the game area
  *
  */
