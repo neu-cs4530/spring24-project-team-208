@@ -1,3 +1,8 @@
+import InvalidParametersError, {
+  GAME_FULL_MESSAGE,
+  PLAYER_ALREADY_IN_GAME_MESSAGE,
+  PLAYER_NOT_IN_GAME_MESSAGE,
+} from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
 import {
   BattleShipColor,
@@ -46,7 +51,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * - Assigns the player to a color (blue or green). If the player was in the prior game, then attempts
    * to reuse the same color if it is not in use. Otherwise, assigns the player to the first
    * available color (blue, then green).
-   * - If both players are now assigned, updates the game status to WAITING_TO_START.
+   * - If both players are now assigned, updates the game status to ARRANGING_BOATS.
    *
    * @throws InvalidParametersError if the player is already in the game (PLAYER_ALREADY_IN_GAME_MESSAGE)
    * @throws InvalidParametersError if the game is full (GAME_FULL_MESSAGE)
@@ -54,7 +59,39 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @param player the player to join the game
    */
   protected _join(player: Player): void {
-    throw new Error('Method not implemented.');
+    if (this.state.green === player.id || this.state.blue === player.id) {
+      throw new InvalidParametersError(PLAYER_ALREADY_IN_GAME_MESSAGE);
+    }
+    if (this._preferredBlue === player.id && !this.state.blue) {
+      this.state = {
+        ...this.state,
+        status: 'WAITING_FOR_PLAYERS',
+        blue: player.id,
+      };
+    } else if (this._preferredGreen === player.id && !this.state.green) {
+      this.state = {
+        ...this.state,
+        status: 'WAITING_FOR_PLAYERS',
+        green: player.id,
+      };
+    } else if (!this.state.blue) {
+      this.state = {
+        ...this.state,
+        status: 'WAITING_FOR_PLAYERS',
+        blue: player.id,
+      };
+    } else if (!this.state.green) {
+      this.state = {
+        ...this.state,
+        status: 'WAITING_FOR_PLAYERS',
+        green: player.id,
+      };
+    } else {
+      throw new InvalidParametersError(GAME_FULL_MESSAGE);
+    }
+    if (this.state.blue && this.state.green) {
+      this.state.status = 'ARRANGING_BOATS';
+    }
   }
 
   /**
@@ -92,7 +129,46 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @throws InvalidParametersError if the player is not in the game (PLAYER_NOT_IN_GAME_MESSAGE)
    */
   protected _leave(player: Player): void {
-    throw new Error('Method not implemented.');
+    if (this.state.status === 'OVER') {
+      return;
+    }
+    const removePlayer = (playerID: string): BattleShipColor => {
+      if (this.state.blue === playerID) {
+        this.state = {
+          ...this.state,
+          blue: undefined,
+          blueReady: false,
+        };
+        return 'Blue';
+      }
+      if (this.state.green === playerID) {
+        this.state = {
+          ...this.state,
+          green: undefined,
+          greenReady: false,
+        };
+        return 'Green';
+      }
+      throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
+    };
+    const color = removePlayer(player.id);
+    switch (this.state.status) {
+      case 'ARRANGING_BOATS':
+      case 'WAITING_FOR_PLAYERS':
+        // no-ops: nothing needs to happen here
+        this.state.status = 'WAITING_FOR_PLAYERS';
+        break;
+      case 'IN_PROGRESS':
+        this.state = {
+          ...this.state,
+          status: 'OVER',
+          winner: color === 'Blue' ? this.state.green : this.state.blue,
+        };
+        break;
+      default:
+        // This behavior can be undefined :)
+        throw new Error(`Unexpected game status: ${this.state.status}`);
+    }
   }
 
   /**
