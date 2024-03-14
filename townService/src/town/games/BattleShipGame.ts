@@ -453,4 +453,30 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
   public applyMove(move: GameMove<BattleShipGuess>): void {
     throw new Error('Method not implemented.');
   }
+
+  /*
+  Returns true if the game is won by either player.
+  */
+  private _gameIsWon(guesses: BattleShipGuess[]): boolean {
+    // Checks if the locations of all the boats on on the board have been guessed, ignoring the boardColor of the guesses
+    const boardIsGuessed = (board: BattleShipPlacement[], guessList: BattleShipGuess[]) => {
+      for (const piece of board) {
+        if (!guessList.some(guess => guess.row === piece.row && guess.col === piece.col)) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    const blueWon = boardIsGuessed(
+      this.state.blueBoard,
+      guesses.filter(guess => guess.boardColor === 'Blue'),
+    );
+    const greenWon = boardIsGuessed(
+      this.state.greenBoard,
+      guesses.filter(guess => guess.boardColor === 'Green'),
+    );
+
+    return blueWon || greenWon;
+  }
 }
