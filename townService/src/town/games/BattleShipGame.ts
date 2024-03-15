@@ -1,9 +1,10 @@
 import InvalidParametersError, {
-  BOARD_POSITION_NOT_VALID_MESSAGE,
   GAME_FULL_MESSAGE,
-  GAME_NOT_STARTABLE_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
+  MOVE_NOT_YOUR_TURN_MESSAGE,
+  BOARD_POSITION_NOT_VALID_MESSAGE,
+  GAME_NOT_STARTABLE_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
 import {
@@ -68,14 +69,23 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    *
    * @param player the player to join the game
    */
-  // TODO: currently no first player logic implemented. Only basic functionality implemented
-  // so place boats and start game can be tested. Add first player + any other additional functionality
-  // later
   protected _join(player: Player): void {
-    if (this.state.blue === player.id || this.state.green === player.id) {
+    if (this.state.green === player.id || this.state.blue === player.id) {
       throw new InvalidParametersError(PLAYER_ALREADY_IN_GAME_MESSAGE);
     }
-    if (!this.state.blue) {
+    if (this._preferredBlue === player.id && !this.state.blue) {
+      this.state = {
+        ...this.state,
+        status: 'WAITING_FOR_PLAYERS',
+        blue: player.id,
+      };
+    } else if (this._preferredGreen === player.id && !this.state.green) {
+      this.state = {
+        ...this.state,
+        status: 'WAITING_FOR_PLAYERS',
+        green: player.id,
+      };
+    } else if (!this.state.blue) {
       this.state = {
         ...this.state,
         status: 'WAITING_FOR_PLAYERS',
@@ -107,7 +117,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @param nextCol
    * @param board
    */
-  private _removeValidBoats(
+  private _isValidBoat(
     hasFront: boolean,
     row: number,
     col: number,
@@ -157,7 +167,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     // check if all vertical boats have a front and end piece
     for (let col = 0; col < board[0].length; col++) {
       for (let row = 0; row < board.length - 1; row++) {
-        hasFront = this._removeValidBoats(hasFront, row, col, row + 1, col, board);
+        hasFront = this._isValidBoat(hasFront, row, col, row + 1, col, board);
       }
       hasFront = false;
     }
@@ -165,7 +175,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     // check if all horizontal boats have a front and end piece
     for (let row = 0; row < board.length; row++) {
       for (let col = 0; col < board[row].length - 1; col++) {
-        hasFront = this._removeValidBoats(hasFront, row, col, row, col + 1, board);
+        hasFront = this._isValidBoat(hasFront, row, col, row, col + 1, board);
       }
       hasFront = false;
     }
@@ -273,7 +283,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @param position
    * @returns newPlacement
    */
-  protected _createBattleShipPlacement(position: GameMove<BattleShipPlacement>) {
+  protected _battleShipPlacement(position: GameMove<BattleShipPlacement>) {
     if (this.state.status !== 'WAITING_TO_START') {
       throw new InvalidParametersError(GAME_NOT_WAITING_TO_START_MESSAGE);
     }
@@ -320,7 +330,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @throws InvalidParametersError if trying to place on board that isn't theirs (NOT_YOUR_BOARD_MESSAGE)
    */
   public placeBoat(position: GameMove<BattleShipPlacement>): void {
-    const newPlacement = this._createBattleShipPlacement(position);
+    const newPlacement = this._battleShipPlacement(position);
     this._validatePlacement(newPlacement);
     this._place(newPlacement);
   }
@@ -357,7 +367,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @param position The reposition attempt to apply, from leftmost corner
    */
   public removeBoat(position: GameMove<BattleShipPlacement>): void {
-    const newPlacement = this._createBattleShipPlacement(position);
+    const newPlacement = this._battleShipPlacement(position);
     this._remove(newPlacement);
   }
 
@@ -367,7 +377,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    *
    * If the game state is currently "IN_PROGRESS", updates the game's status to OVER and sets the winner to the other player.
    *
-   * If the game state is currently "ARRANGING_BOATS", updates the game's status to WAITING_FOR_PLAYERS.
+   * If the game state is currently "WAITING_TO_START", updates the game's status to WAITING_FOR_PLAYERS.
    *
    * If the game state is currently "WAITING_FOR_PLAYERS" or "OVER", the game state is unchanged.
    *
@@ -376,7 +386,64 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @param player The player to remove from the game
    */
   protected _leave(player: Player): void {
-    throw new Error('Method not implemented.');
+    if (this.state.status === 'OVER') {
+      return;
+    }
+    const removePlayer = (playerID: string): BattleShipColor => {
+      if (this.state.blue === playerID) {
+        this.state = {
+          ...this.state,
+          blue: undefined,
+          blueReady: false,
+        };
+        return 'Blue';
+      }
+      if (this.state.green === playerID) {
+        this.state = {
+          ...this.state,
+          green: undefined,
+          greenReady: false,
+        };
+        return 'Green';
+      }
+      throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
+    };
+    const color = removePlayer(player.id);
+    switch (this.state.status) {
+      case 'WAITING_TO_START':
+      case 'WAITING_FOR_PLAYERS':
+        // no-ops: nothing needs to happen here
+        this.state.status = 'WAITING_FOR_PLAYERS';
+        break;
+      case 'IN_PROGRESS':
+        this.state = {
+          ...this.state,
+          status: 'OVER',
+          winner: color === 'Blue' ? this.state.green : this.state.blue,
+        };
+        break;
+      default:
+        // This behavior can be undefined :)
+        throw new Error(`Unexpected game status: ${this.state.status}`);
+    }
+  }
+
+  /**
+   * Ensures that "guess" is valid given the current state of the game
+   * Follows the rules of "Battleship"
+   * @param move
+   */
+  protected _validateGuess(move: BattleShipGuess): void {
+    // A guess is invalid if the player is not the current player
+    let nextPlayer: BattleShipColor;
+    if (this.state.firstPlayer === 'Blue') {
+      nextPlayer = this.state.moves.length % 2 === 0 ? 'Blue' : 'Green';
+    } else {
+      nextPlayer = this.state.moves.length % 2 === 0 ? 'Green' : 'Blue';
+    }
+    if (move.boardColor !== nextPlayer) {
+      throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
+    }
   }
 
   /**
@@ -385,5 +452,31 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    */
   public applyMove(move: GameMove<BattleShipGuess>): void {
     throw new Error('Method not implemented.');
+  }
+
+  /*
+  Returns true if the game is won by either player.
+  */
+  private _gameIsWon(guesses: BattleShipGuess[]): boolean {
+    // Checks if the locations of all the boats on on the board have been guessed, ignoring the boardColor of the guesses
+    const boardIsGuessed = (board: BattleShipPlacement[], guessList: BattleShipGuess[]) => {
+      for (const piece of board) {
+        if (!guessList.some(guess => guess.row === piece.row && guess.col === piece.col)) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    const blueWon = boardIsGuessed(
+      this.state.blueBoard,
+      guesses.filter(guess => guess.boardColor === 'Blue'),
+    );
+    const greenWon = boardIsGuessed(
+      this.state.greenBoard,
+      guesses.filter(guess => guess.boardColor === 'Green'),
+    );
+
+    return blueWon || greenWon;
   }
 }
