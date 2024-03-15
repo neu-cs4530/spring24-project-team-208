@@ -31,14 +31,14 @@ const MAX_BOAT_PIECES = 18;
  * made, and throw an error.
  *
  * @param game Game to apply the pattern to
- * @param boardColor Color of board to apply pattern to
+ * @param gamePiece Color of board to apply pattern to
  * @param pattern Board pattern to apply
  * @param blueID ID of player with blue board
  * @param greenID ID of green player
  */
 function createBoatPlacementsFromPattern(
   game: BattleShipGame,
-  boardColor: BattleShipColor,
+  gamePiece: BattleShipColor,
   pattern: string[][],
   blueID: string,
   greenID: string,
@@ -85,12 +85,12 @@ function createBoatPlacementsFromPattern(
     game.placeBoat({
       gameID: game.id,
       move: {
-        boardColor,
+        gamePiece,
         boat: move.boat,
         col: move.colIdx,
         row: move.rowIdx,
       },
-      playerID: boardColor === 'Blue' ? blueID : greenID,
+      playerID: gamePiece === 'Blue' ? blueID : greenID,
     });
     queues.Board = queue.filter(m => m !== move);
   }
@@ -590,12 +590,12 @@ describe('BattleShipGame', () => {
       game.removeBoat({
         gameID: game.id,
         playerID: blue.id,
-        move: { boardColor: 'Blue', boat: 'End', col: 7, row: 7 },
+        move: { gamePiece: 'Blue', boat: 'End', col: 7, row: 7 },
       });
       game.placeBoat({
         gameID: game.id,
         playerID: blue.id,
-        move: { boardColor: 'Blue', boat: 'End', col: 7, row: 7 },
+        move: { gamePiece: 'Blue', boat: 'End', col: 7, row: 7 },
       });
 
       game.startGame(blue);
@@ -629,12 +629,12 @@ describe('BattleShipGame', () => {
       game.removeBoat({
         gameID: game.id,
         playerID: green.id,
-        move: { boardColor: 'Green', boat: 'End', col: 7, row: 3 },
+        move: { gamePiece: 'Green', boat: 'End', col: 7, row: 3 },
       });
       game.placeBoat({
         gameID: game.id,
         playerID: green.id,
-        move: { boardColor: 'Green', boat: 'Front', col: 7, row: 3 },
+        move: { gamePiece: 'Green', boat: 'Front', col: 7, row: 3 },
       });
 
       game.startGame(green);
@@ -693,7 +693,7 @@ describe('BattleShipGame', () => {
             gameID: game.id,
             playerID: green.id,
             move: {
-              boardColor: 'Green',
+              gamePiece: 'Green',
               boat: 'Front',
               col: idx as BattleShipColIndex,
               row: idx as BattleShipRowIndex,
@@ -703,7 +703,7 @@ describe('BattleShipGame', () => {
             gameID: game.id,
             playerID: green.id,
             move: {
-              boardColor: 'Green',
+              gamePiece: 'Green',
               boat: 'Front',
               col: idx as BattleShipColIndex,
               row: idx as BattleShipRowIndex,
@@ -716,12 +716,12 @@ describe('BattleShipGame', () => {
         game.placeBoat({
           gameID: game.id,
           playerID: blue.id,
-          move: { boardColor: 'Blue', boat: 'Middle', col: 0, row: 1 },
+          move: { gamePiece: 'Blue', boat: 'Middle', col: 0, row: 1 },
         });
         game.removeBoat({
           gameID: game.id,
           playerID: blue.id,
-          move: { boardColor: 'Blue', boat: 'Middle', col: 0, row: 1 },
+          move: { gamePiece: 'Blue', boat: 'Middle', col: 0, row: 1 },
         });
         expect(game.state.blueBoard.length).toEqual(0);
       });
@@ -732,7 +732,7 @@ describe('BattleShipGame', () => {
             gameID: game.id,
             playerID: blue.id,
             move: {
-              boardColor: 'Blue',
+              gamePiece: 'Blue',
               boat: 'End',
               col: 0,
               row: 0,
@@ -742,7 +742,7 @@ describe('BattleShipGame', () => {
             gameID: game.id,
             playerID: blue.id,
             move: {
-              boardColor: 'Blue',
+              gamePiece: 'Blue',
               boat: boatType,
               col: 0,
               row: 0,
@@ -758,7 +758,7 @@ describe('BattleShipGame', () => {
             gameID: game.id,
             playerID: green.id,
             move: {
-              boardColor: 'Green',
+              gamePiece: 'Green',
               boat: 'End',
               col: 0,
               row: 0,
@@ -768,7 +768,7 @@ describe('BattleShipGame', () => {
             gameID: game.id,
             playerID: green.id,
             move: {
-              boardColor: 'Green',
+              gamePiece: 'Green',
               boat: boatType,
               col: 0,
               row: 0,
@@ -781,7 +781,7 @@ describe('BattleShipGame', () => {
         game.removeBoat({
           gameID: game.id,
           playerID: blue.id,
-          move: { boardColor: 'Blue', boat: 'Middle', col: 0, row: 0 },
+          move: { gamePiece: 'Blue', boat: 'Middle', col: 0, row: 0 },
         });
         expect(game.state.blueBoard.length).toEqual(0);
       });
@@ -796,7 +796,7 @@ describe('BattleShipGame', () => {
         game.removeBoat({
           gameID: game.id,
           playerID: player.id,
-          move: { boardColor: 'Blue', boat: 'End', col: 0, row: 0 },
+          move: { gamePiece: 'Blue', boat: 'End', col: 0, row: 0 },
         }),
       ).toThrowError(GAME_NOT_WAITING_TO_START_MESSAGE);
     });
@@ -811,7 +811,7 @@ describe('BattleShipGame', () => {
         game.removeBoat({
           gameID: game.id,
           playerID: player.id,
-          move: { boardColor: 'Blue', boat: 'End', col: 0, row: 0 },
+          move: { gamePiece: 'Blue', boat: 'End', col: 0, row: 0 },
         }),
       ).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
     });
@@ -825,7 +825,7 @@ describe('BattleShipGame', () => {
         game.removeBoat({
           gameID: game.id,
           playerID: blue.id,
-          move: { boardColor: 'Green', boat: 'End', col: 0, row: 0 },
+          move: { gamePiece: 'Green', boat: 'End', col: 0, row: 0 },
         }),
       ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
     });
@@ -839,7 +839,7 @@ describe('BattleShipGame', () => {
         game.removeBoat({
           gameID: game.id,
           playerID: green.id,
-          move: { boardColor: 'Blue', boat: 'End', col: 0, row: 0 },
+          move: { gamePiece: 'Blue', boat: 'End', col: 0, row: 0 },
         }),
       ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
     });
@@ -859,14 +859,14 @@ describe('BattleShipGame', () => {
             gameID: game.id,
             playerID: blue.id,
             move: {
-              boardColor: 'Blue',
+              gamePiece: 'Blue',
               boat: 'End',
               col: idx as BattleShipColIndex,
               row: idx as BattleShipRowIndex,
             },
           });
           expect(game.state.blueBoard[0]).toEqual({
-            boardColor: 'Blue',
+            gamePiece: 'Blue',
             boat: 'End',
             col: idx as BattleShipRowIndex,
             row: idx as BattleShipColIndex,
@@ -878,14 +878,14 @@ describe('BattleShipGame', () => {
           gameID: game.id,
           playerID: green.id,
           move: {
-            boardColor: 'Green',
+            gamePiece: 'Green',
             boat: 'Middle',
             col: 0,
             row: 0,
           },
         });
         expect(game.state.greenBoard[0]).toEqual({
-          boardColor: 'Green',
+          gamePiece: 'Green',
           boat: 'Middle',
           col: 0,
           row: 0,
@@ -944,7 +944,7 @@ describe('BattleShipGame', () => {
         game.placeBoat({
           gameID: game.id,
           playerID: player.id,
-          move: { boardColor: 'Blue', boat: 'End', col: 0, row: 0 },
+          move: { gamePiece: 'Blue', boat: 'End', col: 0, row: 0 },
         }),
       ).toThrowError(GAME_NOT_WAITING_TO_START_MESSAGE);
     });
@@ -959,7 +959,7 @@ describe('BattleShipGame', () => {
         game.placeBoat({
           gameID: game.id,
           playerID: player.id,
-          move: { boardColor: 'Blue', boat: 'End', col: 0, row: 0 },
+          move: { gamePiece: 'Blue', boat: 'End', col: 0, row: 0 },
         }),
       ).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
     });
@@ -973,7 +973,7 @@ describe('BattleShipGame', () => {
         game.placeBoat({
           gameID: game.id,
           playerID: blue.id,
-          move: { boardColor: 'Green', boat: 'End', col: 0, row: 0 },
+          move: { gamePiece: 'Green', boat: 'End', col: 0, row: 0 },
         }),
       ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
     });
@@ -987,7 +987,7 @@ describe('BattleShipGame', () => {
         game.placeBoat({
           gameID: game.id,
           playerID: green.id,
-          move: { boardColor: 'Blue', boat: 'End', col: 0, row: 0 },
+          move: { gamePiece: 'Blue', boat: 'End', col: 0, row: 0 },
         }),
       ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
     });
@@ -1000,13 +1000,13 @@ describe('BattleShipGame', () => {
       game.placeBoat({
         gameID: game.id,
         playerID: blue.id,
-        move: { boardColor: 'Blue', boat: 'End', col: 0, row: 0 },
+        move: { gamePiece: 'Blue', boat: 'End', col: 0, row: 0 },
       });
       expect(() =>
         game.placeBoat({
           gameID: game.id,
           playerID: blue.id,
-          move: { boardColor: 'Blue', boat: 'End', col: 0, row: 0 },
+          move: { gamePiece: 'Blue', boat: 'End', col: 0, row: 0 },
         }),
       ).toThrowError(BOARD_POSITION_NOT_VALID_MESSAGE);
     });
@@ -1039,7 +1039,7 @@ describe('BattleShipGame', () => {
         game.placeBoat({
           gameID: game.id,
           playerID: blue.id,
-          move: { boardColor: 'Blue', boat: 'End', col: 0, row: 0 },
+          move: { gamePiece: 'Blue', boat: 'End', col: 0, row: 0 },
         }),
       ).toThrowError(BOARD_POSITION_NOT_VALID_MESSAGE);
     });

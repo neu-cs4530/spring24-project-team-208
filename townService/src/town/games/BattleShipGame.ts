@@ -241,7 +241,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    */
   protected _validatePlacement(placement: BattleShipPlacement): void {
     let board;
-    if (placement.boardColor === 'Blue') {
+    if (placement.gamePiece === 'Blue') {
       board = this.state.blueBoard;
     } else {
       board = this.state.greenBoard;
@@ -263,7 +263,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    */
   protected _place(placement: BattleShipPlacement) {
     let board;
-    if (placement.boardColor === 'Blue') {
+    if (placement.gamePiece === 'Blue') {
       board = this.state.blueBoard;
     } else {
       board = this.state.greenBoard;
@@ -271,8 +271,8 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     const newPlacement = [...board, placement];
     const newState: BattleShipGameState = {
       ...this.state,
-      ...(placement.boardColor === 'Blue' && { blueBoard: newPlacement }),
-      ...(placement.boardColor === 'Green' && { greenBoard: newPlacement }),
+      ...(placement.gamePiece === 'Blue' && { blueBoard: newPlacement }),
+      ...(placement.gamePiece === 'Green' && { greenBoard: newPlacement }),
     };
     this.state = newState;
   }
@@ -288,8 +288,8 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       throw new InvalidParametersError(GAME_NOT_WAITING_TO_START_MESSAGE);
     }
     if (
-      (position.playerID === this.state.blue && position.move.boardColor !== 'Blue') ||
-      (position.playerID === this.state.green && position.move.boardColor !== 'Green')
+      (position.playerID === this.state.blue && position.move.gamePiece !== 'Blue') ||
+      (position.playerID === this.state.green && position.move.gamePiece !== 'Green')
     ) {
       throw new InvalidParametersError(NOT_YOUR_BOARD_MESSAGE);
     }
@@ -304,7 +304,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     }
 
     const newPlacement = {
-      boardColor: gamePiece,
+      gamePiece,
       boat: position.move.boat,
       col: position.move.col,
       row: position.move.row,
@@ -341,15 +341,15 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    */
   protected _remove(removal: BattleShipPlacement) {
     let board;
-    if (removal.boardColor === 'Blue') {
+    if (removal.gamePiece === 'Blue') {
       board = this.state.blueBoard.filter(p => p.col !== removal.col || p.row !== removal.row);
     } else {
       board = this.state.greenBoard.filter(p => p.col !== removal.col || p.row !== removal.row);
     }
     const newState: BattleShipGameState = {
       ...this.state,
-      ...(removal.boardColor === 'Blue' && { blueBoard: board }),
-      ...(removal.boardColor === 'Green' && { greenBoard: board }),
+      ...(removal.gamePiece === 'Blue' && { blueBoard: board }),
+      ...(removal.gamePiece === 'Green' && { greenBoard: board }),
     };
     this.state = newState;
   }
@@ -441,7 +441,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     } else {
       nextPlayer = this.state.moves.length % 2 === 0 ? 'Green' : 'Blue';
     }
-    if (move.boardColor !== nextPlayer) {
+    if (move.gamePiece !== nextPlayer) {
       throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
     }
   }
@@ -458,7 +458,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
   Returns true if the game is won by either player.
   */
   private _gameIsWon(guesses: BattleShipGuess[]): boolean {
-    // Checks if the locations of all the boats on on the board have been guessed, ignoring the boardColor of the guesses
+    // Checks if the locations of all the boats on on the board have been guessed, ignoring the gamePiece of the guesses
     const boardIsGuessed = (board: BattleShipPlacement[], guessList: BattleShipGuess[]) => {
       for (const piece of board) {
         if (!guessList.some(guess => guess.row === piece.row && guess.col === piece.col)) {
@@ -470,11 +470,11 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
 
     const blueWon = boardIsGuessed(
       this.state.blueBoard,
-      guesses.filter(guess => guess.boardColor === 'Blue'),
+      guesses.filter(guess => guess.gamePiece === 'Blue'),
     );
     const greenWon = boardIsGuessed(
       this.state.greenBoard,
-      guesses.filter(guess => guess.boardColor === 'Green'),
+      guesses.filter(guess => guess.gamePiece === 'Green'),
     );
 
     return blueWon || greenWon;
