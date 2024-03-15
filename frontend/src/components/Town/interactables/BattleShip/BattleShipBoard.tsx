@@ -11,11 +11,16 @@ export type BattleShipGameProps = {
  * Renders the BattleShip board as a "StyledBattleShipBoard", which consists of "StyledBattleShipSquare"s
  * (one for each cell in the board, starting from the top left and going left to right, top to bottom).
  *
- * Each StyledBattleShipSquare has an aria-label property that describes the cell's position in the board,
- * formatted as `Cell ${rowIndex},${colIndex} (Miss|Hit|Boat|Empty)`.
+ * Each StyledBattleShipSquare has an aria-label property that describes the cell's position in the board.
+ * Depending on who the player is, the cell will either be be formatted as `Cell ${rowIndex},${colIndex} (Miss|Hit|Empty)`
+ * or as `Cell ${rowIndex},${colIndex} (Front|Middle|End|Empty)(e.g. if we are the blue player, the latter will
+ * be for our board and the former will be for the green board and vice versa).
+ *
+ * Players not in the game will see `Cell ${rowIndex},${colIndex} (Miss|Hit|Empty)` for both boards.
  *
  * The background color of each StyledBattleShipSquare is determined by the value of the cell in the board, either
- * 'miss', 'hit', 'boat' or '' (an empty for an empty square).
+ * 'miss', 'hit', or '' (an empty for an empty square) if it's the opponent's board or 'front', 'middle', 'end', or ''
+ * (an empty for an empty square) if it's the player's board.
  *
  * The board is re-rendered whenever the board changes, and each cell is re-rendered whenever the value of that cell changes.
  *
@@ -26,6 +31,6 @@ export type BattleShipGameProps = {
  *
  * @param gameAreaController the controller for the BattleShip game
  */
-export default function BattleShipBoard({ gameAreaController }: BattleShipGameProps): JSX.Element {
-  return <>Implement this to show battleship board</>;
+export default function BattleShipBlueBoard({ gameAreaController }: BattleShipGameProps): JSX.Element {
+  return <>Implement this to show the blue battleship board</>;
 }
