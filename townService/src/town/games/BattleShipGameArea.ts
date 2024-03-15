@@ -14,8 +14,6 @@ import InvalidParametersError, {
   INVALID_COMMAND_MESSAGE,
 } from '../../lib/InvalidParametersError';
 
-const GAME_NOT_WAITING_TO_START_MESSAGE = 'Game is not in waiting to start mode';
-
 /**
  * A BattleShipGameArea is a GameArea that hosts a BattleShipGame.
  *
@@ -71,9 +69,9 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
    * @param player player making the request
    * @returns response to the command, @see InteractableCommandResponse
    * @throws InvalidParametersError if the command is not supported or is invalid. Invalid commands:
-   *  - GameMove, StartGame, SetUpGameMove and LeaveGame: No game in progress (GAME_NOT_IN_PROGRESS_MESSAGE),
+   *  - StartGame, GameMove, SetUpGameMove and LeaveGame: No game in progress (GAME_NOT_IN_PROGRESS_MESSAGE),
    *    or gameID does not match the game in progress (GAME_ID_MISSMATCH_MESSAGE)
-   *  - Any command besides JoinGame, GameMove, StartGame and LeaveGame: INVALID_COMMAND_MESSAGE
+   *  - Any command besides JoinGame, StartGame, GameMove, SetUpGameMove and LeaveGame: INVALID_COMMAND_MESSAGE
    */
   public handleCommand<CommandType extends InteractableCommand>(
     command: CommandType,
@@ -82,7 +80,7 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
     if (command.type === 'SetUpGameMove') {
       const game = this._game;
       if (!game) {
-        throw new InvalidParametersError(GAME_NOT_WAITING_TO_START_MESSAGE);
+        throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
       }
       if (this._game?.id !== command.gameID) {
         throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
