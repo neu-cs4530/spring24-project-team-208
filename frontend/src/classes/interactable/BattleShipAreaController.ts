@@ -13,7 +13,7 @@ import GameAreaController, { GameEventTypes } from './GameAreaController';
 /**
  * For BattleShipAreaController
  */
-export type BattleShipCell = 'Miss' | 'Hit' | 'Boat' | undefined;
+export type BattleShipCell = BattleShipPiece | undefined;
 export type BattleShipEvents = GameEventTypes & {
   boardChanged: (board: BattleShipCell[][]) => void;
   turnChanged: (isOurTurn: boolean) => void;
@@ -27,13 +27,24 @@ export default class BattleShipAreaController extends GameAreaController<
   BattleShipEvents
 > {
   /**
-   * Returns the current state of the board.
+   * Returns the current state of the blue board.
    *
    * The board is a 10x10 array of BattleShipCell, which is either 'Miss', 'Hit', 'Boat' or undefined.
    *
    * The 2-dimensional array is indexed by row and then column, so board[0][0] is the top-left cell,
    */
-  get board(): BattleShipCell[][] {
+  get blueBoard(): BattleShipCell[][] {
+    throw new Error('Not implemented');
+  }
+
+  /**
+   * Returns the current state of the green board.
+   *
+   * The board is a 10x10 array of BattleShipCell, which is either 'Miss', 'Hit', 'Boat' or undefined.
+   *
+   * The 2-dimensional array is indexed by row and then column, so board[0][0] is the top-left cell,
+   */
+  get greenBoard(): BattleShipCell[][] {
     throw new Error('Not implemented');
   }
 
