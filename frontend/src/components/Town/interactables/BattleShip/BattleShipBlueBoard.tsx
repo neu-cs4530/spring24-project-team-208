@@ -13,14 +13,14 @@ export type BattleShipGameProps = {
  *
  * Each StyledBattleShipSquare has an aria-label property that describes the cell's position in the board.
  * Depending on who the player is, the cell will either be be formatted as `Cell ${rowIndex},${colIndex} (Miss|Hit|Empty)`
- * or as `Cell ${rowIndex},${colIndex} (Front|Middle|End|Empty)(e.g. if we are the blue player, the latter will
- * be for our board and the former will be for the green board and vice versa).
+ * if the current player is green or an observer or as `Cell ${rowIndex},${colIndex} (Front|Middle|End|Empty) if the
+ * current player is blue.
  *
  * Players not in the game will see `Cell ${rowIndex},${colIndex} (Miss|Hit|Empty)` for both boards.
  *
  * The background color of each StyledBattleShipSquare is determined by the value of the cell in the board, either
- * 'miss', 'hit', or '' (an empty for an empty square) if it's the opponent's board or 'front', 'middle', 'end', or ''
- * (an empty for an empty square) if it's the player's board.
+ * 'miss', 'hit', or '' (an empty for an empty square) if the current player is green or an observer or 'front', 'middle',
+ * 'end', or '' (an empty for an empty square) if the current player is blue.
  *
  * The board is re-rendered whenever the board changes, and each cell is re-rendered whenever the value of that cell changes.
  *
