@@ -31,6 +31,8 @@ export type BattleShipGameProps = {
  *
  * @param gameAreaController the controller for the BattleShip game
  */
-export default function BattleShipBlueBoard({ gameAreaController }: BattleShipGameProps): JSX.Element {
+export default function BattleShipBlueBoard({
+  gameAreaController,
+}: BattleShipGameProps): JSX.Element {
   return <>Implement this to show the blue battleship board</>;
 }
