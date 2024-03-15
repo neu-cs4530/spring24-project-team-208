@@ -17,7 +17,7 @@ export type TownJoinResponse = {
   interactables: TypedInteractable[];
 }
 
-export type InteractableType = 'ConversationArea' | 'ViewingArea' | 'TicTacToeArea' | 'ConnectFourArea';
+export type InteractableType = 'ConversationArea' | 'ViewingArea' | 'TicTacToeArea' | 'ConnectFourArea' | 'BattleShipArea';
 export interface Interactable {
   type: InteractableType;
   id: InteractableID;
@@ -190,7 +190,7 @@ export interface BattleShipGameState extends WinnableGameState {
  * Rows are numbered 0-9, with 0 being the top row
  */
 export interface BattleShipGuess {
-  boardColor: BattleShipColor;
+  gamePiece: BattleShipColor;
   col: BattleShipColIndex;
   row: BattleShipRowIndex;
 }
@@ -202,7 +202,7 @@ export interface BattleShipGuess {
  * Rows are numbered 0-9, with 0 being the top row
  */
 export interface BattleShipPlacement {
-  boardColor: BattleShipColor;
+  gamePiece: BattleShipColor;
   boat: BattleShipPiece;
   col: BattleShipColIndex;
   row: BattleShipRowIndex;
@@ -286,7 +286,7 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | StartGameCommand | LeaveGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<BattleShipGuess> | SetUpGameMove | StartGameCommand | LeaveGameCommand;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;
@@ -306,6 +306,12 @@ export interface GameMoveCommand<MoveType> {
   type: 'GameMove';
   gameID: GameInstanceID;
   move: MoveType;
+}
+export interface SetUpGameMove {
+  type: 'SetUpGameMove';
+  gameID: GameInstanceID;
+  placement: BattleShipPlacement; // TODO can be generalized to any game in future
+  placementType: 'Placement' | 'Removal';
 }
 export type InteractableCommandReturnType<CommandType extends InteractableCommand> = 
   CommandType extends JoinGameCommand ? { gameID: string}:
