@@ -342,10 +342,10 @@ describe('BattleShipAreaController', () => {
           row: (BATTLESHIP_ROWS - 1) as BattleShipRowIndex,
           boat: 'Front',
         },
-        'Blue',
+        'Green',
       );
       expect(controller.blueBoard[0][0]).toBe('End');
-      expect(controller.greenBoard[BATTLESHIP_ROWS - 1][BATTLESHIP_COLS - 1]).toBe('Green');
+      expect(controller.greenBoard[BATTLESHIP_ROWS - 1][BATTLESHIP_COLS - 1]).toBe('Front');
       //Also check that the rest are still undefined
       for (let i = 0; i < BATTLESHIP_ROWS; i++) {
         for (let j = 0; j < BATTLESHIP_COLS; j++) {
