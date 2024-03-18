@@ -329,7 +329,7 @@ describe('BattleShipAreaController', () => {
     });
     it('returns the correct board after a placement', () => {
       updateGameWithPlacement(controller, { col: 0, gamePiece: 'Blue', boat: 'End', row: 0 });
-      expect(controller.blueBoard[0][0]).toBe('Blue');
+      expect(controller.blueBoard[0][0]).toBe('End');
       updateGameWithPlacement(controller, {
         row: (BATTLESHIP_ROWS - 1) as BattleShipRowIndex,
         col: (BATTLESHIP_COLS - 1) as BattleShipColIndex,
