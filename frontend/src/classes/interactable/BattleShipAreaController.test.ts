@@ -347,7 +347,7 @@ describe('BattleShipAreaController', () => {
       const spy = jest.fn();
       controller.addListener('boardChanged', spy);
       updateGameWithPlacement(controller, { col: 0, gamePiece: 'Blue', row: 0, boat: 'End' });
-      expect(spy).toHaveBeenCalledWith(controller.greenBoard);
+      expect(spy).toHaveBeenCalledWith(controller.blueBoard);
     });
     it('does not emit a boardChange event if the board has not changed', () => {
       const spy = jest.fn();
