@@ -46,13 +46,18 @@ describe('BattleShipAreaController', () => {
   function updateGameWithPlacement(
     controller: BattleShipAreaController,
     nextMove: BattleShipPlacement,
+    color: BattleShipColor,
   ): void {
     const nextState = Object.assign({}, controller.toInteractableAreaModel());
     const nextGame = Object.assign({}, nextState.game);
     nextState.game = nextGame;
     const newState = Object.assign({}, nextGame.state);
     nextGame.state = newState;
-    newState.moves = newState.moves.concat([nextMove]);
+    if (color === 'Blue') {
+      newState.blueBoard = newState.blueBoard.concat([nextMove]);
+    } else if (color === 'Green') {
+      newState.greenBoard = newState.greenBoard.concat([nextMove]);
+    }
     controller.updateFrom(nextState, controller.occupants);
   }
   function battleShipAreaControllerWithProps({
@@ -323,14 +328,22 @@ describe('BattleShipAreaController', () => {
       });
     });
     it('returns the correct board after a placement', () => {
-      updateGameWithPlacement(controller, { col: 0, gamePiece: 'Blue', boat: 'End', row: 0 });
+      updateGameWithPlacement(
+        controller,
+        { col: 0, gamePiece: 'Blue', boat: 'End', row: 0 },
+        'Blue',
+      );
       expect(controller.blueBoard[0][0]).toBe('Blue');
-      updateGameWithPlacement(controller, {
-        col: (BATTLESHIP_COLS - 1) as BattleShipColIndex,
-        gamePiece: 'Green',
-        row: (BATTLESHIP_ROWS - 1) as BattleShipRowIndex,
-        boat: 'Front',
-      });
+      updateGameWithPlacement(
+        controller,
+        {
+          col: (BATTLESHIP_COLS - 1) as BattleShipColIndex,
+          gamePiece: 'Green',
+          row: (BATTLESHIP_ROWS - 1) as BattleShipRowIndex,
+          boat: 'Front',
+        },
+        'Blue',
+      );
       expect(controller.blueBoard[0][0]).toBe('Blue');
       expect(controller.greenBoard[BATTLESHIP_ROWS - 1][BATTLESHIP_COLS - 1]).toBe('Green');
       //Also check that the rest are still undefined
@@ -346,7 +359,11 @@ describe('BattleShipAreaController', () => {
     it('emits a boardChange event if the board has changed', () => {
       const spy = jest.fn();
       controller.addListener('boardChanged', spy);
-      updateGameWithPlacement(controller, { col: 0, gamePiece: 'Blue', row: 0, boat: 'End' });
+      updateGameWithPlacement(
+        controller,
+        { col: 0, gamePiece: 'Blue', row: 0, boat: 'End' },
+        'Blue',
+      );
       expect(spy).toHaveBeenCalledWith(controller.blueBoard);
     });
     it('does not emit a boardChange event if the board has not changed', () => {
