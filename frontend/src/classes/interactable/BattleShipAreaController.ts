@@ -205,18 +205,23 @@ export default class BattleShipAreaController extends GameAreaController<
     const newGame = newModel.game;
     if (newGame) {
       const gamePiece = this.gamePiece;
-      const newBoard = createEmptyBoard();
-      let boardToUpdate = gamePiece === 'Blue' ? this._blueBoard : this._greenBoard;
-      const boardFromGame =
-        gamePiece === 'Blue' ? newGame.state.blueBoard : newGame.state.greenBoard;
+      const newBlueBoard = createEmptyBoard();
+      const newGreenBoard = createEmptyBoard();
 
-      boardFromGame.forEach(piece => {
-        newBoard[piece.row][piece.col] = piece.boat;
+      newGame.state.blueBoard.forEach(piece => {
+        newBlueBoard[piece.row][piece.col] = piece.boat;
       });
 
-      if (!_.isEqual(newBoard, boardToUpdate)) {
-        boardToUpdate = newBoard;
-        this.emit('boardChanged', boardToUpdate);
+      newGame.state.greenBoard.forEach(piece => {
+        newGreenBoard[piece.row][piece.col] = piece.boat;
+      });
+
+      if (!_.isEqual(newBlueBoard, this._blueBoard) && gamePiece === 'Blue') {
+        this._blueBoard = newBlueBoard;
+        this.emit('boardChanged', this._blueBoard);
+      } else if (!_.isEqual(newGreenBoard, this._greenBoard) && gamePiece === 'Green') {
+        this._greenBoard = newGreenBoard;
+        this.emit('boardChanged', this._greenBoard);
       }
     }
   }
