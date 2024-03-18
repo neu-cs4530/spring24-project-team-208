@@ -16,6 +16,7 @@ import BattleShipAreaController, {
   BATTLESHIP_COLS,
   BATTLESHIP_ROWS,
 } from './BattleShipAreaController';
+import GameAreaController from './GameAreaController';
 
 describe('BattleShipAreaController', () => {
   const ourPlayer = new PlayerController(nanoid(), nanoid(), {
