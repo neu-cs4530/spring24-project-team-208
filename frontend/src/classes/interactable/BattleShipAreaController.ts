@@ -6,6 +6,7 @@ import {
   BattleShipColor,
   BattleShipColIndex,
   BattleShipRowIndex,
+  BattleShipPiece,
 } from '../../types/CoveyTownSocket';
 import PlayerController from '../PlayerController';
 import GameAreaController, { GameEventTypes } from './GameAreaController';
