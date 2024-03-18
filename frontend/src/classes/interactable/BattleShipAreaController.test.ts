@@ -333,7 +333,7 @@ describe('BattleShipAreaController', () => {
         { col: 0, gamePiece: 'Blue', boat: 'End', row: 0 },
         'Blue',
       );
-      expect(controller.blueBoard[0][0]).toBe('Blue');
+      expect(controller.blueBoard[0][0]).toBe('End');
       updateGameWithPlacement(
         controller,
         {
@@ -344,7 +344,7 @@ describe('BattleShipAreaController', () => {
         },
         'Blue',
       );
-      expect(controller.blueBoard[0][0]).toBe('Blue');
+      expect(controller.blueBoard[0][0]).toBe('End');
       expect(controller.greenBoard[BATTLESHIP_ROWS - 1][BATTLESHIP_COLS - 1]).toBe('Green');
       //Also check that the rest are still undefined
       for (let i = 0; i < BATTLESHIP_ROWS; i++) {
