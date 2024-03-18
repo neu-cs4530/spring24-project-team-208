@@ -470,11 +470,11 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
 
     const blueWon = boardIsGuessed(
       this.state.blueBoard,
-      guesses.filter(guess => guess.gamePiece === 'Blue'),
+      guesses.filter(guess => guess.gamePiece === 'Green'),
     );
     const greenWon = boardIsGuessed(
       this.state.greenBoard,
-      guesses.filter(guess => guess.gamePiece === 'Green'),
+      guesses.filter(guess => guess.gamePiece === 'Blue'),
     );
 
     return blueWon || greenWon;

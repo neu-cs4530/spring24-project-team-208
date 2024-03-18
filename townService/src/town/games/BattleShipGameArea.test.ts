@@ -21,8 +21,6 @@ import {
   INVALID_COMMAND_MESSAGE,
 } from '../../lib/InvalidParametersError';
 
-const GAME_NOT_WAITING_TO_START_MESSAGE = 'Game is not in waiting to start mode';
-
 class TestingGame extends Game<BattleShipGameState, BattleShipGuess> {
   public setUpMove(position: GameMove<BattleShipPlacement>): void {
     throw new Error('Method not implemented.');
@@ -208,7 +206,7 @@ describe('BattleShipGameArea', () => {
           },
           blue,
         ),
-      ).toThrowError(GAME_NOT_WAITING_TO_START_MESSAGE);
+      ).toThrowError(GAME_NOT_IN_PROGRESS_MESSAGE);
       expect(interactableUpdateSpy).not.toHaveBeenCalled();
     });
     describe('when the game is in waiting to start mode', () => {
