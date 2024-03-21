@@ -161,6 +161,46 @@ export type ConnectFourColIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export type ConnectFourColor = 'Red' | 'Yellow';
 
+export interface BattleshipGameState extends WinnableGameState {
+    // The moves in this game
+    moves: ReadonlyArray<BattleshipMove>;
+    // The playerID of player1, if any
+    player1?: PlayerID;
+    // The playerID of player2, if any
+    player2?: PlayerID;
+    // Whether player1 is ready to start the game
+    player1Ready?: boolean;
+    // Whether player2 is ready to start the game
+    player2Ready?: boolean;
+    // The color of the player who will make the first move
+    firstPlayer: BattleshipPlayer;
+}
+
+export interface BattleshipMove {
+  player: BattleshipPlayer;
+  col: BattleshipColIndex;
+  row: BattleshipRowIndex;
+}
+
+/**
+ * Row indices in Battleship start at the top of the board and go down
+ */
+export type BattleshipRowIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+/**
+ * Column indices in Battleship start at the left of the board and go right
+ */
+export type BattleshipColIndex =  0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+
+export type BattleshipPlayer = "Player1" | "Player2";
+
+export type BattleshipBoatType = "Battleship" | "Submarine" | "Cruiser" | "Destroyer" | "Aircraft Carrier" | "Custom";
+export type BattleShipPieceState = "Hit" | "Safe";
+
+export type BattleshipCell = {
+  type: BattleshipBoatType | "Ocean";
+  state: BattleShipPieceState;
+}
+
 export type InteractableID = string;
 export type GameInstanceID = string;
 
@@ -216,7 +256,7 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | StartGameCommand | LeaveGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<BattleshipMove> | StartGameCommand | LeaveGameCommand;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;
