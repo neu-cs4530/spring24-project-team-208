@@ -6,11 +6,17 @@ import {
   BattleShipColor,
   BattleShipColIndex,
   BattleShipRowIndex,
-  BattleShipPiece,
+  // BattleShipPiece,
+  BattleshipBoat,
+  BattleShipPlacement,
+  BattleShipCell,
+  BattleShipGuess,
 } from '../../types/CoveyTownSocket';
 import PlayerController from '../PlayerController';
 import GameAreaController, {
   GameEventTypes,
+  NOT_IN_PLACEMENT,
+  NO_GAME_IN_PROGRESS_ERROR,
   NO_GAME_STARTABLE,
   PLAYER_NOT_IN_GAME_ERROR,
 } from './GameAreaController';
@@ -18,7 +24,7 @@ import GameAreaController, {
 /**
  * For BattleShipAreaController
  */
-export type BattleShipCell = BattleShipPiece | undefined;
+// export type BattleShipCell = BattleShipCell | undefined;
 export type BattleShipEvents = GameEventTypes & {
   boardChanged: (board: BattleShipCell[][]) => void;
   turnChanged: (isOurTurn: boolean) => void;
@@ -91,6 +97,16 @@ export default class BattleShipAreaController extends GameAreaController<
     return undefined;
   }
 
+  /**
+   * Returns what color the current player is
+   */
+  get whatColor(): BattleShipColor | undefined {
+    if (this.isPlayer) {
+      return this._townController.ourPlayer.id === this._model.game?.state.blue ? 'Blue' : 'Green';
+    } else {
+      return undefined;
+    }
+  }
   /**
    * Returns the player who won the game, if there is one, or undefined otherwise
    */
@@ -209,7 +225,7 @@ export default class BattleShipAreaController extends GameAreaController<
 
       if (gamePiece === 'Blue') {
         newGame.state.blueBoard.forEach(piece => {
-          newBoard[piece.row][piece.col] = piece.boat;
+          newBoard[piece.row][piece.col] = piece;
         });
         if (!_.isEqual(newBoard, this._blueBoard)) {
           this._blueBoard = newBoard;
@@ -217,7 +233,7 @@ export default class BattleShipAreaController extends GameAreaController<
         }
       } else if (gamePiece === 'Green') {
         newGame.state.greenBoard.forEach(piece => {
-          newBoard[piece.row][piece.col] = piece.boat;
+          newBoard[piece.row][piece.col] = piece;
         });
         if (!_.isEqual(newBoard, this._greenBoard)) {
           this._greenBoard = newBoard;
@@ -252,8 +268,25 @@ export default class BattleShipAreaController extends GameAreaController<
    *
    * @throws an error with message NO_GAME_IN_PROGRESS_ERROR if there is no game in progress
    */
-  public async placeBoatPiece(row: BattleShipRowIndex, col: BattleShipColIndex): Promise<void> {
-    throw new Error('Not implemented');
+  public async placeBoatPiece(boat: BattleshipBoat, row: BattleShipRowIndex, col: BattleShipColIndex): Promise<void> {
+    const instanceID = this._instanceID;
+    if (!instanceID || this._model.game?.state.status !== 'PLACING_BOATS') {
+      throw new Error(NOT_IN_PLACEMENT);
+    }
+    // LOGIC FOR THIS WHEN A BOAT IS SELECTED IT PLACES ALL PIECES 
+    const player = this._townController.ourPlayer.id === this._model.game?.state.blue ? 'Blue' : 'Green';
+    
+    const placement: BattleShipPlacement = {
+      player,
+      cell: boat,
+      col,
+      row,
+    };
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'SetUpGameMove',
+      gameID: instanceID,
+      placement,
+    });
   }
 
   /**
@@ -266,6 +299,20 @@ export default class BattleShipAreaController extends GameAreaController<
    * @param col Column to place guess in
    */
   public async makeMove(row: BattleShipRowIndex, col: BattleShipColIndex): Promise<void> {
-    throw new Error('Not implemented');
+    const instanceID = this._instanceID;
+    if (!instanceID || this._model.game?.state.status !== 'IN_PROGRESS') {
+      throw new Error(NO_GAME_IN_PROGRESS_ERROR);
+    }
+    
+    const move: BattleShipGuess = {
+      player: this.whatColor!,
+      col,
+      row,
+    };
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'GameMove',
+      gameID: instanceID,
+      move,
+    });
   }
 }

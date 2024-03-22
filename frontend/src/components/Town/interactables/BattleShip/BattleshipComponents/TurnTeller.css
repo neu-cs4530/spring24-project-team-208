@@ -1,0 +1,17 @@
+@font-face {
+    font-family: 'Digital Numbers Regular';
+    font-style: normal;
+    font-weight: normal;
+    src: local('Digital Numbers Regular'), url('DigitalNumbers-Regular.woff') format('woff');
+}
+
+.turn-teller-container {
+    width: 300px;
+    height: 50px;
+    background-color: #1C1C1C;
+    border-radius: 10px;
+}
+
+.turn-text {
+    color: #24FF00;
+}

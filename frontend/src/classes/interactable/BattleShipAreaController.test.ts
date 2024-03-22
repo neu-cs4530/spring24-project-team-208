@@ -4,7 +4,7 @@ import { nanoid } from 'nanoid';
 import {
   BattleShipColIndex,
   BattleShipColor,
-  BattleShipGuess,
+  BattleShipMove,
   BattleShipPlacement,
   BattleShipRowIndex,
   GameResult,
@@ -82,7 +82,7 @@ describe('BattleShipAreaController', () => {
     undefinedGame?: boolean;
     status?: GameStatus;
     gameInstanceID?: string;
-    moves?: BattleShipGuess[];
+    moves?: BattleShipMove[];
     blueBoard?: BattleShipPlacement[];
     greenBoard?: BattleShipPlacement[];
     winner?: string;
