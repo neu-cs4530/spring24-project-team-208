@@ -1,4 +1,4 @@
-import { Cell_SIZE } from "../../../../../types/CoveyTownSocket";
+import { Cell_SIZE } from "../../../../../types/CoveyTownSocket.d";
 
 export const Crosshair = () => {
     <img src='./Crosshair.png' style={{ height: Cell_SIZE, width: Cell_SIZE }} />

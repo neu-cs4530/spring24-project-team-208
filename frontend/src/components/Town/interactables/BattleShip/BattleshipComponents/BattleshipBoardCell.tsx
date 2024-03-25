@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BattleShipCell, Cell_SIZE } from "../../../../../types/CoveyTownSocket";
+import { BattleShipCell, Cell_SIZE } from "../../../../../types/CoveyTownSocket.d";
 import { BattleShipPieceStore, FireOverlay, OceanStore } from "../BattleshipCellSprites";
 import { Crosshair } from "../BattleshipMenuSprites/BattleshipMenuSprites";
 
