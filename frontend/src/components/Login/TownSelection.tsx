@@ -27,6 +27,8 @@ import useVideoContext from '../VideoCall/VideoFrontend/hooks/useVideoContext/us
 
 export default function TownSelection(): JSX.Element {
   const [userName, setUserName] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
   const [newTownName, setNewTownName] = useState<string>('');
   const [newTownIsPublic, setNewTownIsPublic] = useState<boolean>(true);
   const [townIDToJoin, setTownIDToJoin] = useState<string>('');
@@ -137,10 +139,10 @@ export default function TownSelection(): JSX.Element {
   );
 
   const handleCreate = async () => {
-    if (!userName || userName.length === 0) {
+    if (!userName || userName.length === 0 || !password || password.length === 0) {
       toast({
         title: 'Unable to create town',
-        description: 'Please select a username before creating a town',
+        description: 'Please signup/login before creating a town',
         status: 'error',
       });
       return;
@@ -240,6 +242,24 @@ export default function TownSelection(): JSX.Element {
         <Stack>
           <Box p='4' borderWidth='1px' borderRadius='lg'>
             <Heading as='h2' size='lg'>
+              Sign Up
+            </Heading>
+            <Heading as='h2' size='lg'>
+              Select an email
+            </Heading>
+
+            <FormControl>
+              <FormLabel htmlFor='email'>Email</FormLabel>
+              <Input
+                autoFocus
+                name='email'
+                placeholder='Your email'
+                value={email}
+                onChange={event => setEmail(event.target.value)}
+              />
+            </FormControl>
+
+            <Heading as='h2' size='lg'>
               Select a username
             </Heading>
 
@@ -251,6 +271,56 @@ export default function TownSelection(): JSX.Element {
                 placeholder='Your name'
                 value={userName}
                 onChange={event => setUserName(event.target.value)}
+              />
+            </FormControl>
+
+            <Heading as='h2' size='lg'>
+              Select a password
+            </Heading>
+            <FormControl>
+              <FormLabel htmlFor='password'>Password</FormLabel>
+              <Input
+                autoFocus
+                name='password'
+                placeholder='Your password'
+                value={password}
+                onChange={event => setPassword(event.target.value)}
+              />
+            </FormControl>
+
+            <Heading as='h2' size='lg'>
+              -or-
+            </Heading>
+            <Heading as='h2' size='lg'>
+              Login
+            </Heading>
+
+            <Heading as='h2' size='lg'>
+              Username
+            </Heading>
+
+            <FormControl>
+              <FormLabel htmlFor='name'>Name</FormLabel>
+              <Input
+                autoFocus
+                name='name'
+                placeholder='Your name'
+                value={userName}
+                onChange={event => setUserName(event.target.value)}
+              />
+            </FormControl>
+
+            <Heading as='h2' size='lg'>
+              Password
+            </Heading>
+            <FormControl>
+              <FormLabel htmlFor='password'>Password</FormLabel>
+              <Input
+                autoFocus
+                name='password'
+                placeholder='Your password'
+                value={password}
+                onChange={event => setPassword(event.target.value)}
               />
             </FormControl>
           </Box>
