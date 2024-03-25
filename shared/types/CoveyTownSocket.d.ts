@@ -190,7 +190,7 @@ export interface BattleShipGameState extends WinnableGameState {
  * Rows are numbered 0-9, with 0 being the top row
  */
 export interface BattleShipGuess {
-  player: BattleShipColor;
+  gamePiece: BattleShipColor;
   col: BattleShipColIndex;
   row: BattleShipRowIndex;
 }
@@ -204,7 +204,7 @@ export const Cell_SIZE = 40
  * Rows are numbered 0-9, with 0 being the top row
  */
 export interface BattleShipPlacement { // CHANGE
-  player: BattleShipColor;
+  gamePiece: BattleShipColor;
   cell: BattleshipBoat;
   col: BattleShipColIndex;
   row: BattleShipRowIndex;

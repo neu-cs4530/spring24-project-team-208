@@ -11,7 +11,7 @@ import {
   BattleShipColor,
   BattleShipGameState,
   BattleShipGuess,
-  BattleShipPiece,
+  BattleShipCell,
   BattleShipPlacement,
   GameMove,
   PlayerID,
@@ -106,6 +106,8 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     }
   }
 
+
+
   /**
    * Removes valid boats if they are in the correct order (contain a front and end
    * piece from left to right or from top to bottom).
@@ -123,21 +125,23 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     col: number,
     nextRow: number,
     nextCol: number,
-    board: (BattleShipPiece | undefined)[][],
+    board: (BattleShipCell | undefined)[][],
   ): boolean {
+    const boatFronts = ["Aircraft_Front", "Battleship_Front", "Cruiser_Front", "Destroyer", "Submarine_Front"];
+    const boatBacks = ["Aircraft_Back", "Battleship_Back", "Cruiser_Back", "Destroyer", "Submarine_Back"]
     const currPiece = board[row][col];
     if (hasFront && currPiece === undefined) {
       hasFront = false;
     }
-    if (currPiece === 'Front' && board[nextRow][nextCol] !== undefined) {
+    if (currPiece && boatFronts.includes(currPiece.type) && board[nextRow][nextCol] !== undefined) {
       board[row][col] = undefined;
       hasFront = true;
     }
-    if (hasFront && currPiece === 'End') {
+    if (hasFront && currPiece && boatBacks.includes(currPiece.type)) {
       board[row][col] = undefined;
       hasFront = false;
     }
-    if (hasFront && currPiece === 'Middle') {
+    if (hasFront && currPiece && (![...boatFronts, ...boatBacks].includes(currPiece.type) || currPiece.type === "Destroyer")) {
       board[row][col] = undefined;
     }
     return hasFront;
@@ -149,18 +153,18 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * has the correct number of boat pieces. If incorrect, player will have
    * to reposition their boats to start the game
    */
-  protected _isValidBoard(boardPlacements: BattleShipPlacement[]): boolean {
+  protected _isValidBoard(boardCells: BattleShipCell[]): boolean {
     const numRows = 10;
     const numCols = 10;
 
     // Convert pieces to board
-    const board: (BattleShipPiece | undefined)[][] = new Array(numRows);
+    const board: (BattleShipCell | undefined)[][] = new Array(numRows);
     for (let i = 0; i < board.length; i++) {
       board[i] = new Array(numCols).fill(undefined);
     }
 
-    for (const piece of boardPlacements) {
-      board[piece.row][piece.col] = piece.boat;
+    for (const piece of boardCells) {
+      board[piece.row][piece.col] = piece;
     }
 
     let hasFront = false;
@@ -183,7 +187,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     // false if there are any non-undefined pieces left or if number of boat pieces is incorrect
     return (
       board.every(row => row.every(col => col === undefined)) &&
-      boardPlacements.length === MAX_BOAT_PIECES
+      boardCells.length === MAX_BOAT_PIECES
     );
   }
 
@@ -268,7 +272,15 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     } else {
       board = this.state.greenBoard;
     }
-    const newPlacement = [...board, placement];
+    const newPlacement: BattleShipCell[] = [
+      ...board, 
+      {
+        type: placement.cell,
+        state: "Safe",
+        row: placement.row,
+        col: placement.col,
+      },
+    ];
     const newState: BattleShipGameState = {
       ...this.state,
       ...(placement.gamePiece === 'Blue' && { blueBoard: newPlacement }),
@@ -283,7 +295,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @param position
    * @returns newPlacement
    */
-  protected _battleShipPlacement(position: GameMove<BattleShipPlacement>) {
+  protected _battleShipPlacement(position: GameMove<BattleShipPlacement>): BattleShipPlacement {
     if (this.state.status !== 'WAITING_TO_START') {
       throw new InvalidParametersError(GAME_NOT_WAITING_TO_START_MESSAGE);
     }
@@ -305,7 +317,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
 
     const newPlacement = {
       gamePiece,
-      boat: position.move.boat,
+      cell: position.move.cell,
       col: position.move.col,
       row: position.move.row,
     };
@@ -459,7 +471,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
   */
   private _gameIsWon(guesses: BattleShipGuess[]): boolean {
     // Checks if the locations of all the boats on on the board have been guessed, ignoring the gamePiece of the guesses
-    const boardIsGuessed = (board: BattleShipPlacement[], guessList: BattleShipGuess[]) => {
+    const boardIsGuessed = (board: BattleShipCell[], guessList: BattleShipGuess[]) => {
       for (const piece of board) {
         if (!guessList.some(guess => guess.row === piece.row && guess.col === piece.col)) {
           return false;

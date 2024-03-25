@@ -1,6 +1,13 @@
 import BattleShipAreaController from "../../../../../classes/interactable/BattleShipAreaController";
 import { Scratch } from "../BattleshipMenuSprites/BattleshipMenuSprites";
-import './EnemyCounter.css';
+
+// @import url('https://fonts.googleapis.com/css2?family=Just+Me+Again+Down+Here&display=swap');
+
+// .just-me-again-down-here {
+//   font-family: 'Just Me Again Down Here', cursive;
+//   font-weight: 400;
+//   font-style: normal;
+// }
 
 const ships = ["Battleship", "Aircraft Carrier", "Submarine", "Cruiser", "Destroyer"]
 

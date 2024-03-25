@@ -1,7 +1,7 @@
-import BattleShipAreaController, { BattleShipCell } from "../../../../../classes/interactable/BattleShipAreaController";
+import BattleShipAreaController from "../../../../../classes/interactable/BattleShipAreaController";
 import useTownController from "../../../../../hooks/useTownController";
+import { BattleShipCell } from "../../../../../types/CoveyTownSocket";
 import { Awaiting_Button, Ready_Button } from "../BattleshipMenuSprites/BattleshipMenuSprites";
-import './ButtonStatus.css';
 export default function ButtonStatus(
     {
         controller, 
@@ -22,8 +22,15 @@ export default function ButtonStatus(
         
         return (
             <div style={{ display: 'flex', flexDirection: 'row' }}>
-                <div className="button-status-container">
-                    <p className="status-text">{turnText}</p>
+                <div 
+                style={{
+                    width: '300px',
+                    height: '50px',
+                    backgroundColor: '#1C1C1C',
+                    borderRadius: '10px'
+                }}
+                >
+                    <p style={{ color: '#24FF00' }}>{turnText}</p>
 
                 </div>
                 {turnText.includes('READY') ? Ready_Button : Awaiting_Button}

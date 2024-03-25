@@ -1,4 +1,4 @@
-import { Cell_SIZE } from "../../../../types/CoveyTownSocket"
+const Cell_SIZE = 40
 
 export const BattleShipPieceStore = [
     {

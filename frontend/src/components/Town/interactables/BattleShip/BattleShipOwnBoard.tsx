@@ -1,11 +1,8 @@
 import { Modal, useDisclosure, useToast } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import BattleShipAreaController from '../../../../classes/interactable/BattleShipAreaController';
-import TownController from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
 import { BattleshipBoat, BattleShipCell, Cell_SIZE } from '../../../../types/CoveyTownSocket';
-import { BattleShipPieceStore, FireOverlay, OceanStore } from './BattleshipCellSprites';
-import './BatleshipBoard.css'
 import { Battleship_Logo, Crosshair, Scratch, Small_Notebook } from './BattleshipMenuSprites/BattleshipMenuSprites';
 import { BattleShipBoardCell } from './BattleshipComponents/BattleshipBoardCell';
 import { EnemyCounter } from './BattleshipComponents/EnemyCounter';
@@ -76,9 +73,28 @@ export default function BattleShipOwnBoard({
 
   return (
     <>
-    <div className='battleship-container'>
+    <div 
+      style={{
+        width: '1000px',
+        height: '600px',
+        display: 'flex',
+        flexDirection: 'row',
+        backgroundColor: '#6F6F78',   
+        border: '3px solid black',
+        borderRadius: '15px',
+        padding: '10px',
+      }}
+    
+    >
       {/* {isOpen && <CheatSheetNoteBookModal controller={gameAreaController} exitModal={closeNotebook} />} */}
-      <div className='board-container'>
+      <div 
+        style={{
+          width: '540px',
+          height: '540px',
+          border: '3px solid black',
+          borderRadius: '15px',
+        }}
+      >
         {board.map((row: BattleShipCell[], rowIndex: number) => {
           return(row.map((cell: BattleShipCell, cellIndex: number) => {
             <BattleShipBoardCell 
@@ -102,7 +118,7 @@ export default function BattleShipOwnBoard({
         chosenBoat={chosenBoat} 
         doAction={inPlacement ? placeBoat : fireBoat}
       />
-      <ButtonStatus controller={gameAreaController} chosenCell={chosenCell}/>
+      <ButtonStatus controller={gameAreaController} chosenCell={chosenCell!}/>
       <CheatSheetNoteBookSmall openModal={openNotebook}/>
     </div>
     </>
