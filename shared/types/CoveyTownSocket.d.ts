@@ -17,7 +17,7 @@ export type TownJoinResponse = {
   interactables: TypedInteractable[];
 }
 
-export type InteractableType = 'ConversationArea' | 'ViewingArea' | 'TicTacToeArea' | 'ConnectFourArea';
+export type InteractableType = 'ConversationArea' | 'ViewingArea' | 'TicTacToeArea' | 'ConnectFourArea' | 'BattleShipArea';
 export interface Interactable {
   type: InteractableType;
   id: InteractableID;
@@ -168,6 +168,10 @@ export type ConnectFourColor = 'Red' | 'Yellow';
 export interface BattleShipGameState extends WinnableGameState {
   // The moves in this game
   moves: ReadonlyArray<BattleShipGuess>;
+  // The blue player's board
+  blueBoard: Array<BattleShipPlacement>;
+  // The green player's board
+  greenBoard: Array<BattleShipPlacement>;
   // The playerID of the blue player, if any
   blue?: PlayerID;
   // The playerID of the green player, if any
@@ -186,7 +190,7 @@ export interface BattleShipGameState extends WinnableGameState {
  * Rows are numbered 0-9, with 0 being the top row
  */
 export interface BattleShipGuess {
-  boardColor: BattleShipColor;
+  gamePiece: BattleShipColor;
   col: BattleShipColIndex;
   row: BattleShipRowIndex;
 }
@@ -197,17 +201,18 @@ export interface BattleShipGuess {
  * Columns are lettered A-J, with A being the leftmost column
  * Rows are numbered 0-9, with 0 being the top row
  */
-export interface BattleShipReposition {
-  boardColor: BattleShipColor;
-  boat: BattleShipShipTypes;
+export interface BattleShipPlacement {
+  gamePiece: BattleShipColor;
+  boat: BattleShipPiece;
   col: BattleShipColIndex;
   row: BattleShipRowIndex;
 }
 
 /**
- * Row indices in BattleShip start at the top of the board and go down
+ * Row indices in BattleShip start at the top of the board and go down.
+ * Represented as A-J to users.
  */
-export type BattleShipRowIndex = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I'| 'J';
+export type BattleShipRowIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 /**
  * Column indices in BattleShip start at the left of the board and go right
@@ -281,7 +286,7 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | StartGameCommand | LeaveGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<BattleShipGuess> | SetUpGameMove | StartGameCommand | LeaveGameCommand;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;
@@ -301,6 +306,12 @@ export interface GameMoveCommand<MoveType> {
   type: 'GameMove';
   gameID: GameInstanceID;
   move: MoveType;
+}
+export interface SetUpGameMove {
+  type: 'SetUpGameMove';
+  gameID: GameInstanceID;
+  placement: BattleShipPlacement; // TODO can be generalized to any game in future
+  placementType: 'Placement' | 'Removal';
 }
 export type InteractableCommandReturnType<CommandType extends InteractableCommand> = 
   CommandType extends JoinGameCommand ? { gameID: string}:
