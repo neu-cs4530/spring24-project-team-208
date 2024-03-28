@@ -1,3 +1,4 @@
+import { FieldValue } from 'firebase-admin/firestore';
 import GameArea from './GameArea';
 import BattleShipGame from './BattleShipGame';
 import Player from '../../lib/Player';
@@ -13,6 +14,7 @@ import InvalidParametersError, {
   GAME_NOT_IN_PROGRESS_MESSAGE,
   INVALID_COMMAND_MESSAGE,
 } from '../../lib/InvalidParametersError';
+import db from '../../lib/firebaseData';
 
 /**
  * A BattleShipGameArea is a GameArea that hosts a BattleShipGame.
@@ -25,7 +27,7 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
     return 'BattleShipArea';
   }
 
-  private _stateUpdated(updatedState: GameInstance<BattleShipGameState>) {
+  private async _stateUpdated(updatedState: GameInstance<BattleShipGameState>) {
     if (updatedState.state.status === 'OVER') {
       // If we haven't yet recorded the outcome, do so now.
       const gameID = this._game?.id;
@@ -43,10 +45,39 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
               [greenName]: updatedState.state.winner === green ? 1 : 0,
             },
           });
+          this._emitAreaChanged();
+          const blueWon: boolean = updatedState.state.winner === blue;
+          const blueDocRef = db.collection('battleship').doc(blueName);
+          const blueDoc = await blueDocRef.get();
+          if (!blueDoc.exists) {
+            // If the document does not exist, create it
+            await blueDocRef.set({
+              wins: 0,
+              losses: 0,
+            });
+          }
+          blueDocRef.update({
+            wins: FieldValue.increment(blueWon ? 1 : 0),
+            losses: FieldValue.increment(blueWon ? 0 : 1),
+          });
+          const greenDocRef = db.collection('battleship').doc(greenName);
+          const greenDoc = await greenDocRef.get();
+          if (!greenDoc.exists) {
+            // If the document does not exist, create it
+            await greenDocRef.set({
+              wins: 0,
+              losses: 0,
+            });
+          }
+          greenDocRef.update({
+            wins: FieldValue.increment(blueWon ? 0 : 1),
+            losses: FieldValue.increment(blueWon ? 1 : 0),
+          });
         }
       }
+    } else {
+      this._emitAreaChanged();
     }
-    this._emitAreaChanged();
   }
 
   /**
