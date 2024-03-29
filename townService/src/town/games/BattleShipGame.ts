@@ -5,6 +5,7 @@ import InvalidParametersError, {
   MOVE_NOT_YOUR_TURN_MESSAGE,
   BOARD_POSITION_NOT_VALID_MESSAGE,
   GAME_NOT_STARTABLE_MESSAGE,
+  GAME_NOT_IN_PROGRESS_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
 import {
@@ -446,14 +447,6 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     }
   }
 
-  /**
-   * TODO: Specify and implement this method.
-   * @param move
-   */
-  public applyMove(move: GameMove<BattleShipGuess>): void {
-    throw new Error('Method not implemented.');
-  }
-
   /*
   Returns true if the game is won by either player.
   */
@@ -478,5 +471,56 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     );
 
     return blueWon || greenWon;
+  }
+
+  protected _applyMove(move: BattleShipGuess) {
+    const newMoves = [...this.state.moves, move];
+    const newState: BattleShipGameState = {
+      ...this.state,
+      moves: newMoves,
+    };
+
+    if (this._gameIsWon(newMoves)) {
+      newState.status = 'OVER';
+      newState.winner = move.gamePiece === 'Blue' ? this.state.blue : this.state.green;
+    }
+    this.state = newState;
+  }
+
+  /**
+   * Applies a guess to the game.
+   * Uses the player's ID to determine which color they are playing as (ignores move.gamePiece).
+   *
+   * Validates the move, and if it is valid, applies it to the game state.
+   *
+   * If the move ends the game, updates the game state to reflect the end of the game,
+   * setting the status to "OVER" and the winner to the player who won
+   *
+   * @param move The move to attempt to apply
+   *
+   * @throws InvalidParametersError if the game is not in progress (GAME_NOT_IN_PROGRESS_MESSAGE)
+   * @throws InvalidParametersError if the player is not in the game (PLAYER_NOT_IN_GAME_MESSAGE)
+   * @throws INvalidParametersError if the move is not the player's turn (MOVE_NOT_YOUR_TURN_MESSAGE)
+   *
+   */
+  public applyMove(move: GameMove<BattleShipGuess>): void {
+    if (this.state.status !== 'IN_PROGRESS') {
+      throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+    }
+    let gamePiece: BattleShipColor;
+    if (move.playerID === this.state.blue) {
+      gamePiece = 'Blue';
+    } else if (move.playerID === this.state.green) {
+      gamePiece = 'Green';
+    } else {
+      throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
+    }
+    const newMove = {
+      gamePiece,
+      row: move.move.row,
+      col: move.move.col,
+    };
+    this._validateGuess(newMove);
+    this._applyMove(newMove);
   }
 }
