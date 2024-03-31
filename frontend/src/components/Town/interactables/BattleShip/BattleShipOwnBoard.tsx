@@ -2,7 +2,7 @@ import { Modal, useDisclosure, useToast } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import BattleShipAreaController from '../../../../classes/interactable/BattleShipAreaController';
 import useTownController from '../../../../hooks/useTownController';
-import { BattleshipBoat, BattleShipCell, Cell_SIZE } from '../../../../types/CoveyTownSocket';
+import { BattleshipBoat, BattleShipCell } from '../../../../types/CoveyTownSocket';
 import { Battleship_Logo, Crosshair, Scratch, Small_Notebook } from './BattleshipMenuSprites/BattleshipMenuSprites';
 import { BattleShipBoardCell } from './BattleshipComponents/BattleshipBoardCell';
 import { EnemyCounter } from './BattleshipComponents/EnemyCounter';
@@ -70,7 +70,7 @@ export default function BattleShipOwnBoard({
       gameAreaController.removeListener('turnChanged', setIsOurTurn);
     };
   }, [gameAreaController]);
-  console.log(board)
+
   return (
     <div 
       style={{

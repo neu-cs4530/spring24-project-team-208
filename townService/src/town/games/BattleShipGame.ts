@@ -212,9 +212,9 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    */
   public startGame(player: Player): void {
     if (
-      this.state.status !== 'WAITING_TO_START' ||
-      (this.state.blue === player.id && !this._isValidBoard(this.state.blueBoard)) ||
-      (this.state.green === player.id && !this._isValidBoard(this.state.greenBoard))
+      this.state.status !== 'WAITING_TO_START' 
+      // || (this.state.blue === player.id && !this._isValidBoard(this.state.blueBoard)) 
+      // || (this.state.green === player.id && !this._isValidBoard(this.state.greenBoard))
     ) {
       throw new InvalidParametersError(GAME_NOT_STARTABLE_MESSAGE);
     }
@@ -234,7 +234,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     }
     this.state = {
       ...this.state,
-      status: this.state.blueReady && this.state.greenReady ? 'IN_PROGRESS' : 'WAITING_TO_START',
+      status: this.state.blueReady && this.state.greenReady ? 'PLACING_BOATS' : 'WAITING_TO_START',
     };
   }
 

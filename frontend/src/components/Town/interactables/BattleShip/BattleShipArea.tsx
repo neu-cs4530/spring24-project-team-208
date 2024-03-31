@@ -163,7 +163,6 @@ export default function BattleShipArea({
       </b>
     );
   }
-
   return (
     <>
       {gameStatusText}
@@ -171,12 +170,9 @@ export default function BattleShipArea({
         <ListItem>Red: {blue?.userName || '(No player yet!)'}</ListItem>
         <ListItem>Yellow: {green?.userName || '(No player yet!)'}</ListItem>
       </List>
-      {/* {gameAreaController.isActive() &&
-        // gameAreaController.whoseTurn === townController.ourPlayer
-        // ?  */}
+      {['PLACING_BOATS', 'IN_PROGRESS'].includes(gameStatus)  &&
         <BattleShipOwnBoard gameAreaController={gameAreaController} />
-        {/* // : <BattleShipOwnBoard gameAreaController={gameAreaController} />
-      } */}
+      } 
     </>
   );
 }
