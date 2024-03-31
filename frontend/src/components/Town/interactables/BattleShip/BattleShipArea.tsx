@@ -171,11 +171,12 @@ export default function BattleShipArea({
         <ListItem>Red: {blue?.userName || '(No player yet!)'}</ListItem>
         <ListItem>Yellow: {green?.userName || '(No player yet!)'}</ListItem>
       </List>
-      {
-        gameAreaController.whoseTurn === townController.ourPlayer
-        ? <BattleShipOwnBoard gameAreaController={gameAreaController} />
-        : <BattleShipOpponentBoard gameAreaController={gameAreaController} />
-      }
+      {/* {gameAreaController.isActive() &&
+        // gameAreaController.whoseTurn === townController.ourPlayer
+        // ?  */}
+        <BattleShipOwnBoard gameAreaController={gameAreaController} />
+        {/* // : <BattleShipOwnBoard gameAreaController={gameAreaController} />
+      } */}
     </>
   );
 }

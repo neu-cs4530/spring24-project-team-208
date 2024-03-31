@@ -1,16 +1,16 @@
 import { useState } from "react";
-import { BattleShipCell, Cell_SIZE } from "../../../../../types/CoveyTownSocket.d";
+import { BattleShipCell } from "../../../../../types/CoveyTownSocket";
 import { BattleShipPieceStore, FireOverlay, OceanStore } from "../BattleshipCellSprites";
 import { Crosshair } from "../BattleshipMenuSprites/BattleshipMenuSprites";
+
+const CELL_SIZE = 54;
 
 export function BattleShipBoardCell(
   {
     cell, 
     chooseCell, 
     chosenCell
-  } 
-  : 
-  {
+  } : {
     cell: BattleShipCell, 
     chooseCell: Function, 
     chosenCell: any
@@ -26,25 +26,22 @@ export function BattleShipBoardCell(
       chooseCell(cell)
     }
   
-    let pieceImage: any;
     const hit = cell?.state === "Hit";
-  
-    if (cell?.type === "Ocean") {
-      pieceImage = OceanStore[Math.random() * OceanStore.length];
-    } else {
-      pieceImage = BattleShipPieceStore.find(piece => piece.name === cell?.type)?.component;
-    }
-  
+    
     return (
       <div 
-        style={{ height: Cell_SIZE, width: Cell_SIZE }}
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={handleClick}
       >
-        {(isHovered || cell === chosenCell) && {Crosshair}}
-        {hit && {FireOverlay}}
-        {pieceImage}
+        {(isHovered || cell === chosenCell) && Crosshair}
+        {hit && FireOverlay}
+        {
+          cell?.type === "Ocean" 
+          ? OceanStore[Math.floor(Math.random() * OceanStore.length)] 
+          : BattleShipPieceStore.find(piece => piece.name === cell?.type)?.component
+        }
       </div>
     )
   }

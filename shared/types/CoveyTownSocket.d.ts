@@ -196,7 +196,7 @@ export interface BattleShipGuess {
 }
 
 // The size of each cell square (in pixels)
-export const Cell_SIZE = 40
+// export const Cell_SIZE = 40
 
 /**
  * Type for repositioning a boat in BattleShip during pre-game phase

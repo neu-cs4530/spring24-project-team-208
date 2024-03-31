@@ -219,7 +219,7 @@ export default class BattleShipAreaController extends GameAreaController<
   protected _updateFrom(newModel: GameArea<BattleShipGameState>): void {
     super._updateFrom(newModel);
     const newGame = newModel.game;
-    if (newGame) {
+    if (newGame && this.isActive()) {
       const gamePiece = this.gamePiece;
       const newBoard = createEmptyBoard();
 
@@ -274,10 +274,10 @@ export default class BattleShipAreaController extends GameAreaController<
       throw new Error(NOT_IN_PLACEMENT);
     }
     // LOGIC FOR THIS WHEN A BOAT IS SELECTED IT PLACES ALL PIECES 
-    const player = this._townController.ourPlayer.id === this._model.game?.state.blue ? 'Blue' : 'Green';
+    const gamePiece = this._townController.ourPlayer.id === this._model.game?.state.blue ? 'Blue' : 'Green';
     
     const placement: BattleShipPlacement = {
-      player,
+      gamePiece,
       cell: boat,
       col,
       row,
@@ -305,7 +305,7 @@ export default class BattleShipAreaController extends GameAreaController<
     }
     
     const move: BattleShipGuess = {
-      player: this.whatColor!,
+      gamePiece: this.whatColor!,
       col,
       row,
     };

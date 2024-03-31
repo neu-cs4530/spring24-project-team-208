@@ -1,4 +1,4 @@
-const Cell_SIZE = 40
+const Cell_SIZE = 54
 
 export const BattleShipPieceStore = [
     {
@@ -70,4 +70,6 @@ export const OceanStore = [
     <img src='./BattleshipCellSprites/Ocean_4.png' style={{ height: Cell_SIZE, width: Cell_SIZE }} />
 ]
 
-export const FireOverlay = () => (<img src='./BattleshipCellSprites/Fire.png' style={{ height: Cell_SIZE, width: Cell_SIZE }} />)
+export const FireOverlay = (
+    <img src='./BattleshipCellSprites/Fire.png' style={{ height: Cell_SIZE, width: Cell_SIZE }} />
+)

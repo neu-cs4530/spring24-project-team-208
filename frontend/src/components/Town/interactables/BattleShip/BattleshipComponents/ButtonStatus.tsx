@@ -24,13 +24,15 @@ export default function ButtonStatus(
             <div style={{ display: 'flex', flexDirection: 'row' }}>
                 <div 
                 style={{
+                    display: 'flex',
+                    alignItems: 'center',
                     width: '300px',
-                    height: '50px',
+                    height: '40px',
                     backgroundColor: '#1C1C1C',
                     borderRadius: '10px'
                 }}
                 >
-                    <p style={{ color: '#24FF00' }}>{turnText}</p>
+                    <p style={{ marginLeft: 10, color: '#24FF00' }}>{turnText}</p>
 
                 </div>
                 {turnText.includes('READY') ? Ready_Button : Awaiting_Button}

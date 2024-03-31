@@ -1,33 +1,33 @@
-import { Cell_SIZE } from "../../../../../types/CoveyTownSocket.d";
+const Cell_SIZE = 54;
 
-export const Crosshair = () => {
+export const Crosshair = (
     <img src='./Crosshair.png' style={{ height: Cell_SIZE, width: Cell_SIZE }} />
-}
+)
 
-export const Scratch = () => {
+export const Scratch = (
     <img src='./Scratch.png' style={{ height: Cell_SIZE, width: Cell_SIZE }} />
-}
+)
 
-export const Small_Notebook = () => {
+export const Small_Notebook = (
     <img src='./Small_Notebook.png' />
-}
+)
 
-export const Large_Notebook = () => {
+export const Large_Notebook = (
     <img src='./Large_Notebook.png' />
-}
+)
 
-export const Notebook_Exit = () => {
+export const Notebook_Exit = (
     <img src='./Notebook_Exit.png' />
-}
+)
 
-export const Battleship_Logo = () => {
+export const Battleship_Logo = (
     <img src='./Battleship_Logo.png' /> 
-}
+)
 
-export const Awaiting_Button = () => {
+export const Awaiting_Button = (
     <img src='./awaiting.png' />
-}
+)
 
-export const Ready_Button = () => {
+export const Ready_Button = (
     <img src='./ready.png' />
-}
+)

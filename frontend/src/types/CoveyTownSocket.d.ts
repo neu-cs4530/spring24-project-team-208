@@ -7,9 +7,9 @@
 
 import { Socket } from 'socket.io-client';
 /* eslint-disable import/no-relative-packages */
-import { ClientToServerEvents, ServerToClientEvents } from '../../../shared/types/CoveyTownSocket.d';
+import { ClientToServerEvents, ServerToClientEvents } from '../../../shared/types/CoveyTownSocket';
 /* eslint-disable import/no-relative-packages */
-export * from '../../../shared/types/CoveyTownSocket.d';
+export * from '../../../shared/types/CoveyTownSocket';
 
 export type CoveyTownSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
@@ -24,6 +24,3 @@ export type CoveyTownSocket = Socket<ServerToClientEvents, ClientToServerEvents>
     row: BattleShipRowIndex;
     col: BattleShipColIndex;
 }
-
-// The size of each cell square (in pixels)
-export const Cell_SIZE = 40

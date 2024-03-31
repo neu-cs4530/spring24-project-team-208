@@ -70,14 +70,14 @@ export default function BattleShipOwnBoard({
       gameAreaController.removeListener('turnChanged', setIsOurTurn);
     };
   }, [gameAreaController]);
-
+  console.log(board)
   return (
-    <>
     <div 
       style={{
         width: '1000px',
         height: '600px',
         display: 'flex',
+        flexWrap: 'wrap',
         flexDirection: 'row',
         backgroundColor: '#6F6F78',   
         border: '3px solid black',
@@ -89,38 +89,48 @@ export default function BattleShipOwnBoard({
       {/* {isOpen && <CheatSheetNoteBookModal controller={gameAreaController} exitModal={closeNotebook} />} */}
       <div 
         style={{
-          width: '540px',
-          height: '540px',
+          display: 'flex',
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          width: '546px',
+          height: '546px',
           border: '3px solid black',
           borderRadius: '15px',
         }}
       >
         {board.map((row: BattleShipCell[], rowIndex: number) => {
           return(row.map((cell: BattleShipCell, cellIndex: number) => {
-            <BattleShipBoardCell 
-              cell={cell} 
-              key={cellIndex} 
-              chooseCell={chooseChosenCell} 
-              chosenCell={chosenCell}
-            />
+            return(
+              <BattleShipBoardCell 
+                cell={cell} 
+                key={cellIndex} 
+                chooseCell={chooseChosenCell} 
+                chosenCell={chosenCell}
+              />)
           }))
-      })}
+        })}
       </div>
-      {Battleship_Logo}
-      <TurnTeller controller={gameAreaController} />
-      <EnemyCounter 
-        controller={gameAreaController} 
-        setBoat={setChosenBoat}
-      />
-      <ActionButton 
-        controller={gameAreaController} 
-        chosenCell={chosenCell} 
-        chosenBoat={chosenBoat} 
-        doAction={inPlacement ? placeBoat : fireBoat}
-      />
-      <ButtonStatus controller={gameAreaController} chosenCell={chosenCell!}/>
-      <CheatSheetNoteBookSmall openModal={openNotebook}/>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        {Battleship_Logo}
+        <TurnTeller controller={gameAreaController} />
+        <EnemyCounter 
+          controller={gameAreaController} 
+          setBoat={setChosenBoat}
+        />
+        <ActionButton 
+          controller={gameAreaController} 
+          chosenCell={chosenCell} 
+          chosenBoat={chosenBoat} 
+          doAction={inPlacement ? placeBoat : fireBoat}
+        />
+        <ButtonStatus controller={gameAreaController} chosenCell={chosenCell!}/>
+        <CheatSheetNoteBookSmall openModal={openNotebook}/>
+      </div>
     </div>
-    </>
   );
 }

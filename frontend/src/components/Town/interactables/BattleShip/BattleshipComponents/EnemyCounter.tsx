@@ -39,6 +39,7 @@ export function EnemyCounter(
             >
               {/* {Scratch} */}
               {name}
+              <br />
             </span>
           )
         })}
