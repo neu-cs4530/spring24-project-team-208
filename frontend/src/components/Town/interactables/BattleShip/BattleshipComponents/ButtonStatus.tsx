@@ -17,15 +17,20 @@ export default function ButtonStatus(
         let turnText = inPlacementPhase ? 'CHOOSE SHIP' : 'CANNOT FIRE';
 
         if (chosenCell && validChosenCellPlacement(chosenCell)) {
-            if (inPlacementPhase) {
-                turnText = chosenBoat ? 'READY TO PLACE' : 'PLACE BOAT';
-            } else if (!inPlacementPhase) {
-                turnText = 'READY TO FIRE';
+            turnText = 'READY TO FIRE';
+        }
+        if (inPlacementPhase) {
+            if (!chosenBoat) {
+                turnText = 'CHOOSE BOAT';
+            } else if (!chosenCell) {
+                turnText = 'PLACE BOAT';
+            } else {
+                turnText = 'READY TO PLACE';
             }
         }
         
         return (
-            <div style={{ display: 'absolute' }}>
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                 <div 
                     style={{
                         display: 'flex',
@@ -38,13 +43,9 @@ export default function ButtonStatus(
                 >
                     <p style={{ marginLeft: 10, color: '#24FF00', fontSize: '.7rem' }}>{turnText}</p>
                 </div>
-                <span
-                    style={{
-                        display: 'relative',
-                        top: '90%'
-                    }}
-                >
-                    {turnText.includes('READY') ? Ready_Button : Awaiting_Button}
+                <span style={{ marginLeft: -7 }}>
+                {turnText.includes('READY') ? Ready_Button : Awaiting_Button}
+
                 </span>
             </div>
         )

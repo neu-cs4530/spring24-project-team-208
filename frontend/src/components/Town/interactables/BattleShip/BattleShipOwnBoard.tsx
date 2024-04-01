@@ -144,6 +144,7 @@ export default function BattleShipOwnBoard({
           <EnemyCounter 
             controller={gameAreaController} 
             setBoat={setChosenBoat}
+            chosenBoat={chosenBoat}
           />
         </span>
         <span
@@ -167,7 +168,11 @@ export default function BattleShipOwnBoard({
             left: '70%'
           }}
         >
-          <ButtonStatus controller={gameAreaController} chosenCell={chosenCell} chosenBoat={chosenBoat}/>
+          <ButtonStatus 
+            controller={gameAreaController} 
+            chosenCell={chosenCell} 
+            chosenBoat={chosenBoat}
+          />
         </span>
         <span
           style={{

@@ -5,7 +5,7 @@ export const Crosshair = (
 )
 
 export const Scratch = (
-    <img src='./battleship_sprites/BattleshipMenuSprites/Scratch.png' style={{ height: Cell_SIZE, width: Cell_SIZE, position: 'absolute' }} />
+    <img src='./battleship_sprites/BattleshipMenuSprites/Scratch.png' style={{ height: 20, width: 100, position: 'absolute', top: '15%', right: `${Math.random() * 10 + 10}%`, rotate: '5deg' }} />
 )
 
 export const Small_Notebook = (
