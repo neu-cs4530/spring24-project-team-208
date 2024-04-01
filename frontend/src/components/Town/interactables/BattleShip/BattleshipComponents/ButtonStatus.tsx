@@ -1,23 +1,27 @@
 import BattleShipAreaController from "../../../../../classes/interactable/BattleShipAreaController";
 import useTownController from "../../../../../hooks/useTownController";
-import { BattleShipCell } from "../../../../../types/CoveyTownSocket";
+import { BattleShipCell, BattleshipBoat } from "../../../../../types/CoveyTownSocket";
 import { Awaiting_Button, Ready_Button } from "../BattleshipMenuSprites";
 export default function ButtonStatus(
     {
         controller, 
-        chosenCell
+        chosenCell,
+        chosenBoat
     } : {
         controller: BattleShipAreaController, 
-        chosenCell: BattleShipCell
+        chosenCell?: BattleShipCell,
+        chosenBoat?: BattleshipBoat,
     }) {
         const townController = useTownController();
-        let turnText: string;
-
         const inPlacementPhase = controller.status === 'PLACING_BOATS';
-        if (inPlacementPhase) {
-            turnText = validChosenCellPlacement(chosenCell) ? 'READY TO PLACE' : 'CHOOSE SHIP'
-        } else {
-            turnText = validChosenCellFire(chosenCell) ? 'READY TO FIRE' : 'CANNOT FIRE'
+        let turnText = inPlacementPhase ? 'CHOOSE SHIP' : 'CANNOT FIRE';
+        
+        if (chosenCell && validChosenCellPlacement(chosenCell)) {
+            if (inPlacementPhase && chosenBoat) {
+                turnText  = 'READY TO PLACE';
+            } else if (!inPlacementPhase) {
+                turnText = 'READT TO FIRE';
+            }
         }
         
         return (

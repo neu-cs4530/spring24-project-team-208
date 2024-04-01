@@ -15,10 +15,14 @@ export default function ActionButton(
     }) {
     const inPlacement = controller.status === 'PLACING_BOATS';
     const handleClick = () => {
-        if (chosenCell) {
-            if (inPlacement && !chosenBoat) {
-                return
+        console.log('hi')
+        console.log(chosenBoat)
+        if (inPlacement) {
+            if (chosenBoat) {
+                doAction();
+                console.log('bruh')
             }
+        } else if (chosenCell) {
             doAction()
         }
     }
