@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import BattleShipAreaController from '../../../../classes/interactable/BattleShipAreaController';
 import useTownController from '../../../../hooks/useTownController';
 import { BattleshipBoat, BattleShipCell } from '../../../../types/CoveyTownSocket';
-import { Battleship_Logo, Crosshair, Scratch, Small_Notebook } from './BattleshipMenuSprites/BattleshipMenuSprites';
+import { Battleship_Logo, Crosshair, Scratch, Small_Notebook } from './BattleshipMenuSprites';
 import { BattleShipBoardCell } from './BattleshipComponents/BattleshipBoardCell';
 import { EnemyCounter } from './BattleshipComponents/EnemyCounter';
 import { CheatSheetNoteBookSmall } from './BattleshipComponents/CheatSheetNoteBookSmall';
@@ -70,11 +70,10 @@ export default function BattleShipOwnBoard({
       gameAreaController.removeListener('turnChanged', setIsOurTurn);
     };
   }, [gameAreaController]);
-
   return (
     <div 
       style={{
-        width: '1000px',
+        width: '950px',
         height: '600px',
         display: 'flex',
         flexWrap: 'wrap',
@@ -86,7 +85,7 @@ export default function BattleShipOwnBoard({
       }}
     
     >
-      {/* {isOpen && <CheatSheetNoteBookModal controller={gameAreaController} exitModal={closeNotebook} />} */}
+      {isOpen && <CheatSheetNoteBookModal controller={gameAreaController} />}
       <div 
         style={{
           display: 'flex',
@@ -96,6 +95,7 @@ export default function BattleShipOwnBoard({
           height: '546px',
           border: '3px solid black',
           borderRadius: '15px',
+          overflow: 'hidden',
         }}
       >
         {board.map((row: BattleShipCell[], rowIndex: number) => {
@@ -112,24 +112,72 @@ export default function BattleShipOwnBoard({
       </div>
       <div
         style={{
-          display: 'flex',
+          display: 'relative',
           flexDirection: 'column'
         }}
       >
-        {Battleship_Logo}
-        <TurnTeller controller={gameAreaController} />
-        <EnemyCounter 
-          controller={gameAreaController} 
-          setBoat={setChosenBoat}
-        />
-        <ActionButton 
-          controller={gameAreaController} 
-          chosenCell={chosenCell} 
-          chosenBoat={chosenBoat} 
-          doAction={inPlacement ? placeBoat : fireBoat}
-        />
-        <ButtonStatus controller={gameAreaController} chosenCell={chosenCell!}/>
-        <CheatSheetNoteBookSmall openModal={openNotebook}/>
+        <span 
+          style={{
+            position: 'relative',
+            top: '10px',
+            left: '10%'
+          }}
+        >
+          {Battleship_Logo}
+        </span>
+        <span
+          style={{
+            position: 'relative',
+            top: '25px',
+            left: '14%'
+          }}
+        >
+          <TurnTeller controller={gameAreaController} />
+        </span>
+        <span
+          style={{
+            position: 'relative',
+            top: '38%',
+            right: '10%'
+          }}
+        >
+          <EnemyCounter 
+            controller={gameAreaController} 
+            setBoat={setChosenBoat}
+          />
+        </span>
+        <span
+          style={{
+            position: 'relative',
+            bottom: '15%',
+            left: '85%'
+          }}
+        >
+          <ActionButton 
+            controller={gameAreaController} 
+            chosenCell={chosenCell} 
+            chosenBoat={chosenBoat} 
+            doAction={inPlacement ? placeBoat : fireBoat}
+          />
+        </span>
+        <span
+          style={{
+            position: 'relative',
+            bottom: '13%',
+            left: '70%'
+          }}
+        >
+          <ButtonStatus controller={gameAreaController} chosenCell={chosenCell!}/>
+        </span>
+        <span
+          style={{
+            position: 'relative',
+            bottom: '13%',
+            left: '70%'
+          }}
+        >
+          <CheatSheetNoteBookSmall openModal={openNotebook}/>
+        </span>
       </div>
     </div>
   );

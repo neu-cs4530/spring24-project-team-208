@@ -30,9 +30,10 @@ export default function ActionButton(
                 backgroundColor: "#C60000",
                 borderRadius: '50%',
                 border: '10px solid #A6A6A6',
-                width: 70,
-                height: 70,
-                justifyContent: 'center'
+                width: 100,
+                height: 100,
+                justifyContent: 'center',
+                cursor: "pointer"
             }}
             onClick={handleClick}
         >

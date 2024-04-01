@@ -21,7 +21,7 @@ export default function TurnTeller({controller} : {controller: BattleShipAreaCon
             style={{
                 display: 'flex',
                 alignItems: 'center',
-                width: '300px',
+                width: '290px',
                 height: '40px',
                 backgroundColor: '#1C1C1C',
                 borderRadius: '10px',

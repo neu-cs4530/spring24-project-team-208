@@ -1,6 +1,6 @@
 import { useDisclosure } from "@chakra-ui/react";
 import BattleShipAreaController from "../../../../../classes/interactable/BattleShipAreaController";
-import { Large_Notebook, Notebook_Exit } from "../BattleshipMenuSprites/BattleshipMenuSprites";
+import { Large_Notebook, Notebook_Exit } from "../BattleshipMenuSprites";
 
 // .hover-shadow {
 //     transition: box-shadow 0.3s; 

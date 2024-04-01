@@ -1,4 +1,4 @@
-import { Small_Notebook } from "../BattleshipMenuSprites/BattleshipMenuSprites";
+import { Small_Notebook } from "../BattleshipMenuSprites";
 
 // .green-shadow {
 //     transition: box-shadow 0.3s; 

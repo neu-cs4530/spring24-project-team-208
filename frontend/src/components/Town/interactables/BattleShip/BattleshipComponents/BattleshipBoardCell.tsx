@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { BattleShipCell } from "../../../../../types/CoveyTownSocket";
 import { BattleShipPieceStore, FireOverlay, OceanStore } from "../BattleshipCellSprites";
-import { Crosshair } from "../BattleshipMenuSprites/BattleshipMenuSprites";
+import { Crosshair } from "../BattleshipMenuSprites";
 
 const CELL_SIZE = 54;
 
@@ -25,23 +25,27 @@ export function BattleShipBoardCell(
     const handleClick = () => {
       chooseCell(cell)
     }
-  
+    
     const hit = cell?.state === "Hit";
     
     return (
       <div 
-        style={{ height: CELL_SIZE, width: CELL_SIZE }}
+        style={{ 
+          height: CELL_SIZE,
+          display: 'relative',
+          width: CELL_SIZE,
+        }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={handleClick}
       >
-        {(isHovered || cell === chosenCell) && Crosshair}
         {hit && FireOverlay}
         {
           cell?.type === "Ocean" 
           ? OceanStore[Math.floor(Math.random() * OceanStore.length)] 
           : BattleShipPieceStore.find(piece => piece.name === cell?.type)?.component
         }
+        {(isHovered || cell === chosenCell) && Crosshair}
       </div>
     )
   }

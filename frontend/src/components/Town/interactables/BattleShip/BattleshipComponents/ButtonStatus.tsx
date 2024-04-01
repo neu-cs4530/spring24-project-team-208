@@ -1,7 +1,7 @@
 import BattleShipAreaController from "../../../../../classes/interactable/BattleShipAreaController";
 import useTownController from "../../../../../hooks/useTownController";
 import { BattleShipCell } from "../../../../../types/CoveyTownSocket";
-import { Awaiting_Button, Ready_Button } from "../BattleshipMenuSprites/BattleshipMenuSprites";
+import { Awaiting_Button, Ready_Button } from "../BattleshipMenuSprites";
 export default function ButtonStatus(
     {
         controller, 
@@ -21,21 +21,27 @@ export default function ButtonStatus(
         }
         
         return (
-            <div style={{ display: 'flex', flexDirection: 'row' }}>
+            <div style={{ display: 'absolute' }}>
                 <div 
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    width: '300px',
-                    height: '40px',
-                    backgroundColor: '#1C1C1C',
-                    borderRadius: '10px'
-                }}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        width: '150px',
+                        height: '25px',
+                        backgroundColor: '#1C1C1C',
+                        borderRadius: '10px'
+                    }}
                 >
-                    <p style={{ marginLeft: 10, color: '#24FF00' }}>{turnText}</p>
-
+                    <p style={{ marginLeft: 10, color: '#24FF00', fontSize: '.7rem' }}>{turnText}</p>
                 </div>
-                {turnText.includes('READY') ? Ready_Button : Awaiting_Button}
+                <span
+                    style={{
+                        display: 'relative',
+                        top: '90%'
+                    }}
+                >
+                    {turnText.includes('READY') ? Ready_Button : Awaiting_Button}
+                </span>
             </div>
         )
 }

@@ -8,6 +8,8 @@ import InvalidParametersError, {
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
 import {
+  BattleShipColIndex,
+  BattleShipRowIndex,
   BattleShipColor,
   BattleShipGameState,
   BattleShipGuess,
@@ -235,7 +237,20 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     this.state = {
       ...this.state,
       status: this.state.blueReady && this.state.greenReady ? 'PLACING_BOATS' : 'WAITING_TO_START',
+      blueBoard: this._createNewBoard(),
+      greenBoard: this._createNewBoard(),
     };
+  }
+
+  protected _createNewBoard(): Array<BattleShipCell> {
+    const newBoard: Array<BattleShipCell> = Array.from({ length: 100 }, (_, index) => ({
+      type: "Ocean",
+      state: "Safe",
+      row: Math.floor(index / 10) as BattleShipRowIndex, 
+      col: index % 10 as BattleShipColIndex, 
+    }));
+
+    return newBoard;
   }
 
   /**

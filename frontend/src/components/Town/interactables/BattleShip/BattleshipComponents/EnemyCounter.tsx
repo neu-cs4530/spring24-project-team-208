@@ -1,5 +1,5 @@
 import BattleShipAreaController from "../../../../../classes/interactable/BattleShipAreaController";
-import { Scratch } from "../BattleshipMenuSprites/BattleshipMenuSprites";
+import { Scratch } from "../BattleshipMenuSprites";
 
 // @import url('https://fonts.googleapis.com/css2?family=Just+Me+Again+Down+Here&display=swap');
 
@@ -29,11 +29,12 @@ export function EnemyCounter(
     }
 
     return (
-      <div>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <h3 className="just-me-again-down-here" style={{ textDecoration: 'underline' }}>{inPlacement ? 'Ship Placements Remaining:' : 'Enemy Ships Remaining:'}</h3>
         {ships.map((name: string, index) => {
           return (
             <span 
+              style={{ cursor: 'pointer' }}
               key={index}
               onClick={() => handleClick(name)}
             >
