@@ -237,7 +237,8 @@ export type BattleShipColor = 'Blue' | 'Green';
  */
 export type BattleshipBoat = 
     "Aircraft_Back" 
-  | "Aircraft_Middle"
+  | "Aircraft_Middle_1"
+  | "Aircraft_Middle_2"
   | "Aircraft_Front"
   | "Battleship_Back"
   | "Battleship_Middle_1"

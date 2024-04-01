@@ -274,20 +274,21 @@ export default class BattleShipAreaController extends GameAreaController<
     if (!instanceID || this._model.game?.state.status !== 'PLACING_BOATS') {
       throw new Error(NOT_IN_PLACEMENT);
     }
-    // LOGIC FOR THIS WHEN A BOAT IS SELECTED IT PLACES ALL PIECES 
+    
     const gamePiece = this._townController.ourPlayer.id === this._model.game?.state.blue ? 'Blue' : 'Green';
     
-    const placement: BattleShipPlacement = {
-      gamePiece,
-      cell: boat,
-      col,
-      row,
-    };
-    await this._townController.sendInteractableCommand(this.id, {
-      type: 'SetUpGameMove',
-      gameID: instanceID,
-      placement,
-    });
+    
+      await this._townController.sendInteractableCommand(this.id, {
+        type: 'SetUpGameMove',
+        gameID: instanceID,
+        placement: {
+          gamePiece,
+          cell: boat,
+          col: col,
+          row: row,
+        },
+      });
+    
   }
 
   /**

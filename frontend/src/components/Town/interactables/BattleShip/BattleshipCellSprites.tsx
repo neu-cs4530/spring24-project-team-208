@@ -23,7 +23,7 @@ export const BattleShipPieceStore = [
     },
     {
         name: "Battleship_Middle_1",
-        component: <img src='./battleship_sprites/BattleshipCellSprites/Battleship_Back.png' style={{ height: Cell_SIZE, width: Cell_SIZE, position: 'absolute' }} />
+        component: <img src='./battleship_sprites/BattleshipCellSprites/Battleship_Middle_1.png' style={{ height: Cell_SIZE, width: Cell_SIZE, position: 'absolute' }} />
     },
     {
         name: "Battleship_Middle_2",

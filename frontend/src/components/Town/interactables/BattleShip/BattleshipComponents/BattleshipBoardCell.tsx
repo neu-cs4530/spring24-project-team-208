@@ -25,7 +25,6 @@ export function BattleShipBoardCell(
     const handleClick = () => {
       chooseCell(cell)
     }
-    
     const hit = cell?.state === "Hit";
     
     return (

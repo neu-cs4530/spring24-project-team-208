@@ -17,12 +17,39 @@ import {
   BattleShipPlacement,
   GameMove,
   PlayerID,
+  BattleshipBoat,
 } from '../../types/CoveyTownSocket';
 import Game from './Game';
 
 const GAME_NOT_WAITING_TO_START_MESSAGE = 'Game is not in waiting to start mode';
 const NOT_YOUR_BOARD_MESSAGE = 'Not your board';
-const MAX_BOAT_PIECES = 18;
+const MAX_BOAT_PIECES = 16;
+const allBoats = 
+    ["Aircraft_Back", "Aircraft_Middle_1", "Aircraft_Middle_2", "Aircraft_Front", "Battleship_Back", "Battleship_Middle_1", "Battleship_Middle_2", "Battleship_Middle_3", "Battleship_Front",
+    "Cruiser_Back",  "Cruiser_Front", "Destroyer", "Submarine_Back", "Submarine_Middle", "Submarine_Front"];
+
+const boatMap = [
+  {
+    name: 'Battleship',
+    ships: ['Battleship_Back', 'Battleship_Middle_1', 'Battleship_Middle_2', 'Battleship_Middle_3', 'Battleship_Front']
+  },
+  {
+    name: 'Aircraft Carrier',
+    ships: ['Aircraft_Back', 'Aircraft_Middle_1', 'Aircraft_Middle_2', 'Aircraft_Front']
+  },
+  {
+    name: 'Submarine',
+    ships: ['Submarine_Back', 'Submarine_Middle', 'Submarine_Front']
+  },
+  {
+    name: 'Cruiser',
+    ships: ['Cruiser_Back', 'Cruiser_Front']
+  },
+  {
+    name: 'Destroyer',
+    ships: ['Destroyer']
+  }
+];
 
 function getOtherPlayerColor(color: BattleShipColor): BattleShipColor {
   if (color === 'Green') {
@@ -243,7 +270,8 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
 
     // reset for use in boat placement phase
     if (this.state.blueReady && this.state.greenReady) {
-      this.state.blueReady, this.state.greenReady = false;
+      this.state.blueReady = false;
+      this.state.greenReady = false;
     }
   }
 
@@ -263,7 +291,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * Follows the rules of "Battle Ship"
    * @param placement
    */
-  protected _validatePlacement(placement: BattleShipPlacement): void {
+  protected _validatePlacement(placement: BattleShipPlacement): boolean {
     let board;
     if (placement.gamePiece === 'Blue') {
       board = this.state.blueBoard;
@@ -272,13 +300,16 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     }
 
     // A placement is invalid if the maximum number of boat pieces have been placed
-    if (board.length >= MAX_BOAT_PIECES) {
-      throw new InvalidParametersError(BOARD_POSITION_NOT_VALID_MESSAGE);
+    if (board.filter(p => p.type !== 'Ocean').length > MAX_BOAT_PIECES) {
+      console.log('too many')
+      return false;
     }
     // A placement is invalid if the given position (row, col) is full
-    if (board.filter(p => p.col === placement.col && p.row === placement.row).length > 0) {
-      throw new InvalidParametersError(BOARD_POSITION_NOT_VALID_MESSAGE);
+    if (board.find(p => p.col === placement.col && p.row === placement.row)?.type !== 'Ocean') {
+      console.log('taken')
+      return false;
     }
+    return true;
   }
 
   /**
@@ -327,7 +358,10 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @param newPlacement the board to check
    */
   protected _allBoatsPlaced(newPlacement: Array<BattleShipCell>): Boolean {
-    return false
+    let boatArr = Array();
+    newPlacement.map(cell => {if (cell.type !== "Ocean") boatArr.push(cell.type)})
+
+    return allBoats.every(item => boatArr.includes(item));;
   }
 
   /**
@@ -337,7 +371,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @returns newPlacement
    */
   protected _battleShipPlacement(position: GameMove<BattleShipPlacement>): BattleShipPlacement {
-    if (this.state.status !== 'WAITING_TO_START') {
+    if (this.state.status !== 'PLACING_BOATS') {
       throw new InvalidParametersError(GAME_NOT_WAITING_TO_START_MESSAGE);
     }
     if (
@@ -384,8 +418,18 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    */
   public placeBoat(position: GameMove<BattleShipPlacement>): void {
     const newPlacement = this._battleShipPlacement(position);
-    this._validatePlacement(newPlacement);
-    this._place(newPlacement);
+    if(this._validatePlacement(newPlacement)) {
+      boatMap.find(boatM => boatM.name === position.move.cell)?.ships.map(async (ship, index) => 
+        this._place(
+          {
+            gamePiece: position.playerID === this.state.blue ? 'Blue' : 'Green',
+            cell: ship as BattleshipBoat,
+            col: position.move.col + index as BattleShipColIndex,
+            row: position.move.row,
+          }
+        )
+      );
+    }
   }
 
   /**

@@ -4,7 +4,7 @@ import { nanoid } from 'nanoid';
 import {
   BattleShipColIndex,
   BattleShipColor,
-  BattleShipMove,
+  BattleShipGuess,
   BattleShipPlacement,
   BattleShipRowIndex,
   GameResult,

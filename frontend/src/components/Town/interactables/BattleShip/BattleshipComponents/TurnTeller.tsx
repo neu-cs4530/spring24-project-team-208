@@ -15,7 +15,7 @@ export default function TurnTeller({controller} : {controller: BattleShipAreaCon
         ? 'SHIP PLACEMENT PHASE' 
         : controller.whoseTurn === townController.ourPlayer 
             ? 'YOUR TURN' 
-            : 'OPPONENT\`s TURN';
+            : 'OPPONENT\`S TURN';
     return (
         <div 
             style={{

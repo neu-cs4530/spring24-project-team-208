@@ -1,7 +1,7 @@
 import {
   BattleShipColIndex,
   BattleShipColor,
-  BattleShipPiece,
+  BattleShipCell,
   BattleShipRowIndex,
   Player,
 } from '../../types/CoveyTownSocket';
