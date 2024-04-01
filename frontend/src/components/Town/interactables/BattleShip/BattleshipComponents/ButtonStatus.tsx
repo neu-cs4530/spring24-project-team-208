@@ -15,12 +15,12 @@ export default function ButtonStatus(
         const townController = useTownController();
         const inPlacementPhase = controller.status === 'PLACING_BOATS';
         let turnText = inPlacementPhase ? 'CHOOSE SHIP' : 'CANNOT FIRE';
-        
+
         if (chosenCell && validChosenCellPlacement(chosenCell)) {
-            if (inPlacementPhase && chosenBoat) {
-                turnText  = 'READY TO PLACE';
+            if (inPlacementPhase) {
+                turnText = chosenBoat ? 'READY TO PLACE' : 'PLACE BOAT';
             } else if (!inPlacementPhase) {
-                turnText = 'READT TO FIRE';
+                turnText = 'READY TO FIRE';
             }
         }
         

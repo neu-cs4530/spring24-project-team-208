@@ -176,9 +176,9 @@ export interface BattleShipGameState extends WinnableGameState {
   blue?: PlayerID;
   // The playerID of the green player, if any
   green?: PlayerID;
-  // Whether the blue player has set up all ships and is ready to start game
+  // Whether the blue player is ready to start placement phase, then if the player is ready to start game phase
   blueReady?: boolean;
-  // Whether the green player has set up all ships and is ready to start game
+  // Whether the green player is ready to start placement phase, then if the player is ready to start game phase
   greenReady?: boolean;
   // The color of the player who will make the first move
   firstPlayer: BattleShipColor;
@@ -186,6 +186,7 @@ export interface BattleShipGameState extends WinnableGameState {
 
 /**
  * Type for a move in BattleShip
+ * Gamepiece is which player is making a guess
  * Columns are lettered A-J, with A being the leftmost column
  * Rows are numbered 0-9, with 0 being the top row
  */
@@ -200,10 +201,12 @@ export interface BattleShipGuess {
 
 /**
  * Type for repositioning a boat in BattleShip during pre-game phase
+ * Gamepiece is which player is making a placement
+ * Cell is which boat the player wants to place
  * Columns are lettered A-J, with A being the leftmost column
  * Rows are numbered 0-9, with 0 being the top row
  */
-export interface BattleShipPlacement { // CHANGE
+export interface BattleShipPlacement { 
   gamePiece: BattleShipColor;
   cell: BattleshipBoat;
   col: BattleShipColIndex;
@@ -228,6 +231,10 @@ export type BattleShipColIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 export type BattleShipColor = 'Blue' | 'Green';
 
 
+/**
+ * Each possible individual section of a boat
+ * Full boats should start with a 'Back' piece and end with a 'Front' piece
+ */
 export type BattleshipBoat = 
     "Aircraft_Back" 
   | "Aircraft_Middle"
@@ -242,17 +249,26 @@ export type BattleshipBoat =
   | "Destroyer"
   | "Submarine_Back"
   | "Submarine_Middle"
-  | "Submarine_Front"
+  | "Submarine_Front";
+
+/**
+ * Whether or not a cell has been guessed or not, 'Hit' if guessed and 'Safe' if not
+ */
 export type BattleShipCellState = "Hit" | "Safe";
+
 /**
  * A BattleShipCell can either be "Ocean", representing 1 of 4 ocean tiles or a BattleShipCell, representing
  *  one of the many Battleship pieces. 
  * A BattleShipCell is either "Hit", meaning it has been chosen during a turn or "Safe", meaning it has not been.
  */
 export type BattleShipCell = {
+  // Whether the cell is an ocean or a boat cell, and which kind of boat
   type: BattleshipBoat | "Ocean";
+  // If a cell has been guessed or not
   state: BattleShipCellState;
+  // The row of the cell
   row: BattleShipRowIndex;
+  // The col of the cell
   col: BattleShipColIndex;
 }
 

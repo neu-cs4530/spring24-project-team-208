@@ -12,7 +12,7 @@ import useTownController from "../../../../../hooks/useTownController";
 export default function TurnTeller({controller} : {controller: BattleShipAreaController}) {
     const townController = useTownController();
     const turnText = controller.status === 'PLACING_BOATS' 
-        ? 'PLACE SHIP' 
+        ? 'SHIP PLACEMENT PHASE' 
         : controller.whoseTurn === townController.ourPlayer 
             ? 'YOUR TURN' 
             : 'OPPONENT\`s TURN';

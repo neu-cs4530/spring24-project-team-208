@@ -264,6 +264,7 @@ export default class BattleShipAreaController extends GameAreaController<
   /**
    * Places a boat piece in the pre-game phase based on a given row and
    * column.
+   * If a entire boat is selected it places each piece of the boat
    * Does not check if placement is valid (invalid if no more pieces to place on board).
    *
    * @throws an error with message NO_GAME_IN_PROGRESS_ERROR if there is no game in progress

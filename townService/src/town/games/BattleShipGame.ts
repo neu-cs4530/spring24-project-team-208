@@ -240,6 +240,11 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       blueBoard: this._createNewBoard(),
       greenBoard: this._createNewBoard(),
     };
+
+    // reset for use in boat placement phase
+    if (this.state.blueReady && this.state.greenReady) {
+      this.state.blueReady, this.state.greenReady = false;
+    }
   }
 
   protected _createNewBoard(): Array<BattleShipCell> {
@@ -302,6 +307,27 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       ...(placement.gamePiece === 'Green' && { greenBoard: newPlacement }),
     };
     this.state = newState;
+
+    // if there are no more boats to place player is ready for game phase
+    if (this._allBoatsPlaced(newPlacement)) {
+      if (placement.gamePiece === 'Blue') {
+        this.state.blueReady = true;
+      } else {
+        this.state.greenReady = true;
+      }
+    }
+    // if both players are ready for game phase set status to IN_PROGRESS
+    if (this.state.blueReady && this.state.greenReady) {
+      this.state.status = 'IN_PROGRESS';
+    }
+  }
+
+  /**
+   * Checks if all availible boats in a board have been placed and returns a boolean of the result
+   * @param newPlacement the board to check
+   */
+  protected _allBoatsPlaced(newPlacement: Array<BattleShipCell>): Boolean {
+    return false
   }
 
   /**
