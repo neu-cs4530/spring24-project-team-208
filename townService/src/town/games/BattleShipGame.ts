@@ -19,6 +19,7 @@ import {
   GameMove,
   PlayerID,
   BattleshipBoat,
+  BattleShipCellState,
 } from '../../types/CoveyTownSocket';
 import Game from './Game';
 
@@ -302,7 +303,6 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
 
     // A placement is invalid if the maximum number of boat pieces have been placed
     if (board.filter(p => p.type !== 'Ocean').length > MAX_BOAT_PIECES) {
-      console.log('too many')
       return false;
     }
     // A placement is invalid if the given position (row, col) is full
@@ -572,8 +572,22 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
 
   protected _applyMove(move: BattleShipGuess) {
     const newMoves = [...this.state.moves, move];
+    let boardToChange = move.gamePiece === 'Blue' 
+      ? this.state.greenBoard 
+      : this.state.blueBoard;
+
+    const newBoard = boardToChange.map((cell: BattleShipCell) => {
+      if (cell.row === move.row && cell.col === move.col) {
+        return { ...cell, state : "Hit" as BattleShipCellState};
+      } else {
+          return cell;
+      }
+    });
+
     const newState: BattleShipGameState = {
       ...this.state,
+      ...(move.gamePiece === 'Green' && { blueBoard: newBoard }),
+      ...(move.gamePiece === 'Blue' && { greenBoard: newBoard }),
       moves: newMoves,
     };
 

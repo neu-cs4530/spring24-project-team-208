@@ -26,7 +26,6 @@ export function BattleShipBoardCell(
       chooseCell(cell)
     }
     const hit = cell?.state === "Hit";
-    
     return (
       <div 
         style={{ 
@@ -38,12 +37,12 @@ export function BattleShipBoardCell(
         onMouseLeave={handleMouseLeave}
         onClick={handleClick}
       >
-        {hit && FireOverlay}
         {
           cell?.type === "Ocean" 
           ? OceanStore[Math.floor(Math.random() * OceanStore.length)] 
           : BattleShipPieceStore.find(piece => piece.name === cell?.type)?.component
         }
+        {hit && FireOverlay}
         {(isHovered || cell === chosenCell) && Crosshair}
       </div>
     )

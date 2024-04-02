@@ -13,14 +13,3 @@ export * from '../../../shared/types/CoveyTownSocket';
 
 export type CoveyTownSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
-/**
- * A BattleShipCell can either be "Ocean", representing 1 of 4 ocean tiles or a BattleShipCell, representing
- *  one of the many Battleship pieces. 
- * A BattleShipCell is either "Hit", meaning it has been chosen during a turn or "Safe", meaning it has not been.
- */
- export type BattleShipCell = {
-    type: BattleshipBoat | "Ocean";
-    state: BattleShipCellState;
-    row: BattleShipRowIndex;
-    col: BattleShipColIndex;
-}

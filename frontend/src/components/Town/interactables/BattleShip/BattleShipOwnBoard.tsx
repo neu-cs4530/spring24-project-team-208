@@ -46,21 +46,30 @@ export default function BattleShipOwnBoard({
   gameAreaController,
 }: BattleShipGameProps): JSX.Element {
   const townController = useTownController();
-  const [board, setBoard] = useState<BattleShipCell[][]>(townController.ourPlayer === gameAreaController.blue ? gameAreaController.blueBoard : gameAreaController.greenBoard);
-  const [isOurTurn, setIsOurTurn] = useState(gameAreaController.isOurTurn);
+  const [board, setBoard] = useState<BattleShipCell[][]>(
+    townController.ourPlayer === gameAreaController.blue 
+    ? gameAreaController.blueBoard 
+    : gameAreaController.greenBoard);
+  const [isOurTurn, setIsOurTurn] = useState<boolean>(gameAreaController.isOurTurn);
   const [chosenCell, chooseChosenCell] = useState<BattleShipCell>();
   const [chosenBoat, setChosenBoat] = useState<BattleshipBoat>();
   const {isOpen, onOpen, onClose} = useDisclosure();
-  const openNotebook = () => { onOpen(); }
-  const closeNotebook = () => { onClose(); }
+
   const inPlacement = gameAreaController.status === 'PLACING_BOATS';
+
+  const openNotebook = () => { 
+    onOpen(); 
+  }
+  const closeNotebook = () => { 
+    onClose(); 
+  }
+
   const placeBoat = () => {
     gameAreaController.placeBoatPiece(chosenBoat!, chosenCell!.row, chosenCell!.col)
   }
   const fireBoat = () => {
     gameAreaController.makeMove(chosenCell!.row, chosenCell!.col)
   }
-  const toast = useToast();
 
   useEffect(() => {
     gameAreaController.addListener('turnChanged', setIsOurTurn);
@@ -70,6 +79,30 @@ export default function BattleShipOwnBoard({
       gameAreaController.removeListener('turnChanged', setIsOurTurn);
     };
   }, [gameAreaController]);
+  
+  // Hides opponent cells that have not yet been guessed during their turn
+  useEffect(() => {
+    if (gameAreaController.whoseTurn === townController.ourPlayer) {
+      let oldOpponentBoard: BattleShipCell[][] = board.map((inner) => [...inner]); 
+      oldOpponentBoard = oldOpponentBoard.map((inner) => inner.map((cell: BattleShipCell) => {
+        if (cell.state === 'Safe' && cell.type !== 'Ocean') {
+          return {
+            type: "Ocean",
+            state: "Safe",
+            row: cell.row,
+            col: cell.col
+          }
+        } else {
+          return cell;
+        }
+      }));
+      setBoard(oldOpponentBoard);
+    } else {
+      setBoard(townController.ourPlayer === gameAreaController.blue ? gameAreaController.blueBoard : gameAreaController.greenBoard);
+    }
+  }, [gameAreaController.whoseTurn, isOurTurn])
+  
+    
   return (
     <div 
       style={{

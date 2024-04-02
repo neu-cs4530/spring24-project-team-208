@@ -16,18 +16,27 @@ export default function ButtonStatus(
         const inPlacementPhase = controller.status === 'PLACING_BOATS';
         let turnText = inPlacementPhase ? 'CHOOSE SHIP' : 'CANNOT FIRE';
 
-        if (chosenCell && validChosenCellPlacement(chosenCell)) {
-            turnText = 'READY TO FIRE';
-        }
+        
         if (inPlacementPhase) {
             if (!chosenBoat) {
                 turnText = 'CHOOSE BOAT';
             } else if (!chosenCell) {
                 turnText = 'PLACE BOAT';
             } else {
-                turnText = 'READY TO PLACE';
+                turnText = validChosenCellPlacement(chosenCell) ? 'READY TO PLACE' : 'CANNOT PLACE';
             }
+        } else if (controller.whoseTurn === townController.ourPlayer) {
+            if (chosenCell && validChosenCellFire(chosenCell)) {
+                turnText = 'READY TO FIRE'
+            }
+            else {
+                turnText = 'CANNOT FIRE';
+            }
+        } else {
+            turnText = 'WAIT FOR OPPONENT'
         }
+            
+        
         
         return (
             <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>

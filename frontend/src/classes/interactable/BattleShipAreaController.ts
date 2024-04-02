@@ -278,17 +278,16 @@ export default class BattleShipAreaController extends GameAreaController<
     const gamePiece = this._townController.ourPlayer.id === this._model.game?.state.blue ? 'Blue' : 'Green';
     
     
-      await this._townController.sendInteractableCommand(this.id, {
-        type: 'SetUpGameMove',
-        gameID: instanceID,
-        placement: {
-          gamePiece,
-          cell: boat,
-          col: col,
-          row: row,
-        },
-      });
-    
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'SetUpGameMove',
+      gameID: instanceID,
+      placement: {
+        gamePiece,
+        cell: boat,
+        col: col,
+        row: row,
+      },
+    });
   }
 
   /**
@@ -305,7 +304,6 @@ export default class BattleShipAreaController extends GameAreaController<
     if (!instanceID || this._model.game?.state.status !== 'IN_PROGRESS') {
       throw new Error(NO_GAME_IN_PROGRESS_ERROR);
     }
-    
     const move: BattleShipGuess = {
       gamePiece: this.whatColor!,
       col,
