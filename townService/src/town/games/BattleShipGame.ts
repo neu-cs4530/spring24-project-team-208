@@ -307,7 +307,6 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     }
     // A placement is invalid if the given position (row, col) is full
     if (board.find(p => p.col === placement.col && p.row === placement.row)?.type !== 'Ocean') {
-      console.log('taken')
       return false;
     }
     return true;
@@ -324,22 +323,23 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     } else {
       board = this.state.greenBoard;
     }
-    const newPlacement: BattleShipCell[] = [
-      ...board, 
-      {
-        type: placement.cell,
-        state: "Safe",
-        row: placement.row,
-        col: placement.col,
-      },
-    ];
+    const oldIndex = board.findIndex((piece: BattleShipCell) => piece.col === placement.col && piece.row === placement.row);
+    let newPlacement = [...board];
+    newPlacement[oldIndex] = 
+    {
+      type: placement.cell,
+      state: "Safe",
+      row: placement.row,
+      col: placement.col,
+    }
+
     const newState: BattleShipGameState = {
       ...this.state,
       ...(placement.gamePiece === 'Blue' && { blueBoard: newPlacement }),
       ...(placement.gamePiece === 'Green' && { greenBoard: newPlacement }),
     };
     this.state = newState;
-
+    
     // if there are no more boats to place player is ready for game phase
     if (this._allBoatsPlaced(newPlacement)) {
       if (placement.gamePiece === 'Blue') {
@@ -420,7 +420,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
   public placeBoat(position: GameMove<BattleShipPlacement>): void {
     const newPlacement = this._battleShipPlacement(position);
     if(this._validatePlacement(newPlacement)) {
-      boatMap.find(boatM => boatM.name === position.move.cell)?.ships.map(async (ship, index) => 
+      boatMap.find(boatM => boatM.name === position.move.cell)?.ships.map((ship, index) => 
         this._place(
           {
             gamePiece: position.playerID === this.state.blue ? 'Blue' : 'Green',

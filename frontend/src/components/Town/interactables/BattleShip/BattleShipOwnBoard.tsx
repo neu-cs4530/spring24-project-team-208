@@ -46,17 +46,14 @@ export default function BattleShipOwnBoard({
   gameAreaController,
 }: BattleShipGameProps): JSX.Element {
   const townController = useTownController();
-  const [board, setBoard] = useState<BattleShipCell[][]>(
-    townController.ourPlayer === gameAreaController.blue 
-    ? gameAreaController.blueBoard 
-    : gameAreaController.greenBoard);
+  const [ownBoard, setOwnBoard] = useState<BattleShipCell[][]>(townController.ourPlayer === gameAreaController.blue ? gameAreaController.blueBoard : gameAreaController.greenBoard);
+  const [oppBoard, setOppBoard] = useState<BattleShipCell[][]>(townController.ourPlayer === gameAreaController.blue ? gameAreaController.greenBoard : gameAreaController.blueBoard);
   const [isOurTurn, setIsOurTurn] = useState<boolean>(gameAreaController.isOurTurn);
   const [chosenCell, chooseChosenCell] = useState<BattleShipCell>();
   const [chosenBoat, setChosenBoat] = useState<BattleshipBoat>();
   const {isOpen, onOpen, onClose} = useDisclosure();
 
   const inPlacement = gameAreaController.status === 'PLACING_BOATS';
-
   const openNotebook = () => { 
     onOpen(); 
   }
@@ -70,20 +67,16 @@ export default function BattleShipOwnBoard({
   const fireBoat = () => {
     gameAreaController.makeMove(chosenCell!.row, chosenCell!.col)
   }
-
-  useEffect(() => {
-    gameAreaController.addListener('turnChanged', setIsOurTurn);
-    gameAreaController.addListener('boardChanged', setBoard);
-    return () => {
-      gameAreaController.removeListener('boardChanged', setBoard);
-      gameAreaController.removeListener('turnChanged', setIsOurTurn);
-    };
-  }, [gameAreaController]);
   
-  // Hides opponent cells that have not yet been guessed during their turn
   useEffect(() => {
-    if (gameAreaController.whoseTurn === townController.ourPlayer) {
-      let oldOpponentBoard: BattleShipCell[][] = board.map((inner) => [...inner]); 
+    const setOwnBoardMini = (board: BattleShipCell[][]) => {
+      setOwnBoard(board);
+      setIsOurTurnMini(); // bandaid
+    }
+    const setOpponentBoardMini = () => {
+      const oppBoardMini = townController.ourPlayer === gameAreaController.blue ? gameAreaController.greenBoard : gameAreaController.blueBoard
+
+      let oldOpponentBoard: BattleShipCell[][] = oppBoardMini.map((inner) => [...inner]); 
       oldOpponentBoard = oldOpponentBoard.map((inner) => inner.map((cell: BattleShipCell) => {
         if (cell.state === 'Safe' && cell.type !== 'Ocean') {
           return {
@@ -96,12 +89,22 @@ export default function BattleShipOwnBoard({
           return cell;
         }
       }));
-      setBoard(oldOpponentBoard);
-    } else {
-      setBoard(townController.ourPlayer === gameAreaController.blue ? gameAreaController.blueBoard : gameAreaController.greenBoard);
+      setOppBoard(oldOpponentBoard);
+      setIsOurTurnMini(); // bandaid
     }
-  }, [gameAreaController.whoseTurn, isOurTurn])
-  
+    const setIsOurTurnMini = () => {
+      setIsOurTurn(gameAreaController.whoseTurn === townController.ourPlayer);
+    }
+
+    gameAreaController.addListener('turnChanged', setIsOurTurnMini);
+    gameAreaController.addListener('blueBoardChanged', townController.ourPlayer === gameAreaController.blue ? setOwnBoardMini : setOpponentBoardMini);
+    gameAreaController.addListener('greenBoardChanged', townController.ourPlayer === gameAreaController.blue ? setOpponentBoardMini : setOwnBoardMini);
+    return () => {
+      gameAreaController.removeListener('blueBoardChanged', townController.ourPlayer === gameAreaController.blue ? setOwnBoardMini : setOpponentBoardMini);
+      gameAreaController.removeListener('greenBoardChanged', townController.ourPlayer === gameAreaController.blue ? setOpponentBoardMini : setOwnBoardMini);
+      gameAreaController.removeListener('turnChanged', setIsOurTurnMini); // TODO doesn't work
+    };
+  }, [gameAreaController]);
     
   return (
     <div 
@@ -131,7 +134,7 @@ export default function BattleShipOwnBoard({
           overflow: 'hidden',
         }}
       >
-        {board.map((row: BattleShipCell[], rowIndex: number) => {
+        {(inPlacement ? ownBoard : isOurTurn ? oppBoard : ownBoard).map((row: BattleShipCell[], rowIndex: number) => {
           return(row.map((cell: BattleShipCell, cellIndex: number) => {
             return(
               <BattleShipBoardCell 

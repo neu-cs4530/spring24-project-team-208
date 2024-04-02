@@ -36,8 +36,18 @@ export const SPACE_FULL_MESSAGE = 'The space is full';
 
 function createEmptyBoard(): BattleShipCell[][] {
   const board = new Array(BATTLESHIP_ROWS);
-  for (let i = 0; i < BATTLESHIP_ROWS; i++) {
-    board[i] = new Array(BATTLESHIP_COLS).fill(undefined);
+  
+  for (let row = 0; row < BATTLESHIP_ROWS; row++) {
+    board[row] = new Array(BATTLESHIP_COLS);
+
+    for (let col = 0; col < BATTLESHIP_COLS; col++) {
+      board[row][col] = {
+        type: "Ocean",
+        state: "Safe",
+        row: row as BattleShipRowIndex,
+        col: col as BattleShipColIndex,
+      };
+    }
   }
   return board;
 }
@@ -219,28 +229,29 @@ export default class BattleShipAreaController extends GameAreaController<
   protected _updateFrom(newModel: GameArea<BattleShipGameState>): void {
     super._updateFrom(newModel);
     const newGame = newModel.game;
-    if (newGame && this.isActive()) {
-      const gamePiece = this.gamePiece;
-      const newBoard = createEmptyBoard();
+    const wasOurTurn = this.isOurTurn;
 
-      if (gamePiece === 'Blue') {
-        newGame.state.blueBoard.forEach(piece => {
-          newBoard[piece.row][piece.col] = piece;
-        });
-        if (!_.isEqual(newBoard, this._blueBoard)) {
-          this._blueBoard = newBoard;
-          this.emit('boardChanged', this._blueBoard);
-        }
-      } else if (gamePiece === 'Green') {
-        newGame.state.greenBoard.forEach(piece => {
-          newBoard[piece.row][piece.col] = piece;
-        });
-        if (!_.isEqual(newBoard, this._greenBoard)) {
-          this._greenBoard = newBoard;
-          this.emit('boardChanged', this._greenBoard);
-        }
+    if (newGame && this.isActive()) {
+      let newBoard = createEmptyBoard();
+      
+      newGame.state.blueBoard.forEach(piece => {
+        newBoard[piece.row][piece.col] = piece;
+      });
+      if (!_.isEqual(newBoard, this._blueBoard)) {
+        this._blueBoard = newBoard;
+        this.emit('blueBoardChanged', this._blueBoard);
+      }
+      newBoard = createEmptyBoard();
+      newGame.state.greenBoard.forEach(piece => {
+        newBoard[piece.row][piece.col] = piece;
+      });
+      if (!_.isEqual(newBoard, this._greenBoard)) {
+        this._greenBoard = newBoard;
+        this.emit('greenBoardChanged', this._greenBoard);
       }
     }
+    const isOurTurn = this.isOurTurn;
+    if (wasOurTurn !== isOurTurn) this.emit('turnChanged', isOurTurn);
   }
 
   /**
