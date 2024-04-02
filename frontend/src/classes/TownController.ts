@@ -10,7 +10,7 @@ import Interactable from '../components/Town/Interactable';
 import ConversationArea from '../components/Town/interactables/ConversationArea';
 import GameArea from '../components/Town/interactables/GameArea';
 import ViewingArea from '../components/Town/interactables/ViewingArea';
-import { LoginController } from '../contexts/LoginControllerContext';
+import { TownLoginController } from '../contexts/TownLoginControllerContext';
 import { TownsService, TownsServiceClient } from '../generated/client';
 import useTownController from '../hooks/useTownController';
 import {
@@ -50,7 +50,7 @@ const SOCKET_COMMAND_TIMEOUT_MS = 5000;
 export type ConnectionProperties = {
   userName: string;
   townID: string;
-  loginController: LoginController;
+  townLoginController: TownLoginController;
 };
 
 /**
@@ -139,7 +139,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    * The login controller is used by the frontend application to manage logging in to a town,
    * and is also used to log out of a town.
    */
-  private _loginController: LoginController;
+  private _loginController: TownLoginController;
 
   /**
    * The current list of players in the town. Adding or removing players might replace the array
@@ -211,11 +211,11 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    */
   private _interactableEmitter = new EventEmitter();
 
-  public constructor({ userName, townID, loginController }: ConnectionProperties) {
+  public constructor({ userName, townID, townLoginController }: ConnectionProperties) {
     super();
     this._townID = townID;
     this._userName = userName;
-    this._loginController = loginController;
+    this._loginController = townLoginController;
 
     /*
         The event emitter will show a warning if more than this number of listeners are registered, as it

@@ -21,7 +21,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { Town } from '../../generated/client';
-import useLoginController from '../../hooks/useLoginController';
+import useTownLoginController from '../../hooks/useTownLoginController';
 import TownController from '../../classes/TownController';
 import useVideoContext from '../VideoCall/VideoFrontend/hooks/useVideoContext/useVideoContext';
 
@@ -32,8 +32,8 @@ export default function TownSelection(): JSX.Element {
   const [townIDToJoin, setTownIDToJoin] = useState<string>('');
   const [currentPublicTowns, setCurrentPublicTowns] = useState<Town[]>();
   const [isJoining, setIsJoining] = useState<boolean>(false);
-  const loginController = useLoginController();
-  const { setTownController, townsService } = loginController;
+  const townLoginController = useTownLoginController();
+  const { setTownController, townsService } = townLoginController;
   const { connect: videoConnect } = useVideoContext();
 
   const toast = useToast();
@@ -98,7 +98,7 @@ export default function TownSelection(): JSX.Element {
         const newController = new TownController({
           userName,
           townID: coveyRoomID,
-          loginController,
+          townLoginController,
         });
         await newController.connect();
         const videoToken = newController.providerVideoToken;
@@ -133,7 +133,7 @@ export default function TownSelection(): JSX.Element {
         }
       }
     },
-    [setTownController, userName, toast, videoConnect, loginController],
+    [setTownController, userName, toast, videoConnect, townLoginController],
   );
 
   const handleCreate = async () => {

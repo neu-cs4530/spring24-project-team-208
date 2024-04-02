@@ -8,9 +8,9 @@ import { mock, mockClear, MockProxy, mockReset } from 'jest-mock-extended';
 import { nanoid } from 'nanoid';
 import { act } from 'react-dom/test-utils';
 import * as TownController from '../../classes/TownController';
-import { LoginController } from '../../contexts/LoginControllerContext';
+import { TownLoginController } from '../../contexts/TownLoginControllerContext';
 import { CancelablePromise, Town, TownsService } from '../../generated/client';
-import * as useLoginController from '../../hooks/useLoginController';
+import * as useTownLoginController from '../../hooks/useTownLoginController';
 import { mockTownController } from '../../TestUtils';
 import TownSelection from './TownSelection';
 
@@ -92,8 +92,8 @@ export function wrappedTownSelection() {
 
 describe('Town Selection', () => {
   let mockTownsService: MockProxy<TownsService>;
-  let useLoginControllerSpy: jest.SpyInstance<LoginController, []>;
-  let mockLoginController: MockProxy<LoginController>;
+  let useTownLoginControllerSpy: jest.SpyInstance<TownLoginController, []>;
+  let mockTownLoginController: MockProxy<TownLoginController>;
   let coveyTownControllerConstructorSpy: jest.SpyInstance<
     TownController.default,
     [TownController.ConnectionProperties]
@@ -103,9 +103,9 @@ describe('Town Selection', () => {
 
   beforeAll(() => {
     mockTownsService = mock<TownsService>();
-    useLoginControllerSpy = jest.spyOn(useLoginController, 'default');
-    mockLoginController = mock<LoginController>();
-    mockLoginController.townsService = mockTownsService;
+    useTownLoginControllerSpy = jest.spyOn(useTownLoginController, 'default');
+    mockTownLoginController = mock<TownLoginController>();
+    mockTownLoginController.townsService = mockTownsService;
 
     mockedTownController = mockTownController({ providerVideoToken: expectedProviderVideoToken });
 
@@ -114,11 +114,11 @@ describe('Town Selection', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     mockReset(mockTownsService);
-    mockClear(useLoginControllerSpy);
-    mockClear(mockLoginController);
+    mockClear(useTownLoginControllerSpy);
+    mockClear(mockTownLoginController);
     mockClear(mockedTownController);
     mockClear(coveyTownControllerConstructorSpy);
-    useLoginControllerSpy.mockReturnValue(mockLoginController);
+    useTownLoginControllerSpy.mockReturnValue(mockTownLoginController);
     coveyTownControllerConstructorSpy.mockReturnValue(mockedTownController);
     mockedTownController.connect.mockReturnValue(Promise.resolve());
   });
@@ -342,13 +342,13 @@ describe('Town Selection', () => {
             expect(coveyTownControllerConstructorSpy).toBeCalledWith({
               userName,
               townID: coveyTownID,
-              loginController: mockLoginController,
+              townLoginController: mockTownLoginController,
             }),
           );
           await waitFor(() => expect(mockedTownController.connect).toBeCalled());
           await waitFor(() => expect(mockConnect).toBeCalledWith(expectedProviderVideoToken));
           await waitFor(() =>
-            expect(mockLoginController.setTownController).toBeCalledWith(mockedTownController),
+            expect(mockTownLoginController.setTownController).toBeCalledWith(mockedTownController),
           );
         });
         it('displays an error toast "Unable to join town" if the username is empty', async () => {
@@ -409,7 +409,7 @@ describe('Town Selection', () => {
           for (const town of expectedTowns) {
             if (town.currentOccupancy < town.maximumOccupancy) {
               mockClear(mockedTownController);
-              mockClear(mockLoginController);
+              mockClear(mockTownLoginController);
               mockClear(coveyTownControllerConstructorSpy);
               mockConnect.mockClear();
               const row = rows.find(each => within(each).queryByText(town.townID));
@@ -431,14 +431,14 @@ describe('Town Selection', () => {
                   expect(coveyTownControllerConstructorSpy).toBeCalledWith({
                     userName: username,
                     townID: town.townID,
-                    loginController: mockLoginController,
+                    townLoginController: mockTownLoginController,
                   }),
                 );
 
                 await waitFor(() => expect(mockedTownController.connect).toBeCalled());
                 await waitFor(() => expect(mockConnect).toBeCalledWith(expectedProviderVideoToken));
                 await waitFor(() =>
-                  expect(mockLoginController.setTownController).toBeCalledWith(
+                  expect(mockTownLoginController.setTownController).toBeCalledWith(
                     mockedTownController,
                   ),
                 );
@@ -625,13 +625,15 @@ describe('Town Selection', () => {
               expect(coveyTownControllerConstructorSpy).toBeCalledWith({
                 userName,
                 townID: townID,
-                loginController: mockLoginController,
+                townLoginController: mockTownLoginController,
               }),
             );
             await waitFor(() => expect(mockedTownController.connect).toBeCalled());
             await waitFor(() => expect(mockConnect).toBeCalledWith(expectedProviderVideoToken));
             await waitFor(() =>
-              expect(mockLoginController.setTownController).toBeCalledWith(mockedTownController),
+              expect(mockTownLoginController.setTownController).toBeCalledWith(
+                mockedTownController,
+              ),
             );
           });
           it('displays an error toast "Unable to connect to Towns Service" if an error occurs in createTown', async () => {

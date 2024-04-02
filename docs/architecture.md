@@ -80,7 +80,7 @@ class TownController{
 
 ### Before joining a town
 
-Before a user connects to a town, all communication between the frontend and the backend occurs over the `towns` REST API, which is described and implemented in `townService/src/town/TownsController.ts`. The API is accessed in React code through the `townService` property of the `LoginController`.
+Before a user connects to a town, all communication between the frontend and the backend occurs over the `towns` REST API, which is described and implemented in `townService/src/town/TownsController.ts`. The API is accessed in React code through the `townService` property of the `TownLoginController`.
 
 ### While in a town
 

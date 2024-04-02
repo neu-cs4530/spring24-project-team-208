@@ -1,6 +1,6 @@
 import { mock, mockClear, MockProxy } from 'jest-mock-extended';
 import { nanoid } from 'nanoid';
-import { LoginController } from '../contexts/LoginControllerContext';
+import { TownLoginController } from '../contexts/TownLoginControllerContext';
 import {
   EventNames,
   getEventListener,
@@ -38,11 +38,11 @@ jest.mock('socket.io-client', () => {
 });
 
 describe('TownController', () => {
-  let mockLoginController: MockProxy<LoginController>;
+  let mockTownLoginController: MockProxy<TownLoginController>;
   let userName: string;
   let townID: string;
   beforeAll(() => {
-    mockLoginController = mock<LoginController>();
+    mockTownLoginController = mock<TownLoginController>();
     process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL = 'test';
   });
   let testController: TownController;
@@ -84,7 +84,11 @@ describe('TownController', () => {
     mockClear(mockSocket);
     userName = nanoid();
     townID = nanoid();
-    testController = new TownController({ userName, townID, loginController: mockLoginController });
+    testController = new TownController({
+      userName,
+      townID,
+      townLoginController: mockTownLoginController,
+    });
   });
   describe('With an unsuccesful connection', () => {
     it('Throws an error', async () => {
@@ -454,6 +458,6 @@ describe('TownController', () => {
   });
   it('Disconnects the socket and clears the coveyTownController when disconnection', async () => {
     emitEventAndExpectListenerFiring('townClosing', undefined, 'disconnect');
-    expect(mockLoginController.setTownController).toBeCalledWith(null);
+    expect(mockTownLoginController.setTownController).toBeCalledWith(null);
   });
 });
