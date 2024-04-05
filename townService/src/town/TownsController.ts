@@ -16,6 +16,7 @@ import {
 } from 'tsoa';
 
 import { Town, TownCreateParams, TownCreateResponse } from '../api/Model';
+import { auth } from '../lib/firebaseSetup';
 import InvalidParametersError from '../lib/InvalidParametersError';
 import CoveyTownsStore from '../lib/TownsStore';
 import {
@@ -25,6 +26,8 @@ import {
   TownSettingsUpdate,
   ViewingArea,
 } from '../types/CoveyTownSocket';
+
+type ErrorMessageResponse = { message: string };
 
 /**
  * This is the town route
@@ -192,33 +195,42 @@ export class TownsController extends Controller {
   /**
    * Connects a client's socket to the requested town, or disconnects the socket if no such town exists
    *
-   * @param socket A new socket connection, with the userName and townID parameters of the socket's
-   * auth object configured with the desired townID to join and username to use
+   * @param socket A new socket connection, with the firestore JWT authToken and townID parameters of the socket's
+   * auth object configured with the desired townID to join
    *
    */
+  @Response<ErrorMessageResponse>(401, 'Authentication of the firebase JWT token failed', {
+    message: 'Failed to authenticate',
+  })
   public async joinTown(socket: CoveyTownSocket) {
-    // Parse the client's requested username from the connection
-    const { userName, townID } = socket.handshake.auth as { userName: string; townID: string };
+    // Parse the client's authentication token from the connection
+    const { authToken, townID } = socket.handshake.auth as { authToken: string; townID: string };
+    try {
+      // Authenticate the client's connection to Firestore
+      const decodedToken = await auth.verifyIdToken(authToken);
+      const userName = decodedToken.uid;
+      const town = this._townsStore.getTownByID(townID);
+      if (!town) {
+        socket.disconnect(true);
+        return;
+      }
 
-    const town = this._townsStore.getTownByID(townID);
-    if (!town) {
-      socket.disconnect(true);
-      return;
+      // Connect the client to the socket.io broadcast room for this town
+      socket.join(town.townID);
+
+      const newPlayer = await town.addPlayer(userName, socket);
+      assert(newPlayer.videoToken);
+      socket.emit('initialize', {
+        userID: newPlayer.id,
+        sessionToken: newPlayer.sessionToken,
+        providerVideoToken: newPlayer.videoToken,
+        currentPlayers: town.players.map(eachPlayer => eachPlayer.toPlayerModel()),
+        friendlyName: town.friendlyName,
+        isPubliclyListed: town.isPubliclyListed,
+        interactables: town.interactables.map(eachInteractable => eachInteractable.toModel()),
+      });
+    } catch (err) {
+      throw new InvalidParametersError('Failed to authenticate');
     }
-
-    // Connect the client to the socket.io broadcast room for this town
-    socket.join(town.townID);
-
-    const newPlayer = await town.addPlayer(userName, socket);
-    assert(newPlayer.videoToken);
-    socket.emit('initialize', {
-      userID: newPlayer.id,
-      sessionToken: newPlayer.sessionToken,
-      providerVideoToken: newPlayer.videoToken,
-      currentPlayers: town.players.map(eachPlayer => eachPlayer.toPlayerModel()),
-      friendlyName: town.friendlyName,
-      isPubliclyListed: town.isPubliclyListed,
-      interactables: town.interactables.map(eachInteractable => eachInteractable.toModel()),
-    });
   }
 }
