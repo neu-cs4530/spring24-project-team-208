@@ -1,15 +1,16 @@
-import { initializeApp, cert, ServiceAccount } from 'firebase-admin/app';
+import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
 import fs from 'fs';
 
-const loadJSON = (path: string) =>
-  JSON.parse(fs.readFileSync(new URL(path, import.meta.url), 'utf8'));
+const CREDENTIALS = process.env.FIREBASE_SERVICE_ACCOUNT;
 
-const serviceAccount = loadJSON('../../firebaseAdminKey.json');
+if (!CREDENTIALS) {
+  throw new Error('FIREBASE_SERVICE_ACCOUNT environment variable not set');
+}
 
 initializeApp({
-  credential: cert(<ServiceAccount>serviceAccount),
+  credential: cert(JSON.parse(CREDENTIALS)),
 });
 
 const db = getFirestore();
