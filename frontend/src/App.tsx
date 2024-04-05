@@ -3,20 +3,29 @@ import { MuiThemeProvider } from '@material-ui/core/styles';
 import React, { useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import theme from './components/VideoCall/VideoFrontend/theme';
-import UserController from './classes/UserController';
+import { UserController } from './classes/UserController';
 import LoggedInScreen from './components/Login/LoggedInScreen';
 import LogInScreen from './components/Login/LogInScreen';
 import UserControllerContext from './contexts/UserControllerContext';
 import UserLoginControllerContext from './contexts/UserLoginControllerContext';
+import assert from 'assert';
+import { AppServiceClient } from './generated/client/AppServiceClient';
+import AppStateProvider from './components/VideoCall/VideoFrontend/state';
 
 function App() {
   const [userController, setUserController] = useState<UserController | null>(null);
+
+  const url = process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL;
+  assert(url, 'NEXT_PUBLIC_TOWNS_SERVICE_URL must be defined');
+  const usersService = new AppServiceClient({ BASE: url }).users;
 
   let page: JSX.Element;
   if (userController) {
     page = (
       <UserControllerContext.Provider value={userController}>
-        <LoggedInScreen />
+        <AppStateProvider>
+          <LoggedInScreen />
+        </AppStateProvider>
       </UserControllerContext.Provider>
     );
   } else {
@@ -24,7 +33,7 @@ function App() {
   }
 
   return (
-    <UserLoginControllerContext.Provider value={{ setUserController }}>
+    <UserLoginControllerContext.Provider value={{ setUserController, usersService }}>
       {page}
     </UserLoginControllerContext.Provider>
   );
