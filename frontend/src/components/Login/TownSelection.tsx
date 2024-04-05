@@ -20,19 +20,21 @@ import {
   Tr,
   useToast,
 } from '@chakra-ui/react';
-import { Town } from '../../generated/client';
+import { ApiError, Town } from '../../generated/client';
 import useTownLoginController from '../../hooks/useTownLoginController';
 import TownController from '../../classes/TownController';
 import useVideoContext from '../VideoCall/VideoFrontend/hooks/useVideoContext/useVideoContext';
+import useUserController from '../../hooks/useUserController';
+import { FirebaseError } from '@firebase/util';
 
 export default function TownSelection(): JSX.Element {
-  const [userName, setUserName] = useState<string>('');
   const [newTownName, setNewTownName] = useState<string>('');
   const [newTownIsPublic, setNewTownIsPublic] = useState<boolean>(true);
   const [townIDToJoin, setTownIDToJoin] = useState<string>('');
   const [currentPublicTowns, setCurrentPublicTowns] = useState<Town[]>();
   const [isJoining, setIsJoining] = useState<boolean>(false);
   const townLoginController = useTownLoginController();
+  const userController = useUserController();
   const { setTownController, townsService } = townLoginController;
   const { connect: videoConnect } = useVideoContext();
 
@@ -55,48 +57,41 @@ export default function TownSelection(): JSX.Element {
     async (coveyRoomID: string) => {
       let connectWatchdog: NodeJS.Timeout | undefined = undefined;
       let loadingToast: ToastId | undefined = undefined;
+      if (!coveyRoomID || coveyRoomID.length === 0) {
+        toast({
+          title: 'Unable to join town',
+          description: 'Please enter a town ID',
+          status: 'error',
+        });
+        return;
+      }
+      const isHighLatencyTownService =
+        process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL?.includes('onrender.com');
+      connectWatchdog = setTimeout(() => {
+        if (isHighLatencyTownService) {
+          loadingToast = toast({
+            title: 'Please be patient...',
+            description:
+              "The TownService is starting up - this may take 15-30 seconds, because it is hosted on a free Render.com service. Render.com's free tier automatically puts the TownService to sleep when it is inactive for 15 minutes.",
+            status: 'info',
+            isClosable: false,
+            duration: null,
+          });
+        } else {
+          loadingToast = toast({
+            title: 'Connecting to town...',
+            description: 'This is taking a bit longer than normal - please be patient...',
+            status: 'info',
+            isClosable: false,
+            duration: null,
+          });
+        }
+      }, 1000);
+      setIsJoining(true);
       try {
-        if (!userName || userName.length === 0) {
-          toast({
-            title: 'Unable to join town',
-            description: 'Please select a username',
-            status: 'error',
-          });
-          return;
-        }
-        if (!coveyRoomID || coveyRoomID.length === 0) {
-          toast({
-            title: 'Unable to join town',
-            description: 'Please enter a town ID',
-            status: 'error',
-          });
-          return;
-        }
-        const isHighLatencyTownService =
-          process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL?.includes('onrender.com');
-        connectWatchdog = setTimeout(() => {
-          if (isHighLatencyTownService) {
-            loadingToast = toast({
-              title: 'Please be patient...',
-              description:
-                "The TownService is starting up - this may take 15-30 seconds, because it is hosted on a free Render.com service. Render.com's free tier automatically puts the TownService to sleep when it is inactive for 15 minutes.",
-              status: 'info',
-              isClosable: false,
-              duration: null,
-            });
-          } else {
-            loadingToast = toast({
-              title: 'Connecting to town...',
-              description: 'This is taking a bit longer than normal - please be patient...',
-              status: 'info',
-              isClosable: false,
-              duration: null,
-            });
-          }
-        }, 1000);
-        setIsJoining(true);
+        const authToken: string = await userController.user.getIdToken();
         const newController = new TownController({
-          userName,
+          authToken: authToken,
           townID: coveyRoomID,
           townLoginController,
         });
@@ -118,7 +113,19 @@ export default function TownSelection(): JSX.Element {
         if (connectWatchdog) {
           clearTimeout(connectWatchdog);
         }
-        if (err instanceof Error) {
+        if (err instanceof FirebaseError) {
+          toast({
+            title: 'Session has expired',
+            description: 'Please log in again',
+            status: 'error',
+          });
+        } else if (err instanceof ApiError && err.status === 401) {
+          toast({
+            title: 'Failed to authenticate',
+            description: 'Please log in again',
+            status: 'error',
+          });
+        } else if (err instanceof Error) {
           toast({
             title: 'Unable to connect to Towns Service',
             description: err.toString(),
@@ -133,18 +140,10 @@ export default function TownSelection(): JSX.Element {
         }
       }
     },
-    [setTownController, userName, toast, videoConnect, townLoginController],
+    [setTownController, toast, videoConnect, townLoginController],
   );
 
   const handleCreate = async () => {
-    if (!userName || userName.length === 0) {
-      toast({
-        title: 'Unable to create town',
-        description: 'Please select a username before creating a town',
-        status: 'error',
-      });
-      return;
-    }
     if (!newTownName || newTownName.length === 0) {
       toast({
         title: 'Unable to create town',
@@ -238,22 +237,6 @@ export default function TownSelection(): JSX.Element {
     <>
       <form>
         <Stack>
-          <Box p='4' borderWidth='1px' borderRadius='lg'>
-            <Heading as='h2' size='lg'>
-              Select a username
-            </Heading>
-
-            <FormControl>
-              <FormLabel htmlFor='name'>Name</FormLabel>
-              <Input
-                autoFocus
-                name='name'
-                placeholder='Your name'
-                value={userName}
-                onChange={event => setUserName(event.target.value)}
-              />
-            </FormControl>
-          </Box>
           <Box borderWidth='1px' borderRadius='lg'>
             <Heading p='4' as='h2' size='lg'>
               Create a New Town

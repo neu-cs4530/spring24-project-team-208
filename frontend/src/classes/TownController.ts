@@ -10,7 +10,7 @@ import ConversationArea from '../components/Town/interactables/ConversationArea'
 import GameArea from '../components/Town/interactables/GameArea';
 import ViewingArea from '../components/Town/interactables/ViewingArea';
 import { TownLoginController } from '../contexts/TownLoginControllerContext';
-import { TownsService, TownsServiceClient } from '../generated/client';
+import { TownsService, AppServiceClient } from '../generated/client';
 import useTownController from '../hooks/useTownController';
 import {
   ChatMessage,
@@ -47,7 +47,7 @@ const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
 const SOCKET_COMMAND_TIMEOUT_MS = 5000;
 
 export type ConnectionProperties = {
-  userName: string;
+  authToken: string;
   townID: string;
   townLoginController: TownLoginController;
 };
@@ -172,9 +172,9 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   private _townIsPubliclyListedInternal = false;
 
   /**
-   * The username of the player whose browser created this TownController
+   * The authentication token of the user who created this TownController.
    */
-  private readonly _userName: string;
+  private readonly _authToken: string;
 
   /**
    * The user ID of the player whose browser created this TownController. The user ID is set by the backend townsService, and
@@ -210,10 +210,10 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    */
   private _interactableEmitter = new EventEmitter();
 
-  public constructor({ userName, townID, townLoginController }: ConnectionProperties) {
+  public constructor({ authToken, townID, townLoginController }: ConnectionProperties) {
     super();
     this._townID = townID;
-    this._userName = userName;
+    this._authToken = authToken;
     this._loginController = townLoginController;
 
     /*
@@ -225,8 +225,8 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
 
     const url = process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL;
     assert(url);
-    this._socket = io(url, { auth: { userName, townID } });
-    this._townsService = new TownsServiceClient({ BASE: url }).towns;
+    this._socket = io(url, { auth: { authToken, townID } });
+    this._townsService = new AppServiceClient({ BASE: url }).towns;
     this.registerSocketListeners();
   }
 
@@ -255,8 +255,8 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return token;
   }
 
-  public get userName() {
-    return this._userName;
+  public get authToken() {
+    return this._authToken;
   }
 
   public get friendlyName() {
