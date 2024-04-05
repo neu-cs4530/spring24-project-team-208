@@ -232,15 +232,20 @@ describe('BattleShipGameArea', () => {
         ).toThrowError(GAME_ID_MISSMATCH_MESSAGE);
       });
       it('should call placeBoat on the game and call _emitAreaChanged', () => {
-        const placement: BattleShipPlacement = { col: 0, row: 0, gamePiece: 'Blue', cell: 'Aircraft_Middle_1' };
+        const placement: BattleShipPlacement = {
+          col: 0,
+          row: 0,
+          gamePiece: 'Blue',
+          cell: 'Aircraft_Middle_1',
+        };
         const placeBoatSpy = jest.spyOn(game, 'placeBoat');
         gameArea.handleCommand(
-          { 
-            type: 'SetUpGameMove', 
-            placement, 
-            // placementType: 'Placement', 
+          {
+            type: 'SetUpGameMove',
+            placement,
+            // placementType: 'Placement',
             vertical: true,
-            gameID 
+            gameID,
           },
           blue,
         );

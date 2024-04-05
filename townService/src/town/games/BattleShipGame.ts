@@ -459,13 +459,12 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
         this._place({
           gamePiece: position.playerID === this.state.blue ? 'Blue' : 'Green',
           cell: ship as BattleshipBoatPiece,
-          col: position.move.col + (vertical ? 0 : index) as BattleShipColIndex,
-          row: position.move.row + (vertical ? index : 0) as BattleShipRowIndex,
+          col: (position.move.col + (vertical ? 0 : index)) as BattleShipColIndex,
+          row: (position.move.row + (vertical ? index : 0)) as BattleShipRowIndex,
         }),
       );
     }
   }
-  
 
   /**
    * Removes a boat piece from a board
