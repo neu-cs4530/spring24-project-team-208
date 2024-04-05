@@ -2,7 +2,7 @@ import { Modal, useDisclosure, useToast } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import BattleShipAreaController from '../../../../classes/interactable/BattleShipAreaController';
 import useTownController from '../../../../hooks/useTownController';
-import { BattleshipBoat, BattleShipCell } from '../../../../types/CoveyTownSocket';
+import { BattleshipBoatPiece, BattleShipCell } from '../../../../types/CoveyTownSocket';
 import { battleshipLogo, crosshair, scratch, smallNotebook } from './BattleshipMenuSprites';
 import { BattleShipBoardCell } from './BattleshipComponents/BattleshipBoardCell';
 import { EnemyCounter } from './BattleshipComponents/EnemyCounter';
@@ -58,7 +58,8 @@ export default function BattleShipOwnBoard({
   );
   const [isOurTurn, setIsOurTurn] = useState<boolean>(gameAreaController.isOurTurn);
   const [chosenCell, chooseChosenCell] = useState<BattleShipCell>();
-  const [chosenBoat, setChosenBoat] = useState<BattleshipBoat>();
+  const [chosenBoat, setChosenBoat] = useState<BattleshipBoatPiece>();
+  const [vertical, setVertical] = useState<boolean>(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const inPlacement = gameAreaController.status === 'PLACING_BOATS';
@@ -70,7 +71,7 @@ export default function BattleShipOwnBoard({
   };
 
   const placeBoat = () => {
-    gameAreaController.placeBoatPiece(chosenBoat!, chosenCell!.row, chosenCell!.col);
+    gameAreaController.placeBoatPiece(chosenBoat!, chosenCell!.row, chosenCell!.col, vertical);
   };
   const fireBoat = () => {
     gameAreaController.makeMove(chosenCell!.row, chosenCell!.col);

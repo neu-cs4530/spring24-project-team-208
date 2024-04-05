@@ -200,8 +200,9 @@ describe('BattleShipGameArea', () => {
         gameArea.handleCommand(
           {
             type: 'SetUpGameMove',
-            placement: { col: 0, row: 0, gamePiece: 'Blue', boat: 'Front' },
-            placementType: 'Placement',
+            placement: { col: 0, row: 0, gamePiece: 'Blue', cell: 'Aircraft_Middle_1' },
+            vertical: true,
+            // placementType: 'Placement',
             gameID: nanoid(),
           },
           blue,
@@ -221,8 +222,9 @@ describe('BattleShipGameArea', () => {
           gameArea.handleCommand(
             {
               type: 'SetUpGameMove',
-              placement: { col: 0, row: 0, gamePiece: 'Blue', boat: 'Front' },
-              placementType: 'Placement',
+              placement: { col: 0, row: 0, gamePiece: 'Blue', cell: 'Aircraft_Middle_1' },
+              vertical: true,
+              // placementType: 'Placement',
               gameID: nanoid(),
             },
             blue,
@@ -230,10 +232,16 @@ describe('BattleShipGameArea', () => {
         ).toThrowError(GAME_ID_MISSMATCH_MESSAGE);
       });
       it('should call placeBoat on the game and call _emitAreaChanged', () => {
-        const placement: BattleShipPlacement = { col: 0, row: 0, gamePiece: 'Blue', boat: 'End' };
+        const placement: BattleShipPlacement = { col: 0, row: 0, gamePiece: 'Blue', cell: 'Aircraft_Middle_1' };
         const placeBoatSpy = jest.spyOn(game, 'placeBoat');
         gameArea.handleCommand(
-          { type: 'SetUpGameMove', placement, placementType: 'Placement', gameID },
+          { 
+            type: 'SetUpGameMove', 
+            placement, 
+            // placementType: 'Placement', 
+            vertical: true,
+            gameID 
+          },
           blue,
         );
         expect(placeBoatSpy).toHaveBeenCalledWith({
@@ -246,23 +254,23 @@ describe('BattleShipGameArea', () => {
         });
         expect(interactableUpdateSpy).toHaveBeenCalledTimes(1);
       });
-      it('should call removeBoat on the game and call _emitAreaChanged', () => {
-        const placement: BattleShipPlacement = { col: 0, row: 0, gamePiece: 'Blue', boat: 'End' };
-        const removeBoatSpy = jest.spyOn(game, 'removeBoat');
-        gameArea.handleCommand(
-          { type: 'SetUpGameMove', placement, placementType: 'Removal', gameID },
-          blue,
-        );
-        expect(removeBoatSpy).toHaveBeenCalledWith({
-          gameID: game.id,
-          playerID: blue.id,
-          move: {
-            ...placement,
-            gamePiece: 'Blue',
-          },
-        });
-        expect(interactableUpdateSpy).toHaveBeenCalledTimes(1);
-      });
+      // it('should call removeBoat on the game and call _emitAreaChanged', () => {
+      //   const placement: BattleShipPlacement = { col: 0, row: 0, gamePiece: 'Blue', boat: 'End' };
+      //   const removeBoatSpy = jest.spyOn(game, 'removeBoat');
+      //   gameArea.handleCommand(
+      //     { type: 'SetUpGameMove', placement, placementType: 'Removal', gameID },
+      //     blue,
+      //   );
+      //   expect(removeBoatSpy).toHaveBeenCalledWith({
+      //     gameID: game.id,
+      //     playerID: blue.id,
+      //     move: {
+      //       ...placement,
+      //       gamePiece: 'Blue',
+      //     },
+      //   });
+      //   expect(interactableUpdateSpy).toHaveBeenCalledTimes(1);
+      // });
     });
   });
   describe('[T3.3] GameMove command', () => {

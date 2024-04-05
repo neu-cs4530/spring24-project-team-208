@@ -208,7 +208,7 @@ export interface BattleShipGuess {
  */
 export interface BattleShipPlacement { 
   gamePiece: BattleShipColor;
-  cell: BattleshipBoat;
+  cell: BattleshipBoatPiece | BattleshipBoat;
   col: BattleShipColIndex;
   row: BattleShipRowIndex;
 }
@@ -231,11 +231,12 @@ export type BattleShipColIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 export type BattleShipColor = 'Blue' | 'Green';
 
 
+export type BattleshipBoat = "Battleship" | "Aircraft Carrier" | "Submarine" | "Cruiser" | "Destroyer";
 /**
  * Each possible individual section of a boat
  * Full boats should start with a 'Back' piece and end with a 'Front' piece
  */
-export type BattleshipBoat = 
+export type BattleshipBoatPiece = 
     "Aircraft_Back" 
   | "Aircraft_Middle_1"
   | "Aircraft_Middle_2"
@@ -264,7 +265,7 @@ export type BattleShipCellState = "Hit" | "Safe";
  */
 export type BattleShipCell = {
   // Whether the cell is an ocean or a boat cell, and which kind of boat
-  type: BattleshipBoat | "Ocean";
+  type: BattleshipBoatPiece | "Ocean";
   // If a cell has been guessed or not
   state: BattleShipCellState;
   // The row of the cell
@@ -353,6 +354,7 @@ export interface SetUpGameMove {
   type: 'SetUpGameMove';
   gameID: GameInstanceID;
   placement: BattleShipPlacement; // TODO can be generalized to any game in future
+  vertical: boolean; // orientation of the boat
   // placementType: 'Placement' | 'Removal';
 }
 export type InteractableCommandReturnType<CommandType extends InteractableCommand> = 

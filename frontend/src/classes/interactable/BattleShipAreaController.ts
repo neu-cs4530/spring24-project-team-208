@@ -7,7 +7,7 @@ import {
   BattleShipColIndex,
   BattleShipRowIndex,
   // BattleShipPiece,
-  BattleshipBoat,
+  BattleshipBoatPiece,
   BattleShipPlacement,
   BattleShipCell,
   BattleShipGuess,
@@ -282,9 +282,10 @@ export default class BattleShipAreaController extends GameAreaController<
    * @throws an error with message NO_GAME_IN_PROGRESS_ERROR if there is no game in progress
    */
   public async placeBoatPiece(
-    boat: BattleshipBoat,
+    boat: BattleshipBoatPiece,
     row: BattleShipRowIndex,
     col: BattleShipColIndex,
+    vertical: boolean,
   ): Promise<void> {
     const instanceID = this._instanceID;
     if (!instanceID || this._model.game?.state.status !== 'PLACING_BOATS') {
@@ -303,6 +304,7 @@ export default class BattleShipAreaController extends GameAreaController<
         col: col,
         row: row,
       },
+      vertical,
     });
   }
 

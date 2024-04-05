@@ -88,11 +88,13 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
       if (command.placement.gamePiece !== 'Blue' && command.placement.gamePiece !== 'Green') {
         throw new InvalidParametersError('Invalid game piece');
       }
-      game.placeBoat({
+      game.placeBoat(
+      {
         gameID: command.gameID,
         playerID: player.id,
         move: command.placement,
-      });
+      },
+      command.vertical);
       this._stateUpdated(game.toModel());
 
       return undefined as InteractableCommandReturnType<CommandType>;

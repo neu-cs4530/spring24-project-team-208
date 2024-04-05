@@ -18,15 +18,16 @@ import {
   BattleShipPlacement,
   GameMove,
   PlayerID,
-  BattleshipBoat,
+  BattleshipBoatPiece,
   BattleShipCellState,
+  BattleshipBoat,
 } from '../../types/CoveyTownSocket';
 import Game from './Game';
 
 const GAME_NOT_WAITING_TO_START_MESSAGE = 'Game is not in waiting to start mode';
 const NOT_YOUR_BOARD_MESSAGE = 'Not your board';
 const MAX_BOAT_PIECES = 16;
-const ALL_BOATS: BattleshipBoat[] = [
+const ALL_BOATS: BattleshipBoatPiece[] = [
   'Aircraft_Back',
   'Aircraft_Middle_1',
   'Aircraft_Middle_2',
@@ -362,7 +363,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     );
     const newPlacement = [...board];
     newPlacement[oldIndex] = {
-      type: placement.cell,
+      type: placement.cell as BattleshipBoatPiece,
       state: 'Safe',
       row: placement.row,
       col: placement.col,
@@ -451,19 +452,20 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @throws InvalidParametersError if the maximum number of boat pieces has been added to the board (BOARD_POSITION_NOT_VALID_MESSAGE)
    * @throws InvalidParametersError if trying to place on board that isn't theirs (NOT_YOUR_BOARD_MESSAGE)
    */
-  public placeBoat(position: GameMove<BattleShipPlacement>): void {
+  public placeBoat(position: GameMove<BattleShipPlacement>, vertical: boolean): void {
     const newPlacement = this._battleShipPlacement(position);
     if (this._validatePlacement(newPlacement)) {
       BOAT_MAP.find(boatM => boatM.name === position.move.cell)?.ships.map((ship, index) =>
         this._place({
           gamePiece: position.playerID === this.state.blue ? 'Blue' : 'Green',
-          cell: ship as BattleshipBoat,
-          col: (position.move.col + index) as BattleShipColIndex,
-          row: position.move.row,
+          cell: ship as BattleshipBoatPiece,
+          col: position.move.col + (vertical ? 0 : index) as BattleShipColIndex,
+          row: position.move.row + (vertical ? index : 0) as BattleShipRowIndex,
         }),
       );
     }
   }
+  
 
   /**
    * Removes a boat piece from a board
