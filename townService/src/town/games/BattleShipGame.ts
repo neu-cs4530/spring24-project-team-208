@@ -408,7 +408,8 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    */
   protected _battleShipPlacement(position: GameMove<BattleShipPlacement>): BattleShipPlacement {
     if (this.state.status !== 'PLACING_BOATS') {
-      throw new InvalidParametersError(GAME_NOT_WAITING_TO_START_MESSAGE);
+      // console.log(this.state.status)
+      throw new InvalidParametersError('Game is not in placing boats phase');
     }
     if (
       (position.playerID === this.state.blue && position.move.gamePiece !== 'Blue') ||
@@ -547,6 +548,13 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
         this.state.status = 'WAITING_FOR_PLAYERS';
         break;
       case 'IN_PROGRESS':
+        this.state = {
+          ...this.state,
+          status: 'OVER',
+          winner: color === 'Blue' ? this.state.green : this.state.blue,
+        };
+        break;
+      case 'PLACING_BOATS':
         this.state = {
           ...this.state,
           status: 'OVER',

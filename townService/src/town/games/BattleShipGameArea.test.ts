@@ -236,7 +236,7 @@ describe('BattleShipGameArea', () => {
           col: 0,
           row: 0,
           gamePiece: 'Blue',
-          cell: 'Aircraft_Middle_1',
+          cell: 'Aircraft Carrier',
         };
         const placeBoatSpy = jest.spyOn(game, 'placeBoat');
         gameArea.handleCommand(
@@ -256,7 +256,8 @@ describe('BattleShipGameArea', () => {
             ...placement,
             gamePiece: 'Blue',
           },
-        });
+        },
+        true);
         expect(interactableUpdateSpy).toHaveBeenCalledTimes(1);
       });
       // it('should call removeBoat on the game and call _emitAreaChanged', () => {
