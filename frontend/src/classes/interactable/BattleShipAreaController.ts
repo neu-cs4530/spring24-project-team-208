@@ -36,14 +36,14 @@ export const SPACE_FULL_MESSAGE = 'The space is full';
 
 function createEmptyBoard(): BattleShipCell[][] {
   const board = new Array(BATTLESHIP_ROWS);
-  
+
   for (let row = 0; row < BATTLESHIP_ROWS; row++) {
     board[row] = new Array(BATTLESHIP_COLS);
 
     for (let col = 0; col < BATTLESHIP_COLS; col++) {
       board[row][col] = {
-        type: "Ocean",
-        state: "Safe",
+        type: 'Ocean',
+        state: 'Safe',
         row: row as BattleShipRowIndex,
         col: col as BattleShipColIndex,
       };
@@ -117,6 +117,7 @@ export default class BattleShipAreaController extends GameAreaController<
       return undefined;
     }
   }
+
   /**
    * Returns the player who won the game, if there is one, or undefined otherwise
    */
@@ -233,7 +234,7 @@ export default class BattleShipAreaController extends GameAreaController<
 
     if (newGame && this.isActive()) {
       let newBoard = createEmptyBoard();
-      
+
       newGame.state.blueBoard.forEach(piece => {
         newBoard[piece.row][piece.col] = piece;
       });
@@ -280,15 +281,19 @@ export default class BattleShipAreaController extends GameAreaController<
    *
    * @throws an error with message NO_GAME_IN_PROGRESS_ERROR if there is no game in progress
    */
-  public async placeBoatPiece(boat: BattleshipBoat, row: BattleShipRowIndex, col: BattleShipColIndex): Promise<void> {
+  public async placeBoatPiece(
+    boat: BattleshipBoat,
+    row: BattleShipRowIndex,
+    col: BattleShipColIndex,
+  ): Promise<void> {
     const instanceID = this._instanceID;
     if (!instanceID || this._model.game?.state.status !== 'PLACING_BOATS') {
       throw new Error(NOT_IN_PLACEMENT);
     }
-    
-    const gamePiece = this._townController.ourPlayer.id === this._model.game?.state.blue ? 'Blue' : 'Green';
-    
-    
+
+    const gamePiece =
+      this._townController.ourPlayer.id === this._model.game?.state.blue ? 'Blue' : 'Green';
+
     await this._townController.sendInteractableCommand(this.id, {
       type: 'SetUpGameMove',
       gameID: instanceID,

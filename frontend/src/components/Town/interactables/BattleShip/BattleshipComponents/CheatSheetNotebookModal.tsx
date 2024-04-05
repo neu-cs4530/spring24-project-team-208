@@ -1,25 +1,22 @@
-import { useDisclosure } from "@chakra-ui/react";
-import BattleShipAreaController from "../../../../../classes/interactable/BattleShipAreaController";
-import { Large_Notebook, Notebook_Exit } from "../BattleshipMenuSprites";
+import React from 'react';
+import BattleShipAreaController from '../../../../../classes/interactable/BattleShipAreaController';
+import { largeNotebook, notebookExit } from '../BattleshipMenuSprites';
 
 // .hover-shadow {
-//     transition: box-shadow 0.3s; 
+//     transition: box-shadow 0.3s;
 //     }
-    
+
 //   .hover-shadow:hover {
-//     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+//     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 //   }
 
-export function CheatSheetNoteBookModal({controller}: {controller: BattleShipAreaController}) {
-
-    return (
-        <>
-            <div>
-                <span>
-                    {Notebook_Exit}
-                </span>
-                {Large_Notebook}
-            </div>
-        </>
-    )
+export function CheatSheetNoteBookModal({ controller }: { controller: BattleShipAreaController }) {
+  return (
+    <>
+      <div>
+        <span>{notebookExit}</span>
+        {largeNotebook}
+      </div>
+    </>
+  );
 }

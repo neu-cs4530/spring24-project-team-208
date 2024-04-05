@@ -106,9 +106,7 @@ export default function BattleShipArea({
           ? 'your'
           : gameAreaController.whoseTurn?.userName + "'s"}{' '}
         turn{' '}
-        {townController.ourPlayer === gameAreaController.blue
-          ? "(You're Blue)"
-          : "(You're Green)"}
+        {townController.ourPlayer === gameAreaController.blue ? "(You're Blue)" : "(You're Green)"}
       </>
     );
   } else if (gameStatus == 'WAITING_TO_START') {
@@ -169,11 +167,11 @@ export default function BattleShipArea({
         <ListItem>Red: {blue?.userName || '(No player yet!)'}</ListItem>
         <ListItem>Yellow: {green?.userName || '(No player yet!)'}</ListItem>
       </List>
-      {
-        ['PLACING_BOATS', 'IN_PROGRESS'].includes(gameStatus) 
-        ? <BattleShipOwnBoard gameAreaController={gameAreaController} />
-        : gameStatusText
-      } 
+      {['PLACING_BOATS', 'IN_PROGRESS'].includes(gameStatus) ? (
+        <BattleShipOwnBoard gameAreaController={gameAreaController} />
+      ) : (
+        gameStatusText
+      )}
     </>
   );
 }

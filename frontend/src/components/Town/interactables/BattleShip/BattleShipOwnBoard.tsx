@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import BattleShipAreaController from '../../../../classes/interactable/BattleShipAreaController';
 import useTownController from '../../../../hooks/useTownController';
 import { BattleshipBoat, BattleShipCell } from '../../../../types/CoveyTownSocket';
-import { Battleship_Logo, Crosshair, Scratch, Small_Notebook } from './BattleshipMenuSprites';
+import { battleshipLogo, crosshair, scratch, smallNotebook } from './BattleshipMenuSprites';
 import { BattleShipBoardCell } from './BattleshipComponents/BattleshipBoardCell';
 import { EnemyCounter } from './BattleshipComponents/EnemyCounter';
 import { CheatSheetNoteBookSmall } from './BattleshipComponents/CheatSheetNoteBookSmall';
@@ -41,88 +41,114 @@ export type BattleShipGameProps = {
  * turn, then the StyledBattleShipSquare will be disabled.
  *
  * @param gameAreaController the controller for the BattleShip game
- */   //CHANGE
+ */ //CHANGE
 export default function BattleShipOwnBoard({
   gameAreaController,
 }: BattleShipGameProps): JSX.Element {
   const townController = useTownController();
-  const [ownBoard, setOwnBoard] = useState<BattleShipCell[][]>(townController.ourPlayer === gameAreaController.blue ? gameAreaController.blueBoard : gameAreaController.greenBoard);
-  const [oppBoard, setOppBoard] = useState<BattleShipCell[][]>(townController.ourPlayer === gameAreaController.blue ? gameAreaController.greenBoard : gameAreaController.blueBoard);
+  const [ownBoard, setOwnBoard] = useState<BattleShipCell[][]>(
+    townController.ourPlayer === gameAreaController.blue
+      ? gameAreaController.blueBoard
+      : gameAreaController.greenBoard,
+  );
+  const [oppBoard, setOppBoard] = useState<BattleShipCell[][]>(
+    townController.ourPlayer === gameAreaController.blue
+      ? gameAreaController.greenBoard
+      : gameAreaController.blueBoard,
+  );
   const [isOurTurn, setIsOurTurn] = useState<boolean>(gameAreaController.isOurTurn);
   const [chosenCell, chooseChosenCell] = useState<BattleShipCell>();
   const [chosenBoat, setChosenBoat] = useState<BattleshipBoat>();
-  const {isOpen, onOpen, onClose} = useDisclosure();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const inPlacement = gameAreaController.status === 'PLACING_BOATS';
-  const openNotebook = () => { 
-    onOpen(); 
-  }
-  const closeNotebook = () => { 
-    onClose(); 
-  }
+  const openNotebook = () => {
+    onOpen();
+  };
+  const closeNotebook = () => {
+    onClose();
+  };
 
   const placeBoat = () => {
-    gameAreaController.placeBoatPiece(chosenBoat!, chosenCell!.row, chosenCell!.col)
-  }
+    gameAreaController.placeBoatPiece(chosenBoat!, chosenCell!.row, chosenCell!.col);
+  };
   const fireBoat = () => {
-    gameAreaController.makeMove(chosenCell!.row, chosenCell!.col)
-  }
-  
+    gameAreaController.makeMove(chosenCell!.row, chosenCell!.col);
+  };
+
   useEffect(() => {
+    const setIsOurTurnMini = () => {
+      setIsOurTurn(gameAreaController.whoseTurn === townController.ourPlayer);
+    };
     const setOwnBoardMini = (board: BattleShipCell[][]) => {
       setOwnBoard(board);
       setIsOurTurnMini(); // bandaid
-    }
+    };
     const setOpponentBoardMini = () => {
-      const oppBoardMini = townController.ourPlayer === gameAreaController.blue ? gameAreaController.greenBoard : gameAreaController.blueBoard
+      const oppBoardMini =
+        townController.ourPlayer === gameAreaController.blue
+          ? gameAreaController.greenBoard
+          : gameAreaController.blueBoard;
 
-      let oldOpponentBoard: BattleShipCell[][] = oppBoardMini.map((inner) => [...inner]); 
-      oldOpponentBoard = oldOpponentBoard.map((inner) => inner.map((cell: BattleShipCell) => {
-        if (cell.state === 'Safe' && cell.type !== 'Ocean') {
-          return {
-            type: "Ocean",
-            state: "Safe",
-            row: cell.row,
-            col: cell.col
+      let oldOpponentBoard: BattleShipCell[][] = oppBoardMini.map(inner => [...inner]);
+      oldOpponentBoard = oldOpponentBoard.map(inner =>
+        inner.map((cell: BattleShipCell) => {
+          if (cell.state === 'Safe' && cell.type !== 'Ocean') {
+            return {
+              type: 'Ocean',
+              state: 'Safe',
+              row: cell.row,
+              col: cell.col,
+            };
+          } else {
+            return cell;
           }
-        } else {
-          return cell;
-        }
-      }));
+        }),
+      );
       setOppBoard(oldOpponentBoard);
       setIsOurTurnMini(); // bandaid
-    }
-    const setIsOurTurnMini = () => {
-      setIsOurTurn(gameAreaController.whoseTurn === townController.ourPlayer);
-    }
-
+    };
     gameAreaController.addListener('turnChanged', setIsOurTurnMini);
-    gameAreaController.addListener('blueBoardChanged', townController.ourPlayer === gameAreaController.blue ? setOwnBoardMini : setOpponentBoardMini);
-    gameAreaController.addListener('greenBoardChanged', townController.ourPlayer === gameAreaController.blue ? setOpponentBoardMini : setOwnBoardMini);
+    gameAreaController.addListener(
+      'blueBoardChanged',
+      townController.ourPlayer === gameAreaController.blue ? setOwnBoardMini : setOpponentBoardMini,
+    );
+    gameAreaController.addListener(
+      'greenBoardChanged',
+      townController.ourPlayer === gameAreaController.blue ? setOpponentBoardMini : setOwnBoardMini,
+    );
     return () => {
-      gameAreaController.removeListener('blueBoardChanged', townController.ourPlayer === gameAreaController.blue ? setOwnBoardMini : setOpponentBoardMini);
-      gameAreaController.removeListener('greenBoardChanged', townController.ourPlayer === gameAreaController.blue ? setOpponentBoardMini : setOwnBoardMini);
+      gameAreaController.removeListener(
+        'blueBoardChanged',
+        townController.ourPlayer === gameAreaController.blue
+          ? setOwnBoardMini
+          : setOpponentBoardMini,
+      );
+      gameAreaController.removeListener(
+        'greenBoardChanged',
+        townController.ourPlayer === gameAreaController.blue
+          ? setOpponentBoardMini
+          : setOwnBoardMini,
+      );
       gameAreaController.removeListener('turnChanged', setIsOurTurnMini); // TODO doesn't work
     };
   }, [gameAreaController]);
-    
+
   return (
-    <div 
+    <div
       style={{
         width: '950px',
         height: '600px',
         display: 'flex',
         flexWrap: 'wrap',
         flexDirection: 'row',
-        backgroundColor: '#6F6F78',   
+        backgroundColor: '#6F6F78',
         border: '3px solid black',
         borderRadius: '15px',
         padding: '10px',
-      }}
-    
-    >
+      }}>
       {isOpen && <CheatSheetNoteBookModal controller={gameAreaController} />}
-      <div 
+      <div
         style={{
           display: 'flex',
           flexDirection: 'row',
@@ -132,53 +158,49 @@ export default function BattleShipOwnBoard({
           border: '3px solid black',
           borderRadius: '15px',
           overflow: 'hidden',
-        }}
-      >
-        {(inPlacement ? ownBoard : isOurTurn ? oppBoard : ownBoard).map((row: BattleShipCell[], rowIndex: number) => {
-          return(row.map((cell: BattleShipCell, cellIndex: number) => {
-            return(
-              <BattleShipBoardCell 
-                cell={cell} 
-                key={cellIndex} 
-                chooseCell={chooseChosenCell} 
+        }}>
+        {(inPlacement ? ownBoard : isOurTurn ? oppBoard : ownBoard).map((row: BattleShipCell[]) => {
+          return row.map((cell: BattleShipCell, cellIndex: number) => {
+            return (
+              <BattleShipBoardCell
+                cell={cell}
+                key={cellIndex}
+                chooseCell={chooseChosenCell}
                 chosenCell={chosenCell}
-              />)
-          }))
+              />
+            );
+          });
         })}
       </div>
       <div
         style={{
           display: 'relative',
-          flexDirection: 'column'
-        }}
-      >
-        <span 
+          flexDirection: 'column',
+        }}>
+        <span
           style={{
             position: 'relative',
             top: '10px',
-            left: '10%'
-          }}
-        >
-          {Battleship_Logo}
+            left: '10%',
+          }}>
+          {battleshipLogo}
         </span>
         <span
           style={{
             position: 'relative',
             top: '25px',
-            left: '14%'
-          }}
-        >
+            left: '14%',
+          }}>
           <TurnTeller controller={gameAreaController} />
         </span>
         <span
           style={{
             position: 'relative',
             top: '38%',
-            right: '10%'
-          }}
-        >
-          <EnemyCounter 
-            controller={gameAreaController} 
+            right: '10%',
+          }}>
+          <EnemyCounter
+            controller={gameAreaController}
             setBoat={setChosenBoat}
             chosenBoat={chosenBoat}
           />
@@ -187,13 +209,12 @@ export default function BattleShipOwnBoard({
           style={{
             position: 'relative',
             bottom: '15%',
-            left: '85%'
-          }}
-        >
-          <ActionButton 
-            controller={gameAreaController} 
-            chosenCell={chosenCell} 
-            chosenBoat={chosenBoat} 
+            left: '85%',
+          }}>
+          <ActionButton
+            controller={gameAreaController}
+            chosenCell={chosenCell}
+            chosenBoat={chosenBoat}
             doAction={inPlacement ? placeBoat : fireBoat}
           />
         </span>
@@ -201,12 +222,11 @@ export default function BattleShipOwnBoard({
           style={{
             position: 'relative',
             bottom: '13%',
-            left: '70%'
-          }}
-        >
-          <ButtonStatus 
-            controller={gameAreaController} 
-            chosenCell={chosenCell} 
+            left: '70%',
+          }}>
+          <ButtonStatus
+            controller={gameAreaController}
+            chosenCell={chosenCell}
             chosenBoat={chosenBoat}
           />
         </span>
@@ -214,10 +234,9 @@ export default function BattleShipOwnBoard({
           style={{
             position: 'relative',
             bottom: '13%',
-            left: '70%'
-          }}
-        >
-          <CheatSheetNoteBookSmall openModal={openNotebook}/>
+            left: '70%',
+          }}>
+          <CheatSheetNoteBookSmall openModal={openNotebook} />
         </span>
       </div>
     </div>

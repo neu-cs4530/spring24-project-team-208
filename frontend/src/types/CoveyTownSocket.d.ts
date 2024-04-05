@@ -12,4 +12,3 @@ import { ClientToServerEvents, ServerToClientEvents } from '../../../shared/type
 export * from '../../../shared/types/CoveyTownSocket';
 
 export type CoveyTownSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
-

@@ -35,6 +35,6 @@ export function isConnectFourArea(
 
 export function isBattleShipGameArea(
   interactable: Interactable,
-) : interactable is GameArea<BattleShipGameState> {
+): interactable is GameArea<BattleShipGameState> {
   return interactable.type === 'BattleShipArea';
 }
