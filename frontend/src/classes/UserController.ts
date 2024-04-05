@@ -1,16 +1,6 @@
-import TypedEmitter from 'typed-emitter';
-import EventEmitter from 'events';
+import { User } from 'firebase/auth';
 
-// TODO: Flesh out this type
-export type UserEvents = {
-  connect: () => void;
-  disconnect: () => void;
-  joinTown: (townID: string) => void;
+export type UserController = {
+  username: string;
+  user: User;
 };
-
-// TODO: Implement this class
-export default class UserController extends (EventEmitter as new () => TypedEmitter<UserEvents>) {
-  public async connect() {
-    return null;
-  }
-}
