@@ -11,6 +11,7 @@ import { CheatSheetNoteBookModal } from './BattleshipComponents/CheatSheetNotebo
 import TurnTeller from './BattleshipComponents/TurnTeller';
 import ButtonStatus from './BattleshipComponents/ButtonStatus';
 import ActionButton from './BattleshipComponents/ActionButton';
+import VerticalSwitchButton from './BattleshipComponents/VerticalSwitch';
 
 export type BattleShipGameProps = {
   gameAreaController: BattleShipAreaController;
@@ -59,7 +60,7 @@ export default function BattleShipOwnBoard({
   const [isOurTurn, setIsOurTurn] = useState<boolean>(gameAreaController.isOurTurn);
   const [chosenCell, chooseChosenCell] = useState<BattleShipCell>();
   const [chosenBoat, setChosenBoat] = useState<BattleshipBoatPiece>();
-  const [vertical, setVertical] = useState<boolean>(false);
+  const [isVertical, setIsVertical] = useState<boolean>(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const inPlacement = gameAreaController.status === 'PLACING_BOATS';
@@ -71,7 +72,7 @@ export default function BattleShipOwnBoard({
   };
 
   const placeBoat = () => {
-    gameAreaController.placeBoatPiece(chosenBoat!, chosenCell!.row, chosenCell!.col, vertical);
+    gameAreaController.placeBoatPiece(chosenBoat!, chosenCell!.row, chosenCell!.col, isVertical);
   };
   const fireBoat = () => {
     gameAreaController.makeMove(chosenCell!.row, chosenCell!.col);
@@ -193,6 +194,18 @@ export default function BattleShipOwnBoard({
             left: '14%',
           }}>
           <TurnTeller controller={gameAreaController} />
+        </span>
+        <span
+          style={{
+            position: 'relative',
+            top: '25%',
+            right: '-40%',
+          }}>
+          <VerticalSwitchButton 
+            controller={gameAreaController}
+            isVertical={isVertical}
+            setIsVertical={setIsVertical}
+          />
         </span>
         <span
           style={{

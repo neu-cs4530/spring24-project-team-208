@@ -54,3 +54,17 @@ export const readyButton = (
     style={{ width: 40, height: 30 }}
   />
 );
+
+export const verticalSwitch = (
+  <img
+    src='./battleship_sprites/BattleshipMenuSprites/Vertical_Switch.png'
+    style={{ width: 75, height: 75 }}
+  />
+);
+
+export const verticalSwitchLever = (
+  <img
+    src='./battleship_sprites/BattleshipMenuSprites/Vertical_Switch_Lever.png'
+    style={{ width: 75, height: 75 }}
+  />
+);

@@ -408,7 +408,6 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    */
   protected _battleShipPlacement(position: GameMove<BattleShipPlacement>): BattleShipPlacement {
     if (this.state.status !== 'PLACING_BOATS') {
-      // console.log(this.state.status)
       throw new InvalidParametersError('Game is not in placing boats phase');
     }
     if (
