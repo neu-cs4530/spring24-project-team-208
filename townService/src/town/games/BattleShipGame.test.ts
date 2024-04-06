@@ -275,8 +275,6 @@ describe('BattleShipGame', () => {
         game.join(green);
         game.startGame(blue);
         game.startGame(green);
-        console.log('bruh')
-        console.log(game.state.status)
         // createValidGame(game, blue, green);
         expect(game.state.green).toBe(green.id);
         expect(game.state.blue).toBe(blue.id);

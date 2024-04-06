@@ -7,7 +7,7 @@ export const BATTLESHIP_PIECE_STORE = [
     component: (
       <img
         src='./battleship_sprites/BattleshipCellSprites/Aircraft_Back.png'
-        style={{ height: CELL_SIZE, width: CELL_SIZE, position: 'absolute' }}
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
@@ -16,7 +16,7 @@ export const BATTLESHIP_PIECE_STORE = [
     component: (
       <img
         src='./battleship_sprites/BattleshipCellSprites/Aircraft_Middle.png'
-        style={{ height: CELL_SIZE, width: CELL_SIZE, position: 'absolute' }}
+        style={{ height: CELL_SIZE, width: CELL_SIZE, }}
       />
     ),
   },
@@ -25,7 +25,7 @@ export const BATTLESHIP_PIECE_STORE = [
     component: (
       <img
         src='./battleship_sprites/BattleshipCellSprites/Aircraft_Middle.png'
-        style={{ height: CELL_SIZE, width: CELL_SIZE, position: 'absolute' }}
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
@@ -34,7 +34,7 @@ export const BATTLESHIP_PIECE_STORE = [
     component: (
       <img
         src='./battleship_sprites/BattleshipCellSprites/Aircraft_Front.png'
-        style={{ height: CELL_SIZE, width: CELL_SIZE, position: 'absolute' }}
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
@@ -43,7 +43,7 @@ export const BATTLESHIP_PIECE_STORE = [
     component: (
       <img
         src='./battleship_sprites/BattleshipCellSprites/Battleship_Back.png'
-        style={{ height: CELL_SIZE, width: CELL_SIZE, position: 'absolute' }}
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
@@ -52,7 +52,7 @@ export const BATTLESHIP_PIECE_STORE = [
     component: (
       <img
         src='./battleship_sprites/BattleshipCellSprites/Battleship_Middle_1.png'
-        style={{ height: CELL_SIZE, width: CELL_SIZE, position: 'absolute' }}
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
@@ -61,7 +61,7 @@ export const BATTLESHIP_PIECE_STORE = [
     component: (
       <img
         src='./battleship_sprites/BattleshipCellSprites/Battleship_Middle_2.png'
-        style={{ height: CELL_SIZE, width: CELL_SIZE, position: 'absolute' }}
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
@@ -70,7 +70,7 @@ export const BATTLESHIP_PIECE_STORE = [
     component: (
       <img
         src='./battleship_sprites/BattleshipCellSprites/Battleship_Middle_3.png'
-        style={{ height: CELL_SIZE, width: CELL_SIZE, position: 'absolute' }}
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
@@ -79,7 +79,7 @@ export const BATTLESHIP_PIECE_STORE = [
     component: (
       <img
         src='./battleship_sprites/BattleshipCellSprites/Battleship_Front.png'
-        style={{ height: CELL_SIZE, width: CELL_SIZE, position: 'absolute' }}
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
@@ -88,7 +88,7 @@ export const BATTLESHIP_PIECE_STORE = [
     component: (
       <img
         src='./battleship_sprites/BattleshipCellSprites/Cruiser_Back.png'
-        style={{ height: CELL_SIZE, width: CELL_SIZE, position: 'absolute' }}
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
@@ -97,7 +97,7 @@ export const BATTLESHIP_PIECE_STORE = [
     component: (
       <img
         src='./battleship_sprites/BattleshipCellSprites/Cruiser_Front.png'
-        style={{ height: CELL_SIZE, width: CELL_SIZE, position: 'absolute' }}
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
@@ -106,7 +106,7 @@ export const BATTLESHIP_PIECE_STORE = [
     component: (
       <img
         src='./battleship_sprites/BattleshipCellSprites/Destroyer.png'
-        style={{ height: CELL_SIZE, width: CELL_SIZE, position: 'absolute' }}
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
@@ -115,7 +115,7 @@ export const BATTLESHIP_PIECE_STORE = [
     component: (
       <img
         src='./battleship_sprites/BattleshipCellSprites/Submarine_Back.png'
-        style={{ height: CELL_SIZE, width: CELL_SIZE, position: 'absolute' }}
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
@@ -124,7 +124,7 @@ export const BATTLESHIP_PIECE_STORE = [
     component: (
       <img
         src='./battleship_sprites/BattleshipCellSprites/Submarine_Middle.png'
-        style={{ height: CELL_SIZE, width: CELL_SIZE, position: 'absolute' }}
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
@@ -133,7 +133,7 @@ export const BATTLESHIP_PIECE_STORE = [
     component: (
       <img
         src='./battleship_sprites/BattleshipCellSprites/Submarine_Front.png'
-        style={{ height: CELL_SIZE, width: CELL_SIZE, position: 'absolute' }}
+        style={{ height: CELL_SIZE, width: CELL_SIZE,}}
       />
     ),
   },
@@ -153,7 +153,7 @@ export const OCEAN_STORE = [
   <img
     key='3'
     src='./battleship_sprites/BattleshipCellSprites/Ocean_3.png'
-    style={{ height: CELL_SIZE, width: CELL_SIZE, position: 'absolute' }}
+    style={{ height: CELL_SIZE, width: CELL_SIZE, position: 'absolute'}}
   />,
   <img
     key='4'

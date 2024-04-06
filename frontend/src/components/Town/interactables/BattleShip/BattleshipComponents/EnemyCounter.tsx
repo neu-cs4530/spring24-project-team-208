@@ -53,7 +53,7 @@ export function EnemyCounter({
             break;
           }
           default: {
-            console.log('bruh')
+            break;
           }
         }
       })
@@ -78,7 +78,7 @@ export function EnemyCounter({
             onClick={() => handleClick(name)}>
             {/* {chosenBoat?.replace(/_/g, ' ') === name && <span>{scratch}</span>} */}
             {scratchedBoats.includes(name) && <span>{scratch}</span>}
-            <span>{(chosenBoat?.replace(/_/g, ' ') === name && !scratchedBoats.includes(name)) ? `${name} ★` : name}</span>
+            <span>{(inPlacement && chosenBoat?.replace(/_/g, ' ') === name && !scratchedBoats.includes(name)) ? `${name} ★` : name}</span>
             <br />
           </span>
         ))}

@@ -165,6 +165,7 @@ export default function BattleShipOwnBoard({
           return row.map((cell: BattleShipCell, cellIndex: number) => {
             return (
               <BattleShipBoardCell
+                controller={gameAreaController}
                 cell={cell}
                 key={cellIndex}
                 chooseCell={chooseChosenCell}
