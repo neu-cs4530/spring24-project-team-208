@@ -396,6 +396,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
           ...this.state,
           blue: undefined,
           blueReady: false,
+          blueBoard: [],
         };
         return 'Blue';
       }
@@ -404,6 +405,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
           ...this.state,
           green: undefined,
           greenReady: false,
+          greenBoard: [],
         };
         return 'Green';
       }
