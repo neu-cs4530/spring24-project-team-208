@@ -1,6 +1,7 @@
 import assert from 'assert';
 import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
 import { nanoid } from 'nanoid';
+import { DecodedIdToken } from 'firebase-admin/auth';
 import { Town } from '../api/Model';
 import { ConversationArea, Interactable, TownEmitter, ViewingArea } from '../types/CoveyTownSocket';
 import TownsStore from '../lib/TownsStore';
@@ -14,6 +15,7 @@ import {
   MockedPlayer,
 } from '../TestUtils';
 import { TownsController } from './TownsController';
+import { auth } from '../lib/firebaseSetup';
 
 type TestTownData = {
   friendlyName: string;
@@ -72,6 +74,17 @@ describe('TownsController integration tests', () => {
     process.env.TWILIO_ACCOUNT_SID = 'ACtesting';
     process.env.TWILIO_API_KEY_SID = 'testing';
     process.env.TWILIO_API_KEY_SECRET = 'testing';
+    // Mock the firebase token authentication so we don't need to log a real user in
+    const decodedToken = {} as DecodedIdToken;
+    decodedToken.uid = 'testUser';
+    const promiseDecodedToken = new Promise<DecodedIdToken>((resolve, reject) => {
+      resolve(decodedToken);
+    });
+    jest
+      .spyOn(auth, 'verifyIdToken')
+      .mockImplementation(
+        (idToken: string, checkRevoked?: boolean | undefined) => promiseDecodedToken,
+      );
   });
 
   beforeEach(async () => {
@@ -218,7 +231,7 @@ describe('TownsController integration tests', () => {
         expect(initialData.providerVideoToken).toBeDefined();
         expect(initialData.sessionToken).toBeDefined();
         expect(initialData.currentPlayers.length).toBe(1);
-        expect(initialData.currentPlayers[0].userName).toEqual(player.userName);
+        expect(initialData.currentPlayers[0].userName).toEqual('testUser');
         expect(initialData.currentPlayers[0].id).toEqual(initialData.userID);
       };
       await joinAndCheckInitialData(true);
