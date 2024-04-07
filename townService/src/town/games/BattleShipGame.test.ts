@@ -79,12 +79,8 @@ function createBoatPlacementsFromPattern(
           boat = 'Destroyer';
           break;
         }
-        case '_': {
-          boat = "Ocean";
-          break;
-        }
         default: {
-          throw new Error(`Invalid pattern: ${pattern}, expecting 2-d array of A, B, S, C, D ending with a V or H, or _`);
+          return;
         }
       }
 
@@ -275,8 +271,6 @@ describe('BattleShipGame', () => {
         game.join(green);
         game.startGame(blue);
         game.startGame(green);
-        console.log('bruh')
-        console.log(game.state.status)
         // createValidGame(game, blue, green);
         expect(game.state.green).toBe(green.id);
         expect(game.state.blue).toBe(blue.id);
@@ -490,24 +484,26 @@ describe('BattleShipGame', () => {
       game.join(green);
       game.startGame(blue);
       game.startGame(green);
-      expect(createBoatPlacementsFromPattern(
-        game,
-        'Blue',
-        [
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'SV'],
-          ['_', 'BH', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'AV', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', 'CH', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', 'DH', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-        ],
-        blue.id,
-        green.id,
-      )).toThrowError(GAME_NOT_STARTABLE_MESSAGE);
+      expect(() =>
+        createBoatPlacementsFromPattern(
+          game,
+          'Blue',
+          [
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'SV'],
+            ['_', 'BH', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', 'AV', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', 'CH', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', 'DH', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ],
+          blue.id,
+          green.id,
+        ),
+      ).toThrowError(GAME_NOT_STARTABLE_MESSAGE);
     });
     test('if overlapping boats, it should not throw an error', () => {
       const blue = createPlayerForTesting();
@@ -545,24 +541,26 @@ describe('BattleShipGame', () => {
       game.join(green);
       game.startGame(blue);
       game.startGame(green);
-      expect(createBoatPlacementsFromPattern(
-        game,
-        'Blue',
-        [
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', 'BH', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'AV', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', 'CH', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', 'DH', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'SV'],
-        ],
-        blue.id,
-        green.id,
-      )).toThrowError(GAME_NOT_STARTABLE_MESSAGE);
+      expect(() =>
+        createBoatPlacementsFromPattern(
+          game,
+          'Blue',
+          [
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', 'BH', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', 'AV', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', 'CH', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', 'DH', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'SV'],
+          ],
+          blue.id,
+          green.id,
+        ),
+      ).toThrowError(GAME_NOT_STARTABLE_MESSAGE);
     });
     test('if green board has incorrect vertical boats, it throws an error', () => {
       const blue = createPlayerForTesting();
@@ -589,7 +587,8 @@ describe('BattleShipGame', () => {
           ],
           blue.id,
           green.id,
-        )).toThrowError(GAME_NOT_STARTABLE_MESSAGE);
+        ),
+      ).toThrowError(GAME_NOT_STARTABLE_MESSAGE);
     });
     // test('if blue board has incorrect vertical boats and repositions, does not throw error twice after fix', () => {
     //   const blue = createPlayerForTesting();

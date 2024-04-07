@@ -249,15 +249,17 @@ describe('BattleShipGameArea', () => {
           },
           blue,
         );
-        expect(placeBoatSpy).toHaveBeenCalledWith({
-          gameID: game.id,
-          playerID: blue.id,
-          move: {
-            ...placement,
-            gamePiece: 'Blue',
+        expect(placeBoatSpy).toHaveBeenCalledWith(
+          {
+            gameID: game.id,
+            playerID: blue.id,
+            move: {
+              ...placement,
+              gamePiece: 'Blue',
+            },
           },
-        },
-        true);
+          true,
+        );
         expect(interactableUpdateSpy).toHaveBeenCalledTimes(1);
       });
       // it('should call removeBoat on the game and call _emitAreaChanged', () => {
