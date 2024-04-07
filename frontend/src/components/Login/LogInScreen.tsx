@@ -176,7 +176,6 @@ export default function LoginScreen() {
         toast.close(loadingToast);
       }
       if (err instanceof ApiError && err.status === 422) {
-        console.log(err.request);
         toast({
           title: 'Unable to log in',
           description: err.body.message,
