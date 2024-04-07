@@ -19,7 +19,7 @@ export function BattleShipBoardCell({
 }) {
   const inPlacement = controller.status === 'PLACING_BOATS';
   const handleClick = () => {
-    if (cell.type !== 'Ocean' || !controller.isOurTurn) return
+    if (!inPlacement && (cell.type !== 'Ocean' || !controller.isOurTurn)) return
     chooseCell(cell);
   };
   const hit = (cell.state === 'Hit');
@@ -30,24 +30,52 @@ export function BattleShipBoardCell({
   shouldRotate = cell.type !== 'Ocean' && ((cell.row + 1 < BATTLESHIP_ROWS && board[cell.row + 1][cell.col].type !== 'Ocean') || 
     (cell.row - 1 >= 0 && board[cell.row - 1][cell.col].type !== 'Ocean'));
 
-  return (
+  return (<div
+    style={{
+      height: CELL_SIZE,
+      display: 'relative',
+      width: CELL_SIZE,
+      position: 'relative',
+    }}
+    onClick={handleClick}
+  >
     <div
       style={{
-        height: CELL_SIZE,
-        display: 'relative',
-        width: CELL_SIZE,
+        rotate: shouldRotate ? '90deg' : '0deg',
+        position: 'relative',
       }}
-      onClick={handleClick}>
+    >
+      {cell?.type === 'Ocean'
+        ? OCEAN_STORE[Math.floor(Math.random() * OCEAN_STORE.length)]
+        : BATTLESHIP_PIECE_STORE.find(piece => piece.name === cell?.type)?.component}
+    </div>
+    {hit && (
       <div
         style={{
-          rotate: shouldRotate ? '90deg' : '0deg',
-        }}>
-        {cell?.type === 'Ocean'
-          ? OCEAN_STORE[Math.floor(Math.random() * OCEAN_STORE.length)]
-          : BATTLESHIP_PIECE_STORE.find(piece => piece.name === cell?.type)?.component}
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: 1,
+        }}
+      >
+        {fireOverlay}
       </div>
-      {hit && fireOverlay}
-      {controller.isOurTurn && cell === chosenCell && crosshair}
-    </div>
+    )}
+    {(inPlacement || (!inPlacement && controller.isOurTurn)) && cell === chosenCell && (
+      <div
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 1,
+      }}
+    >
+      {crosshair}
+    </div>)}
+  </div>
   );
 }

@@ -6,6 +6,7 @@ import InvalidParametersError, {
   BOARD_POSITION_NOT_VALID_MESSAGE,
   GAME_NOT_STARTABLE_MESSAGE,
   GAME_NOT_IN_PROGRESS_MESSAGE,
+  INVALID_MOVE_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
 import {
@@ -26,7 +27,7 @@ import Game from './Game';
 
 const GAME_NOT_WAITING_TO_START_MESSAGE = 'Game is not in waiting to start mode';
 const NOT_YOUR_BOARD_MESSAGE = 'Not your board';
-const MAX_BOAT_PIECES = 16;
+const MAX_BOAT_PIECES = 15;
 const ALL_BOATS: BattleshipBoatPiece[] = [
   'Aircraft_Back',
   'Aircraft_Middle_1',
@@ -328,21 +329,49 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * Follows the rules of "Battle Ship"
    * @param placement
    */
-  protected _validatePlacement(placement: BattleShipPlacement): boolean {
-    let board;
+  protected _validatePlacement(placement: BattleShipPlacement, vertical: boolean): boolean {
+    let board: BattleShipCell[];
     if (placement.gamePiece === 'Blue') {
       board = this.state.blueBoard;
     } else {
       board = this.state.greenBoard;
     }
+    const boatLength = BOAT_MAP.find(boat => boat.name === placement.cell)!.ships.length;
 
     // A placement is invalid if the maximum number of boat pieces have been placed
-    if (board.filter(p => p.type !== 'Ocean').length > MAX_BOAT_PIECES) {
+    if (board.filter(p => p.type !== 'Ocean').length >= MAX_BOAT_PIECES) {
       return false;
     }
     // A placement is invalid if the given position (row, col) is full
-    if (board.find(p => p.col === placement.col && p.row === placement.row)?.type !== 'Ocean') {
+    if (
+      board.find(cell => cell.col === placement.col && cell.row === placement.row)?.type !== 'Ocean'
+    ) {
       return false;
+    }
+    // A placement is invalid if a vertical boat would be out of bounds
+    if (vertical && placement.row + boatLength > 10) {
+      return false;
+    }
+    // A placement is invalid if a horizontal boat would be out of bounds
+    if (!vertical && placement.col + boatLength > 10) {
+      return false;
+    }
+
+    // A placement is invlaid if a vertical boat would collide with another boat
+    if (vertical) {
+      for (let row = 0 + placement.row; row < placement.row + boatLength; row++) {
+        if (board.find(cell => cell.row === row && cell.col === placement.col)!.type !== 'Ocean') {
+          return false;
+        }
+      }
+    }
+    // A placement is invlaid if a horizontal boat would collide with another boat
+    if (!vertical) {
+      for (let col = 0 + placement.col; col < placement.col + boatLength; col++) {
+        if (board.find(cell => cell.row === placement.row && cell.col === col)!.type !== 'Ocean') {
+          return false;
+        }
+      }
     }
     return true;
   }
@@ -408,7 +437,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    */
   protected _battleShipPlacement(position: GameMove<BattleShipPlacement>): BattleShipPlacement {
     if (this.state.status !== 'PLACING_BOATS') {
-      throw new InvalidParametersError('Game is not in placing boats phase');
+      throw new InvalidParametersError('Game is not in placement phase');
     }
     if (
       (position.playerID === this.state.blue && position.move.gamePiece !== 'Blue') ||
@@ -454,7 +483,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    */
   public placeBoat(position: GameMove<BattleShipPlacement>, vertical: boolean): void {
     const newPlacement = this._battleShipPlacement(position);
-    if (this._validatePlacement(newPlacement)) {
+    if (this._validatePlacement(newPlacement, vertical)) {
       BOAT_MAP.find(boatM => boatM.name === position.move.cell)?.ships.map((ship, index) =>
         this._place({
           gamePiece: position.playerID === this.state.blue ? 'Blue' : 'Green',
@@ -463,6 +492,8 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
           row: (position.move.row + (vertical ? index : 0)) as BattleShipRowIndex,
         }),
       );
+    } else {
+      throw new Error(INVALID_MOVE_MESSAGE);
     }
   }
 
