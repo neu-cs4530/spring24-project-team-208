@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import useUserLoginController from '../../hooks/useUserLoginController';
 import auth from '../../firebaseSetup';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { UserController } from '../../classes/UserController';
+import UserController from '../../classes/UserController';
 import { ApiError } from '../../generated/client';
 import { FirebaseError } from '@firebase/util';
 
@@ -22,10 +22,7 @@ export default function LoginScreen() {
   const handleFirebaseLogin = async (): Promise<UserController | undefined> => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const newUserController: UserController = {
-        username: userCredential.user.uid,
-        user: userCredential.user,
-      };
+      const newUserController = new UserController(userCredential.user, userLoginController);
       return newUserController;
     } catch (error) {
       if (error instanceof FirebaseError) {

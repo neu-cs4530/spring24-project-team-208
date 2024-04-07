@@ -89,7 +89,7 @@ export default function TownSelection(): JSX.Element {
       }, 1000);
       setIsJoining(true);
       try {
-        const authToken: string = await userController.user.getIdToken();
+        const authToken: string = await userController.getAuthToken();
         const newController = new TownController({
           authToken: authToken,
           townID: coveyRoomID,
@@ -140,7 +140,7 @@ export default function TownSelection(): JSX.Element {
         }
       }
     },
-    [toast, userController.user, townLoginController, videoConnect, setTownController],
+    [toast, userController, townLoginController, videoConnect, setTownController],
   );
 
   const handleCreate = async () => {

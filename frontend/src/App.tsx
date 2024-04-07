@@ -1,9 +1,9 @@
 import { ChakraProvider } from '@chakra-ui/react';
 import { MuiThemeProvider } from '@material-ui/core/styles';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import theme from './components/VideoCall/VideoFrontend/theme';
-import { UserController } from './classes/UserController';
+import UserController from './classes/UserController';
 import LoggedInScreen from './components/Login/LoggedInScreen';
 import LogInScreen from './components/Login/LogInScreen';
 import UserControllerContext from './contexts/UserControllerContext';
@@ -18,6 +18,12 @@ function App() {
   const url = process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL;
   assert(url, 'NEXT_PUBLIC_TOWNS_SERVICE_URL must be defined');
   const usersService = new AppServiceClient({ BASE: url }).users;
+
+  useEffect(() => {
+    return () => {
+      userController?.logOut();
+    };
+  }, [userController]);
 
   let page: JSX.Element;
   if (userController) {
