@@ -120,3 +120,5 @@ ngrok.yml
 
 # Firebase service account key
 townService/firebaseAdminKey.json
+
+.DS_Store
