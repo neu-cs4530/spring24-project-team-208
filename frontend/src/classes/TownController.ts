@@ -259,6 +259,10 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return this._authToken;
   }
 
+  public get userName() {
+    return this._ourPlayer?.userName;
+  }
+
   public get friendlyName() {
     const friendlyName = this._friendlyNameInternal;
     assert(friendlyName);
