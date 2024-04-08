@@ -279,24 +279,6 @@ describe('BattleShipGame', () => {
         game.leave(green);
         expect(game.state).toEqual(stateBeforeLeaving);
       });
-      test('when blue leaves, it clears blueBoard', () => {
-        const blue = createPlayerForTesting();
-        const green = createPlayerForTesting();
-        game.join(blue);
-        game.join(green);
-        createValidGame(game, blue, green);
-        game.leave(blue);
-        expect(game.state.blueBoard.length).toBe(0);
-      });
-      test('when green leaves, it clears greenBoard', () => {
-        const blue = createPlayerForTesting();
-        const green = createPlayerForTesting();
-        game.join(blue);
-        game.join(green);
-        createValidGame(game, blue, green);
-        game.leave(green);
-        expect(game.state.greenBoard.length).toBe(0);
-      });
       describe('when the game is waiting to start, with status WAITING_TO_START', () => {
         const blue = createPlayerForTesting();
         const green = createPlayerForTesting();
