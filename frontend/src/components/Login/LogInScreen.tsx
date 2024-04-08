@@ -347,7 +347,7 @@ export default function LoginScreen() {
             </Box>
           </Stack>
           <Box>
-            Don&apos;t have an account?{' '}
+            {showSignUp ? 'Already have an account?' : 'Don&apos;t have an account?'}
             <Button size='xs' colorScheme='gray' onClick={handleShowSignUp}>
               {showSignUp ? 'Login' : 'Sign up'}
             </Button>
