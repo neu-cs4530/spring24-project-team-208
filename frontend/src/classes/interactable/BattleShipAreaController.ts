@@ -233,7 +233,7 @@ export default class BattleShipAreaController extends GameAreaController<
     const wasOurTurn = this.isOurTurn;
 
     if (newGame && this.isActive()) {
-      let newBlueBoard = createEmptyBoard();
+      const newBlueBoard = createEmptyBoard();
 
       newGame.state.blueBoard.forEach(piece => {
         newBlueBoard[piece.row][piece.col] = piece;
@@ -243,7 +243,7 @@ export default class BattleShipAreaController extends GameAreaController<
         this.emit('blueBoardChanged', this._blueBoard);
       }
 
-      let newGreenBoard = createEmptyBoard();
+      const newGreenBoard = createEmptyBoard();
       newGame.state.greenBoard.forEach(piece => {
         newGreenBoard[piece.row][piece.col] = piece;
       });
