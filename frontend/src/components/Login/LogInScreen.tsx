@@ -21,7 +21,7 @@ import React, { useState } from 'react';
 import useUserLoginController from '../../hooks/useUserLoginController';
 import auth from '../../firebaseSetup';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { UserController } from '../../classes/UserController';
+import UserController from '../../classes/UserController';
 import { ApiError } from '../../generated/client';
 import { FirebaseError } from '@firebase/util';
 
@@ -36,18 +36,14 @@ export default function LoginScreen() {
   const userLoginController = useUserLoginController();
   const { setUserController, usersService } = userLoginController;
 
+  const toast = useToast();
   const handleShowPasswordClick = () => setShowPassword(!showPassword);
   const handleShowSignUp = () => setShowSignUp(!showSignUp);
-
-  const toast = useToast();
 
   const handleFirebaseLogin = async (): Promise<UserController | undefined> => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const newUserController: UserController = {
-        username: userCredential.user.uid,
-        user: userCredential.user,
-      };
+      const newUserController = new UserController(userCredential.user, userLoginController);
       return newUserController;
     } catch (error) {
       if (error instanceof FirebaseError) {
@@ -147,7 +143,7 @@ export default function LoginScreen() {
   const handleSignUp = async () => {
     if (!email || email.length === 0) {
       toast({
-        title: 'Unable to sign up',
+        title: 'Unable to log in',
         description: 'Please input an email',
         status: 'error',
       });
@@ -155,7 +151,7 @@ export default function LoginScreen() {
     }
     if (!password || password.length === 0) {
       toast({
-        title: 'Unable to sign up',
+        title: 'Unable to log in',
         description: 'Please input a password',
         status: 'error',
       });
@@ -163,7 +159,7 @@ export default function LoginScreen() {
     }
     if (!username || username.length === 0) {
       toast({
-        title: 'Unable to sign up',
+        title: 'Unable to log in',
         description: 'Please input a username',
         status: 'error',
       });
@@ -198,9 +194,8 @@ export default function LoginScreen() {
         toast.close(loadingToast);
       }
       if (err instanceof ApiError && err.status === 422) {
-        console.log(err.request);
         toast({
-          title: 'Unable to sign up',
+          title: 'Unable to log in',
           description: err.body.message,
           status: 'error',
         });
@@ -246,7 +241,7 @@ export default function LoginScreen() {
               <Text
                 fontSize={{ base: '3.3em', sm: '2.5em', md: '4em', lg: '5.3em' }}
                 fontWeight='650'
-                marginBottom='25%'
+                marginBottom='35%'
                 lineHeight='115%'
                 color='white'
                 paddingLeft={'10px'}
@@ -347,7 +342,7 @@ export default function LoginScreen() {
             </Box>
           </Stack>
           <Box>
-            {showSignUp ? 'Already have an account?' : 'Don&apos;t have an account?'}
+            {showSignUp ? 'Already have an account?' : "Don't have an account?"}
             <Button size='xs' colorScheme='gray' onClick={handleShowSignUp}>
               {showSignUp ? 'Login' : 'Sign up'}
             </Button>
