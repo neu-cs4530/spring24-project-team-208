@@ -74,13 +74,13 @@ export default function BattleShipOwnBoard({
   const placeBoat = () => {
     gameAreaController.placeBoatPiece(chosenBoat!, chosenCell!.row, chosenCell!.col, isVertical);
     setChosenCell(undefined);
-    setChosenBoat(undefined)
+    setChosenBoat(undefined);
   };
   const fireBoat = () => {
     gameAreaController.makeMove(chosenCell!.row, chosenCell!.col);
     setChosenCell(undefined);
   };
-  console.log(isOurTurn)
+  console.log(isOurTurn);
 
   useEffect(() => {
     const setIsOurTurnMini = () => {
@@ -206,7 +206,7 @@ export default function BattleShipOwnBoard({
             top: '25%',
             right: '-40%',
           }}>
-          <VerticalSwitchButton 
+          <VerticalSwitchButton
             controller={gameAreaController}
             isVertical={isVertical}
             setIsVertical={setIsVertical}

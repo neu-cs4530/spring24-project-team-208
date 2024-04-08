@@ -3,7 +3,6 @@ import InvalidParametersError, {
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
   MOVE_NOT_YOUR_TURN_MESSAGE,
-  BOARD_POSITION_NOT_VALID_MESSAGE,
   GAME_NOT_STARTABLE_MESSAGE,
   GAME_NOT_IN_PROGRESS_MESSAGE,
   INVALID_MOVE_MESSAGE,
@@ -21,11 +20,9 @@ import {
   PlayerID,
   BattleshipBoatPiece,
   BattleShipCellState,
-  BattleshipBoat,
 } from '../../types/CoveyTownSocket';
 import Game from './Game';
 
-const GAME_NOT_WAITING_TO_START_MESSAGE = 'Game is not in waiting to start mode';
 const NOT_YOUR_BOARD_MESSAGE = 'Not your board';
 const MAX_BOAT_PIECES = 15;
 const ALL_BOATS: BattleshipBoatPiece[] = [
@@ -336,7 +333,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     } else {
       board = this.state.greenBoard;
     }
-    const boatLength = BOAT_MAP.find(boat => boat.name === placement.cell)!.ships.length;
+    const boatLength = BOAT_MAP.find(boat => boat.name === placement.cell)?.ships.length || 0;
 
     // A placement is invalid if the maximum number of boat pieces have been placed
     if (board.filter(p => p.type !== 'Ocean').length >= MAX_BOAT_PIECES) {
@@ -360,7 +357,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     // A placement is invlaid if a vertical boat would collide with another boat
     if (vertical) {
       for (let row = 0 + placement.row; row < placement.row + boatLength; row++) {
-        if (board.find(cell => cell.row === row && cell.col === placement.col)!.type !== 'Ocean') {
+        if (board.find(cell => cell.row === row && cell.col === placement.col)?.type !== 'Ocean') {
           return false;
         }
       }
@@ -368,7 +365,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     // A placement is invlaid if a horizontal boat would collide with another boat
     if (!vertical) {
       for (let col = 0 + placement.col; col < placement.col + boatLength; col++) {
-        if (board.find(cell => cell.row === placement.row && cell.col === col)!.type !== 'Ocean') {
+        if (board.find(cell => cell.row === placement.row && cell.col === col)?.type !== 'Ocean') {
           return false;
         }
       }

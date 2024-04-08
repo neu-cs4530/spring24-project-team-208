@@ -4,11 +4,9 @@ import { nanoid } from 'nanoid';
 import {
   BattleshipBoatPiece,
   BattleShipCell,
-  BattleShipColIndex,
   BattleShipColor,
   BattleShipGuess,
   BattleShipPlacement,
-  BattleShipRowIndex,
   GameResult,
   GameStatus,
 } from '../../types/CoveyTownSocket';
@@ -55,22 +53,24 @@ describe('BattleShipAreaController', () => {
     const newState = Object.assign({}, nextGame.state);
     nextGame.state = newState;
     if (nextMove.gamePiece === 'Blue') {
-      newState.blueBoard = newState.blueBoard.concat(
-        [{
+      newState.blueBoard = newState.blueBoard.concat([
+        {
           type: nextMove.cell as BattleshipBoatPiece,
-          state: "Safe",
+          state: 'Safe',
           row: nextMove.row,
           col: nextMove.col,
-        }]);
+        },
+      ]);
     }
     if (nextMove.gamePiece === 'Green') {
-      newState.greenBoard = newState.greenBoard.concat(
-        [{
+      newState.greenBoard = newState.greenBoard.concat([
+        {
           type: nextMove.cell as BattleshipBoatPiece,
-          state: "Safe",
+          state: 'Safe',
           row: nextMove.row,
           col: nextMove.col,
-        }]);
+        },
+      ]);
     }
     controller.updateFrom(nextState, controller.occupants);
   }
@@ -352,7 +352,12 @@ describe('BattleShipAreaController', () => {
       });
     });
     it('returns the correct board after a placement', () => {
-      updateGameWithPlacement(controller, { col: 0, gamePiece: 'Blue', cell: 'Battleship_Front', row: 0 });
+      updateGameWithPlacement(controller, {
+        col: 0,
+        gamePiece: 'Blue',
+        cell: 'Battleship_Front',
+        row: 0,
+      });
       expect(controller.blueBoard[0][0].type).toBe('Battleship_Front');
       //Also check that the rest are still undefined
       for (let i = 0; i < BATTLESHIP_ROWS; i++) {
@@ -379,7 +384,12 @@ describe('BattleShipAreaController', () => {
     it('emits a boardChange event if the board has changed', () => {
       const spy = jest.fn();
       controller.addListener('blueBoardChanged', spy);
-      updateGameWithPlacement(controller, { col: 0, gamePiece: 'Blue', row: 0, cell: 'Battleship' });
+      updateGameWithPlacement(controller, {
+        col: 0,
+        gamePiece: 'Blue',
+        row: 0,
+        cell: 'Battleship',
+      });
       expect(spy).toHaveBeenCalledWith(controller.blueBoard);
     });
     it('does not emit a boardChange event if the board has not changed', () => {

@@ -1,25 +1,19 @@
 import {
   BattleShipColIndex,
   BattleShipColor,
-  BattleShipCell,
   BattleShipRowIndex,
-  Player,
-  BattleshipBoatPiece,
 } from '../../types/CoveyTownSocket';
 import BattleShipGame from './BattleShipGame';
 import { createPlayerForTesting } from '../../TestUtils';
 import {
   GAME_FULL_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
-  BOARD_POSITION_NOT_VALID_MESSAGE,
   GAME_NOT_STARTABLE_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
   INVALID_MOVE_MESSAGE,
 } from '../../lib/InvalidParametersError';
 
-const GAME_NOT_WAITING_TO_START_MESSAGE = 'Game is not in waiting to start mode';
 const NOT_YOUR_BOARD_MESSAGE = 'Not your board';
-const MAX_BOAT_PIECES = 18;
 const NOT_IN_PLACEMENT = 'Game is not in placement phase';
 /**
  * A helper function to apply a placement of moves to a game.
@@ -112,49 +106,6 @@ function createBoatPlacementsFromPattern(
     );
     queues.Board = queue.filter(m => m !== move);
   }
-}
-
-/**
- * A helper function that creates a placement of boat pieces for
- * both green and blue boards.
- */
-function createValidGame(game: BattleShipGame, blue: Player, green: Player) {
-  createBoatPlacementsFromPattern(
-    game,
-    'Blue',
-    [
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'SV'],
-      ['_', 'BH', '_', '_', '_', '_', '_', '_', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', 'AV', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-      ['_', 'CH', '_', '_', '_', '_', '_', '_', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-      ['_', '_', '_', 'DH', '_', '_', '_', '_', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-    ],
-    blue.id,
-    green.id,
-  );
-  createBoatPlacementsFromPattern(
-    game,
-    'Green',
-    [
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'DH'],
-      ['_', 'SH', '_', '_', '_', 'CH', '_', '_', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', 'AV', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-      ['_', 'BH', '_', '_', '_', '_', '_', '_', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-    ],
-    blue.id,
-    green.id,
-  );
 }
 
 describe('BattleShipGame', () => {

@@ -18,7 +18,6 @@ export default function ActionButton({
     if (inPlacement) {
       if (chosenBoat) {
         doAction();
-        
       }
     } else if (chosenCell) {
       doAction();

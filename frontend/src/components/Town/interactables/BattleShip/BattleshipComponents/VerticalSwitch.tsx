@@ -15,14 +15,13 @@ export default function VerticalSwitchButton({
     setIsVertical(!isVertical);
   };
 
-  return(
+  return (
     <div
       style={{
         position: 'relative',
         cursor: 'pointer',
       }}
-      onClick={handleVerticalSwitchClick}
-    >
+      onClick={handleVerticalSwitchClick}>
       <span
         style={{
           position: 'absolute',
