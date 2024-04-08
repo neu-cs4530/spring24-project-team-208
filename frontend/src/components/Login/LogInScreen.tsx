@@ -1,9 +1,23 @@
-import { Button, ToastId, useToast } from '@chakra-ui/react';
+import {
+  Avatar,
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  Heading,
+  Input,
+  InputGroup,
+  InputRightElement,
+  Text,
+  Stack,
+  useToast,
+  ToastId,
+} from '@chakra-ui/react';
 import React, { useState } from 'react';
 import useUserLoginController from '../../hooks/useUserLoginController';
 import auth from '../../firebaseSetup';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import UserController from '../../classes/UserController';
+import { UserController } from '../../classes/UserController';
 import { ApiError } from '../../generated/client';
 import { FirebaseError } from '@firebase/util';
 
@@ -14,15 +28,22 @@ export default function LoginScreen() {
   const [showSignUp, setShowSignUp] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isSigningUp, setIsSigningUp] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const userLoginController = useUserLoginController();
   const { setUserController, usersService } = userLoginController;
+
+  const handleShowPasswordClick = () => setShowPassword(!showPassword);
+  const handleShowSignUp = () => setShowSignUp(!showSignUp);
 
   const toast = useToast();
 
   const handleFirebaseLogin = async (): Promise<UserController | undefined> => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const newUserController = new UserController(userCredential.user, userLoginController);
+      const newUserController: UserController = {
+        username: userCredential.user.uid,
+        user: userCredential.user,
+      };
       return newUserController;
     } catch (error) {
       if (error instanceof FirebaseError) {
@@ -122,7 +143,7 @@ export default function LoginScreen() {
   const handleSignUp = async () => {
     if (!email || email.length === 0) {
       toast({
-        title: 'Unable to log in',
+        title: 'Unable to sign up',
         description: 'Please input an email',
         status: 'error',
       });
@@ -130,7 +151,7 @@ export default function LoginScreen() {
     }
     if (!password || password.length === 0) {
       toast({
-        title: 'Unable to log in',
+        title: 'Unable to sign up',
         description: 'Please input a password',
         status: 'error',
       });
@@ -138,7 +159,7 @@ export default function LoginScreen() {
     }
     if (!username || username.length === 0) {
       toast({
-        title: 'Unable to log in',
+        title: 'Unable to sign up',
         description: 'Please input a username',
         status: 'error',
       });
@@ -173,8 +194,9 @@ export default function LoginScreen() {
         toast.close(loadingToast);
       }
       if (err instanceof ApiError && err.status === 422) {
+        console.log(err.request);
         toast({
-          title: 'Unable to log in',
+          title: 'Unable to sign up',
           description: err.body.message,
           status: 'error',
         });
@@ -191,56 +213,97 @@ export default function LoginScreen() {
   const handleSignUpButton = async () => {
     if (showSignUp) {
       await handleSignUp();
-    } else {
-      setShowSignUp(true);
     }
   };
 
   const handleLoginButton = async () => {
     if (!showSignUp) {
       await handleLogin();
-    } else {
-      setShowSignUp(false);
     }
   };
 
   return (
-    <div>
-      <h1>{showSignUp ? 'Sign Up' : 'Login'}</h1>
-      <input
-        type='email'
-        placeholder='Email Address'
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-      />
-      <input
-        type='text'
-        placeholder='Password'
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-      />
-      {showSignUp && (
-        <input
-          type='text'
-          placeholder='Username'
-          value={username}
-          onChange={e => setUsername(e.target.value)}
-        />
-      )}
-      <Button
-        colorScheme={showSignUp ? 'gray' : 'blue'}
-        onClick={handleLoginButton}
-        isLoading={isLoggingIn}
-        isDisabled={isLoggingIn}>
-        Login
-      </Button>
-      <Button
-        colorScheme={showSignUp ? 'blue' : 'gray'}
-        onClick={handleSignUpButton}
-        isLoading={isSigningUp}
-        isDisabled={isSigningUp}>
-        Sign Up
-      </Button>
-    </div>
+    <Flex
+      flexDirection='column'
+      width='100wh'
+      height='100vh'
+      backgroundColor='blue.100'
+      justifyContent='center'
+      alignItems='center'>
+      <Stack flexDir='column' mb='2' justifyContent='center' alignItems='center'>
+        <Avatar bg='blue.500' />
+        <Heading color='blue.500'>Welcome to Covey.Town!</Heading>
+        <Text>{showSignUp ? 'Sign up' : 'Login'}</Text>
+        <Box minW={{ base: '90%', md: '468px' }}>
+          <form>
+            <Stack spacing={4} p='1rem' backgroundColor='whiteAlpha.900' boxShadow='md'>
+              {showSignUp && (
+                <>
+                  <FormControl>
+                    <InputGroup>
+                      <Input
+                        type='text'
+                        placeholder='Username'
+                        value={username}
+                        onChange={e => setUsername(e.target.value)}
+                      />
+                    </InputGroup>
+                  </FormControl>
+                </>
+              )}
+              <FormControl>
+                <InputGroup>
+                  <Input
+                    type='email'
+                    placeholder='Email address'
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                  />
+                </InputGroup>
+              </FormControl>
+              <FormControl>
+                <InputGroup>
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder='Password'
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                  />
+                  <InputRightElement width='4.5rem'>
+                    <Button h='1.75rem' size='sm' onClick={handleShowPasswordClick}>
+                      {showPassword ? 'Hide' : 'Show'}
+                    </Button>
+                  </InputRightElement>
+                </InputGroup>
+              </FormControl>
+              {!showSignUp && (
+                <Button
+                  colorScheme='blue'
+                  onClick={handleLoginButton}
+                  isLoading={isLoggingIn}
+                  isDisabled={isLoggingIn}>
+                  Login
+                </Button>
+              )}
+              {showSignUp && (
+                <Button
+                  colorScheme='blue'
+                  onClick={handleSignUpButton}
+                  isLoading={isSigningUp}
+                  isDisabled={isSigningUp}>
+                  Sign Up
+                </Button>
+              )}
+            </Stack>
+          </form>
+        </Box>
+      </Stack>
+      <Box>
+        Don&apos;t have an account?{' '}
+        <Button size='xs' colorScheme='gray' onClick={handleShowSignUp}>
+          {showSignUp ? 'Login' : 'Sign up'}
+        </Button>
+      </Box>
+    </Flex>
   );
 }
