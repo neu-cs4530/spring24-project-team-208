@@ -267,7 +267,7 @@ export default function LoginScreen() {
                 Welcome!
               </Heading>
               <Heading fontSize='2em' color='gray.600'>
-                {showSignUp ? 'Sign up to join our community.' : 'Login to get started.'}
+                {showSignUp ? 'Sign up to join our community.' : 'Log in to get started.'}
               </Heading>
             </Box>
             <Spacer />
@@ -323,7 +323,7 @@ export default function LoginScreen() {
                       isDisabled={isLoggingIn}
                       variant='solid'
                       _hover={{ bg: '#33AAFF' }}>
-                      Login
+                      Log In
                     </Button>
                   )}
                   {showSignUp && (
@@ -344,7 +344,7 @@ export default function LoginScreen() {
           <Box>
             {showSignUp ? 'Already have an account?' : "Don't have an account?"}
             <Button size='xs' colorScheme='gray' onClick={handleShowSignUp}>
-              {showSignUp ? 'Login' : 'Sign up'}
+              {showSignUp ? 'Log In' : 'Sign up'}
             </Button>
           </Box>
         </Flex>
