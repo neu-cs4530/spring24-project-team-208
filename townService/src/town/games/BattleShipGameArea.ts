@@ -1,4 +1,3 @@
-import { FieldValue } from 'firebase-admin/firestore';
 import GameArea from './GameArea';
 import BattleShipGame from './BattleShipGame';
 import Player from '../../lib/Player';
@@ -8,6 +7,7 @@ import {
   InteractableCommandReturnType,
   BattleShipGameState,
   GameInstance,
+  BattleShipDatabaseEntry,
 } from '../../types/CoveyTownSocket';
 import InvalidParametersError, {
   GAME_ID_MISSMATCH_MESSAGE,
@@ -15,6 +15,8 @@ import InvalidParametersError, {
   INVALID_COMMAND_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import db from '../../lib/firebaseData';
+
+const DEFAULT_ELO = 1000;
 
 /**
  * A BattleShipGameArea is a GameArea that hosts a BattleShipGame.
@@ -27,13 +29,51 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
     return 'BattleShipArea';
   }
 
+  private _updatedElo(playerElo: number, opponentElo: number, won: boolean): number {
+    const expectedScore = 1 / (1 + 10 ** ((opponentElo - playerElo) / 400));
+    const realScore = won ? 1 : 0;
+    return playerElo + 32 * (realScore - expectedScore);
+  }
+
+  private async _updatePlayerStats(playerName: string, won: boolean, opponentName: string) {
+    try {
+      const playerDocRef = db.collection('battleship').doc(playerName);
+      const opponentDocRef = db.collection('battleship').doc(opponentName);
+      const playerDoc = await playerDocRef.get();
+      const opponentDoc = await opponentDocRef.get();
+      const playerData = playerDoc.data();
+      const opponentData = opponentDoc.data();
+
+      if (!playerData || !opponentData) {
+        throw new Error(
+          'A document in the database should have been made for the players when they joined the game',
+        );
+      }
+      const updatedData: BattleShipDatabaseEntry = {
+        wins: won ? playerData.wins + 1 : playerData.wins,
+        losses: won ? playerData.losses : playerData.losses + 1,
+        elo: this._updatedElo(playerData.elo, opponentData.elo, won),
+        history: [{ opponent: opponentName, result: won ? 'win' : 'loss' }, ...playerData.history],
+      };
+
+      playerDocRef.set(updatedData);
+    } catch (error) {
+      throw new Error(`Error updating player stats: ${error}`);
+    }
+  }
+
+  private async _updateDatabase(blueName: string, greenName: string, winner: string) {
+    await this._updatePlayerStats(blueName, winner === blueName, greenName);
+    await this._updatePlayerStats(greenName, winner === greenName, blueName);
+  }
+
   private async _stateUpdated(updatedState: GameInstance<BattleShipGameState>) {
     if (updatedState.state.status === 'OVER') {
       // If we haven't yet recorded the outcome, do so now.
       const gameID = this._game?.id;
       if (gameID && !this._history.find(eachResult => eachResult.gameID === gameID)) {
-        const { blue, green } = updatedState.state;
-        if (blue && green) {
+        const { blue, green, winner } = updatedState.state;
+        if (blue && green && winner) {
           const blueName =
             this._occupants.find(eachPlayer => eachPlayer.id === blue)?.userName || blue;
           const greenName =
@@ -46,37 +86,31 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
             },
           });
           this._emitAreaChanged();
-          const blueWon: boolean = updatedState.state.winner === blue;
-          const blueDocRef = db.collection('battleship').doc(blueName);
-          const blueDoc = await blueDocRef.get();
-          if (!blueDoc.exists) {
-            // If the document does not exist, create it
-            await blueDocRef.set({
-              wins: 0,
-              losses: 0,
-            });
-          }
-          blueDocRef.update({
-            wins: FieldValue.increment(blueWon ? 1 : 0),
-            losses: FieldValue.increment(blueWon ? 0 : 1),
-          });
-          const greenDocRef = db.collection('battleship').doc(greenName);
-          const greenDoc = await greenDocRef.get();
-          if (!greenDoc.exists) {
-            // If the document does not exist, create it
-            await greenDocRef.set({
-              wins: 0,
-              losses: 0,
-            });
-          }
-          greenDocRef.update({
-            wins: FieldValue.increment(blueWon ? 0 : 1),
-            losses: FieldValue.increment(blueWon ? 1 : 0),
-          });
+          await this._updateDatabase(blueName, greenName, winner);
+        } else {
+          throw new Error('Game is over, but the game state is not properly set.');
         }
       }
     } else {
       this._emitAreaChanged();
+    }
+  }
+
+  private async _makeDefaultDatabaseEntry(playerName: string) {
+    try {
+      const playerDocRef = db.collection('battleship').doc(playerName);
+      const playerDoc = await playerDocRef.get();
+
+      if (!playerDoc.exists) {
+        playerDocRef.set({
+          wins: 0,
+          losses: 0,
+          elo: DEFAULT_ELO,
+          history: [],
+        });
+      }
+    } catch (error) {
+      throw new Error(`Error creating default database entry: ${error}`);
     }
   }
 
@@ -164,6 +198,7 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
         game = new BattleShipGame(this._game);
         this._game = game;
       }
+      this._makeDefaultDatabaseEntry(player.userName);
       game.join(player);
       this._stateUpdated(game.toModel());
       return { gameID: game.id } as InteractableCommandReturnType<CommandType>;

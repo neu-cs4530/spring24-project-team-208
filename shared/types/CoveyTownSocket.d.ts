@@ -355,5 +355,5 @@ export type BattleShipDatabaseEntry = {
   wins: number;
   losses: number;
   elo: number;
-  gameHistory: BattleShipGameOutcome[];
+  history: BattleShipGameOutcome[];
 }
