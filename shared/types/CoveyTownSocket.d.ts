@@ -345,3 +345,15 @@ export interface ClientToServerEvents {
   interactableUpdate: (update: Interactable) => void;
   interactableCommand: (command: InteractableCommand & InteractableCommandBase) => void;
 }
+
+export type BattleShipGameOutcome = {
+  opponent: string;
+  result: 'win' | 'loss';
+}
+
+export type BattleShipDatabaseEntry = {
+  wins: number;
+  losses: number;
+  elo: number;
+  gameHistory: BattleShipGameOutcome[];
+}
