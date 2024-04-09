@@ -223,7 +223,7 @@ export default function LoginScreen() {
 
   return (
     <Flex minH='100vh'>
-      <Box flex='3' w='full' h='100vh' bg='#81C8FB'>
+      <Box flex='3' w='full' h='100vh' bg='coveyBlue.400'>
         <Flex minH='100vh'>
           <VStack w='full' h='100vh'>
             <Box w='full' h='10%' marginLeft='10%' marginTop='2.5%'>
@@ -239,12 +239,12 @@ export default function LoginScreen() {
             </Box>
             <Box w='full' h='100%' display='flex' alignItems='center' justifyContent='center'>
               <Text
-                fontSize={{ base: '3.3em', sm: '2.5em', md: '4em', lg: '5.3em' }}
+                fontSize={{ base: '2em', sm: '2.5em', md: '4em', lg: '5em' }}
                 fontWeight='650'
                 marginBottom='35%'
                 lineHeight='115%'
                 color='white'
-                paddingLeft={'10px'}
+                paddingLeft={'5px'}
                 paddingBottom={{ base: '0px', sm: '100px', md: '80px', lg: '0px' }}>
                 {' '}
                 A very cool video <br /> chat app.{' '}
@@ -316,24 +316,24 @@ export default function LoginScreen() {
                   </FormControl>
                   {!showSignUp && (
                     <Button
-                      bg='#81C8FB'
+                      bg='coveyBlue.400'
                       color='white'
                       onClick={handleLoginButton}
                       isLoading={isLoggingIn}
                       isDisabled={isLoggingIn}
                       variant='solid'
-                      _hover={{ bg: '#33AAFF' }}>
+                      _hover={{ bg: 'coveyBlue.800' }}>
                       Log In
                     </Button>
                   )}
                   {showSignUp && (
                     <Button
-                      bg='#81C8FB'
+                      bg='coveyBlue.400'
                       color='white'
                       onClick={handleSignUpButton}
                       isLoading={isSigningUp}
                       isDisabled={isSigningUp}
-                      _hover={{ bg: '#33AAFF' }}>
+                      _hover={{ bg: 'coveyBlue.800' }}>
                       Sign Up
                     </Button>
                   )}
