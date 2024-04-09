@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import BattleShipAreaController from '../../../../../classes/interactable/BattleShipAreaController';
-import { largeNotebook, notebookExit } from '../BattleshipMenuSprites';
+import {
+  BattleShipDatabaseEntry,
+  BattleShipGameOutcome,
+} from '../../../../../types/CoveyTownSocket';
+import getBattleShipData from '../../../../Database';
+import { largeNotebook } from '../BattleshipMenuSprites';
 
 // .hover-shadow {
 //     transition: box-shadow 0.3s;
@@ -11,12 +16,74 @@ import { largeNotebook, notebookExit } from '../BattleshipMenuSprites';
 //   }
 
 export function CheatSheetNoteBookModal({ controller }: { controller: BattleShipAreaController }) {
+  const [gameData, setGameData] = useState<BattleShipDatabaseEntry | null>(null);
+  const username =
+    controller.whatColor === 'Blue' ? controller.blue?.userName : controller.green?.userName;
+
+  useEffect(() => {
+    const getData = async () => {
+      const data = await getBattleShipData(username || '');
+      setGameData(data);
+    };
+    getData();
+  }, [username]);
   return (
     <>
-      <div>
-        <span>{notebookExit}</span>
-        {largeNotebook}
-      </div>
+      <span
+        style={{
+          position: 'absolute',
+          width: 800,
+        }}>
+        <span
+          style={{
+            position: 'relative',
+          }}>
+          {largeNotebook}
+        </span>
+        <span
+          style={{
+            position: 'absolute',
+            top: '15%',
+            left: '53%',
+          }}>
+          {`Current ELO: ${gameData?.elo || 0}`}
+        </span>
+        <span
+          style={{
+            position: 'absolute',
+            top: '22%',
+            left: '53%',
+          }}>
+          {`Total Wins: ${gameData?.wins || 0}`}
+        </span>
+        <span
+          style={{
+            position: 'absolute',
+            top: '29%',
+            left: '53%',
+          }}>
+          {`Total Losses: ${gameData?.losses || 0}`}
+        </span>
+        <span
+          style={{
+            position: 'absolute',
+            top: '40%',
+            left: '57%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}>
+          <p style={{ fontSize: '1.5rem', textDecoration: 'underline' }}>Previous Games</p>
+          {gameData?.history && gameData?.history.length > 0 ? (
+            gameData?.history.map(
+              (result: BattleShipGameOutcome) =>
+                `${username} vs. ${result.opponent} - ${result.result}`,
+            )
+          ) : (
+            <p>No Previous Games</p>
+          )}
+        </span>
+      </span>
     </>
   );
 }
