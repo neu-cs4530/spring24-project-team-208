@@ -14,13 +14,6 @@ export function BattleShipBoardCell({
   chooseCell: any;
   chosenCell: any;
 }) {
-  const [isHovered, setIsHovered] = useState(false);
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-  };
   const handleClick = () => {
     chooseCell(cell);
   };
@@ -32,14 +25,12 @@ export function BattleShipBoardCell({
         display: 'relative',
         width: CELL_SIZE,
       }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
       onClick={handleClick}>
       {cell?.type === 'Ocean'
         ? OCEAN_STORE[Math.floor(Math.random() * OCEAN_STORE.length)]
         : BATTLESHIP_PIECE_STORE.find(piece => piece.name === cell?.type)?.component}
       {hit && fireOverlay}
-      {(isHovered || cell === chosenCell) && crosshair}
+      {(cell === chosenCell) && crosshair}
     </div>
   );
 }

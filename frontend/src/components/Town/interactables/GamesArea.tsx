@@ -62,6 +62,9 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
     };
   }, [townController, gameAreaController]);
   return (
+    gameAreaController.toInteractableAreaModel().type === 'BattleShipArea' 
+    ? <BattleShipArea interactableID={interactableID} />
+    : (
     <>
       <Accordion allowToggle>
         <AccordionItem>
@@ -101,8 +104,6 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
             <ConnectFourArea interactableID={interactableID} />
           ) : gameAreaController.toInteractableAreaModel().type === 'TicTacToeArea' ? (
             <TicTacToeArea interactableID={interactableID} />
-          ) : gameAreaController.toInteractableAreaModel().type === 'BattleShipArea' ? (
-            <BattleShipArea interactableID={interactableID} />
           ) : (
             <>{INVALID_GAME_AREA_TYPE_MESSAGE}</>
           )}
@@ -122,7 +123,7 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
           </div>
         </Box>
       </Flex>
-    </>
+    </>)
   );
 }
 /**
@@ -142,12 +143,16 @@ export default function GameAreaWrapper(): JSX.Element {
     }
   }, [townController, gameArea]);
   if (gameArea) {
+    const gameAreaController =
+      useInteractableAreaController<GenericGameAreaController>(gameArea.id);
     return (
       <Modal isOpen={true} onClose={closeModal} closeOnOverlayClick={false} size='xl'>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>{gameArea.name}</ModalHeader>
-          <ModalCloseButton />
+          {gameAreaController.toInteractableAreaModel().type !== 'BattleShipArea' &&
+            <ModalHeader>{gameArea.name}</ModalHeader>}
+          {gameAreaController.toInteractableAreaModel().type !== 'BattleShipArea' &&
+          <ModalCloseButton />}
           <ModalBody>
             <GameArea interactableID={gameArea.id} />
           </ModalBody>
