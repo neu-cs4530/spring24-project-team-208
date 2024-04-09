@@ -16,8 +16,8 @@ export function BattleShipBoardCell({
 }: {
   controller: BattleShipAreaController;
   cell: BattleShipCell;
-  chooseCell: any;
-  chosenCell: any;
+  chooseCell: (cell: BattleShipCell) => void;
+  chosenCell: BattleShipCell | undefined;
 }) {
   const inPlacement = controller.status === 'PLACING_BOATS';
   const handleClick = () => {

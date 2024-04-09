@@ -1,9 +1,9 @@
-import { Modal, useDisclosure, useToast } from '@chakra-ui/react';
+import { useDisclosure } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import BattleShipAreaController from '../../../../classes/interactable/BattleShipAreaController';
 import useTownController from '../../../../hooks/useTownController';
 import { BattleshipBoatPiece, BattleShipCell } from '../../../../types/CoveyTownSocket';
-import { battleshipLogo, crosshair, scratch, smallNotebook } from './BattleshipMenuSprites';
+import { battleshipLogo } from './BattleshipMenuSprites';
 import { BattleShipBoardCell } from './BattleshipComponents/BattleshipBoardCell';
 import { EnemyCounter } from './BattleshipComponents/EnemyCounter';
 import { CheatSheetNoteBookSmall } from './BattleshipComponents/CheatSheetNoteBookSmall';
@@ -12,6 +12,7 @@ import TurnTeller from './BattleshipComponents/TurnTeller';
 import ButtonStatus from './BattleshipComponents/ButtonStatus';
 import ActionButton from './BattleshipComponents/ActionButton';
 import VerticalSwitchButton from './BattleshipComponents/VerticalSwitch';
+import assert from 'assert';
 
 export type BattleShipGameProps = {
   gameAreaController: BattleShipAreaController;
@@ -72,12 +73,15 @@ export default function BattleShipOwnBoard({
   };
 
   const placeBoat = () => {
-    gameAreaController.placeBoatPiece(chosenBoat!, chosenCell!.row, chosenCell!.col, isVertical);
+    assert(chosenBoat !== undefined);
+    assert(chosenCell !== undefined);
+    gameAreaController.placeBoatPiece(chosenBoat, chosenCell.row, chosenCell.col, isVertical);
     setChosenCell(undefined);
     setChosenBoat(undefined);
   };
   const fireBoat = () => {
-    gameAreaController.makeMove(chosenCell!.row, chosenCell!.col);
+    assert(chosenCell !== undefined);
+    gameAreaController.makeMove(chosenCell.row, chosenCell.col);
     setChosenCell(undefined);
   };
   console.log(isOurTurn);
@@ -138,7 +142,7 @@ export default function BattleShipOwnBoard({
       );
       gameAreaController.removeListener('turnChanged', setIsOurTurnMini); // TODO doesn't work
     };
-  }, [gameAreaController]);
+  }, [gameAreaController, townController.ourPlayer]);
 
   return (
     <div

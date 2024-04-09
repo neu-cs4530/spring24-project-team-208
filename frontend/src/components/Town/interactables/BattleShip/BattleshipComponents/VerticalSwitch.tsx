@@ -3,13 +3,12 @@ import BattleShipAreaController from '../../../../../classes/interactable/Battle
 import { verticalSwitch, verticalSwitchLever } from '../BattleshipMenuSprites';
 
 export default function VerticalSwitchButton({
-  controller,
   isVertical,
   setIsVertical,
 }: {
   controller: BattleShipAreaController;
   isVertical: boolean;
-  setIsVertical: any;
+  setIsVertical: (isVertical: boolean) => void;
 }) {
   const handleVerticalSwitchClick = () => {
     setIsVertical(!isVertical);

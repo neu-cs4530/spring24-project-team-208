@@ -2,13 +2,6 @@ import React from 'react';
 import BattleShipAreaController from '../../../../../classes/interactable/BattleShipAreaController';
 import useTownController from '../../../../../hooks/useTownController';
 
-// @font-face {
-//     font-family: 'Digital Numbers Regular';
-//     font-style: normal;
-//     font-weight: normal;
-//     src: local('Digital Numbers Regular'), url('DigitalNumbers-Regular.woff') format('woff');
-// }
-
 export default function TurnTeller({ controller }: { controller: BattleShipAreaController }) {
   const townController = useTownController();
   const turnText =

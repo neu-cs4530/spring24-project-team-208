@@ -6,9 +6,7 @@ import {
   BattleShipColor,
   BattleShipColIndex,
   BattleShipRowIndex,
-  // BattleShipPiece,
   BattleshipBoatPiece,
-  BattleShipPlacement,
   BattleShipCell,
   BattleShipGuess,
 } from '../../types/CoveyTownSocket';
@@ -20,11 +18,11 @@ import GameAreaController, {
   NO_GAME_STARTABLE,
   PLAYER_NOT_IN_GAME_ERROR,
 } from './GameAreaController';
+import assert from 'assert';
 
 /**
  * For BattleShipAreaController
  */
-// export type BattleShipCell = BattleShipCell | undefined;
 export type BattleShipEvents = GameEventTypes & {
   boardChanged: (board: BattleShipCell[][]) => void;
   turnChanged: (isOurTurn: boolean) => void;
@@ -323,8 +321,9 @@ export default class BattleShipAreaController extends GameAreaController<
     if (!instanceID || this._model.game?.state.status !== 'IN_PROGRESS') {
       throw new Error(NO_GAME_IN_PROGRESS_ERROR);
     }
+    assert(this.whatColor !== undefined, 'whatColor is undefined');
     const move: BattleShipGuess = {
-      gamePiece: this.whatColor!,
+      gamePiece: this.whatColor,
       col,
       row,
     };

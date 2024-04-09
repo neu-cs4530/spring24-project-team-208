@@ -7,14 +7,6 @@ import {
 } from '../../../../../types/CoveyTownSocket';
 import { scratch } from '../BattleshipMenuSprites';
 
-// @import url('https://fonts.googleapis.com/css2?family=Just+Me+Again+Down+Here&display=swap');
-
-// .just-me-again-down-here {
-//   font-family: 'Just Me Again Down Here', cursive;
-//   font-weight: 400;
-//   font-style: normal;
-// }
-
 const SHIPS: BattleshipBoat[] = [
   'Battleship',
   'Aircraft Carrier',
@@ -86,7 +78,6 @@ export function EnemyCounter({
             style={{ cursor: 'pointer', position: 'relative' }}
             key={index}
             onClick={() => handleClick(name)}>
-            {/* {chosenBoat?.replace(/_/g, ' ') === name && <span>{scratch}</span>} */}
             {scratchedBoats.includes(name) && <span>{scratch}</span>}
             <span>
               {inPlacement &&

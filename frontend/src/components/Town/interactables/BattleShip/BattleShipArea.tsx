@@ -6,7 +6,6 @@ import useTownController from '../../../../hooks/useTownController';
 import PlayerController from '../../../../classes/PlayerController';
 import { Button, List, ListItem, useToast } from '@chakra-ui/react';
 import BattleShipOwnBoard from './BattleShipOwnBoard';
-import BattleShipOpponentBoard from './BattleShipOpponentBoard';
 
 /**
  * The BattleShipArea component renders the Battleship game area.
