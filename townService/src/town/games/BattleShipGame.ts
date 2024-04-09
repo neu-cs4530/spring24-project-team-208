@@ -615,29 +615,17 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
   }
 
   /*
-  Returns true if the game is won by either player.
+    Returns true all the ships on the given board have been hit
   */
-  private _gameIsWon(guesses: BattleShipGuess[]): boolean {
-    // Checks if the locations of all the boats on on the board have been guessed, ignoring the gamePiece of the guesses
-    const boardIsGuessed = (board: BattleShipCell[], guessList: BattleShipGuess[]) => {
-      for (const piece of board) {
-        if (!guessList.some(guess => guess.row === piece.row && guess.col === piece.col)) {
-          return false;
-        }
+  private _gameIsWon(board: BattleShipCell[]): boolean {
+    let safeTiles = 0;
+    board.forEach((cell: BattleShipCell) => {
+      if (cell.type !== 'Ocean' && cell.state === 'Safe') {
+        safeTiles++;
       }
-      return true;
-    };
+    });
 
-    const blueWon = boardIsGuessed(
-      this.state.blueBoard,
-      guesses.filter(guess => guess.gamePiece === 'Green'),
-    );
-    const greenWon = boardIsGuessed(
-      this.state.greenBoard,
-      guesses.filter(guess => guess.gamePiece === 'Blue'),
-    );
-
-    return blueWon || greenWon;
+    return safeTiles === 0;
   }
 
   protected _applyMove(move: BattleShipGuess) {
@@ -658,7 +646,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       moves: newMoves,
     };
 
-    if (this._gameIsWon(newMoves)) {
+    if (this._gameIsWon(newBoard)) {
       newState.status = 'OVER';
       newState.winner = move.gamePiece === 'Blue' ? this.state.blue : this.state.green;
     }

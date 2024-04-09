@@ -105,6 +105,7 @@ export default function BattleshipMenu({
             paddingLeft: 10,
             paddingTop: 4,
             marginBottom: 10,
+            overflow: 'hidden',
           }}>
           {green?.userName || ''}
         </div>
@@ -118,6 +119,7 @@ export default function BattleshipMenu({
             paddingLeft: 10,
             paddingTop: 4,
             fontSize: '1.4rem',
+            overflow: 'hidden',
           }}>
           {blue?.userName || ''}
         </div>

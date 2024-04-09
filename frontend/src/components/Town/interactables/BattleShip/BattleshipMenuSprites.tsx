@@ -60,42 +60,42 @@ export const readyButton = (
 );
 
 export const joinGameButton = (
-  <img
+  <Image
     src='./battleship_sprites/BattleshipMenuSprites/Join_Game_Button.png'
     style={{ width: 127, height: 59 }}
   />
 );
 
 export const startGameButton = (
-  <img
+  <Image
     src='./battleship_sprites/BattleshipMenuSprites/Start_Game_Button.png'
     style={{ width: 127, height: 59 }}
   />
 );
 
 export const soloGameButton = (
-  <img
+  <Image
     src='./battleship_sprites/BattleshipMenuSprites/Solo_Game_Button.png'
     style={{ width: 127, height: 59 }}
   />
 );
 
 export const newGameButton = (
-  <img
+  <Image
     src='./battleship_sprites/BattleshipMenuSprites/New_Game_Button.png'
     style={{ width: 127, height: 59 }}
   />
 );
 
 export const gameOptionBackground = (
-  <img
+  <Image
     src='./battleship_sprites/BattleshipMenuSprites/Menu_Buttons_Background.png'
     style={{ width: 160, height: 241 }}
   />
 );
 
 export const battleshipWinnerLogo = (
-  <img
+  <Image
     src='./battleship_sprites/BattleshipMenuSprites/Battleship_Winners_Logo.png'
     style={{ width: 466, height: 270 }}
   />
