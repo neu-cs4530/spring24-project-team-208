@@ -117,3 +117,8 @@ ngrok.yml
 
 # Local Netlify folder
 .netlify
+
+# Firebase service account key
+townService/firebaseAdminKey.json
+
+.DS_Store
