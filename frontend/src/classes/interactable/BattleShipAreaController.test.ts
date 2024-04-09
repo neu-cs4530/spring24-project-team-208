@@ -2,11 +2,11 @@ import assert from 'assert';
 import { mock } from 'jest-mock-extended';
 import { nanoid } from 'nanoid';
 import {
-  BattleShipColIndex,
+  BattleshipBoatPiece,
+  BattleShipCell,
   BattleShipColor,
   BattleShipGuess,
   BattleShipPlacement,
-  BattleShipRowIndex,
   GameResult,
   GameStatus,
 } from '../../types/CoveyTownSocket';
@@ -53,10 +53,24 @@ describe('BattleShipAreaController', () => {
     const newState = Object.assign({}, nextGame.state);
     nextGame.state = newState;
     if (nextMove.gamePiece === 'Blue') {
-      newState.blueBoard = newState.blueBoard.concat([nextMove]);
+      newState.blueBoard = newState.blueBoard.concat([
+        {
+          type: nextMove.cell as BattleshipBoatPiece,
+          state: 'Safe',
+          row: nextMove.row,
+          col: nextMove.col,
+        },
+      ]);
     }
     if (nextMove.gamePiece === 'Green') {
-      newState.greenBoard = newState.greenBoard.concat([nextMove]);
+      newState.greenBoard = newState.greenBoard.concat([
+        {
+          type: nextMove.cell as BattleshipBoatPiece,
+          state: 'Safe',
+          row: nextMove.row,
+          col: nextMove.col,
+        },
+      ]);
     }
     controller.updateFrom(nextState, controller.occupants);
   }
@@ -83,8 +97,8 @@ describe('BattleShipAreaController', () => {
     status?: GameStatus;
     gameInstanceID?: string;
     moves?: BattleShipGuess[];
-    blueBoard?: BattleShipPlacement[];
-    greenBoard?: BattleShipPlacement[];
+    blueBoard?: BattleShipCell[];
+    greenBoard?: BattleShipCell[];
     winner?: string;
     firstPlayer?: BattleShipColor;
     observers?: string[];
@@ -139,7 +153,12 @@ describe('BattleShipAreaController', () => {
           expect(controller.blueBoard[i].length).toBe(BATTLESHIP_COLS);
           for (let j = 0; j < BATTLESHIP_COLS; j++) {
             //Expect each cell to be empty
-            expect(controller.blueBoard[i][j]).toBeUndefined();
+            expect(controller.blueBoard[i][j]).toEqual({
+              type: 'Ocean',
+              state: 'Safe',
+              row: i,
+              col: j,
+            });
           }
         }
       });
@@ -154,7 +173,12 @@ describe('BattleShipAreaController', () => {
           expect(controller.greenBoard[i].length).toBe(BATTLESHIP_COLS);
           for (let j = 0; j < BATTLESHIP_COLS; j++) {
             //Expect each cell to be empty
-            expect(controller.greenBoard[i][j]).toBeUndefined();
+            expect(controller.greenBoard[i][j]).toEqual({
+              type: 'Ocean',
+              state: 'Safe',
+              row: i,
+              col: j,
+            });
           }
         }
       });
@@ -328,27 +352,49 @@ describe('BattleShipAreaController', () => {
       });
     });
     it('returns the correct board after a placement', () => {
-      updateGameWithPlacement(controller, { col: 0, gamePiece: 'Blue', boat: 'End', row: 0 });
-      expect(controller.blueBoard[0][0]).toBe('End');
+      updateGameWithPlacement(controller, {
+        col: 0,
+        gamePiece: 'Blue',
+        cell: 'Battleship_Front',
+        row: 0,
+      });
+      expect(controller.blueBoard[0][0].type).toBe('Battleship_Front');
       //Also check that the rest are still undefined
       for (let i = 0; i < BATTLESHIP_ROWS; i++) {
         for (let j = 0; j < BATTLESHIP_COLS; j++) {
           if (!((i === 0 && j == 0) || (i == BATTLESHIP_ROWS - 1 && j === BATTLESHIP_COLS - 1))) {
-            expect(controller.blueBoard[i][j]).toBeUndefined();
-            expect(controller.greenBoard[i][j]).toBeUndefined();
+            // expect(controller.blueBoard[i][j]).toBe({
+            //   type: 'Ocean',
+            //   state: 'Safe',
+            //   row: i,
+            //   col: j,
+            // });
+            // expect(controller.greenBoard[i][j]).toBe({
+            //   type: 'Ocean',
+            //   state: 'Safe',
+            //   row: i,
+            //   col: j,
+            // });
+            expect(controller.blueBoard[i][j].type).toBe('Ocean');
+            expect(controller.greenBoard[i][j].type).toBe('Ocean');
           }
         }
       }
     });
     it('emits a boardChange event if the board has changed', () => {
       const spy = jest.fn();
-      controller.addListener('boardChanged', spy);
-      updateGameWithPlacement(controller, { col: 0, gamePiece: 'Blue', row: 0, boat: 'End' });
+      controller.addListener('blueBoardChanged', spy);
+      updateGameWithPlacement(controller, {
+        col: 0,
+        gamePiece: 'Blue',
+        row: 0,
+        cell: 'Battleship',
+      });
       expect(spy).toHaveBeenCalledWith(controller.blueBoard);
     });
     it('does not emit a boardChange event if the board has not changed', () => {
       const spy = jest.fn();
-      controller.addListener('boardChanged', spy);
+      controller.addListener('blueBoardChanged', spy);
       controller.updateFrom(
         { ...controller.toInteractableAreaModel() },
         otherPlayers.concat(ourPlayer),

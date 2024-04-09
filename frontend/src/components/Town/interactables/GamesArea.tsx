@@ -22,6 +22,7 @@ import PlayerController from '../../../classes/PlayerController';
 import { useInteractable, useInteractableAreaController } from '../../../classes/TownController';
 import useTownController from '../../../hooks/useTownController';
 import { GameResult, InteractableID } from '../../../types/CoveyTownSocket';
+import BattleShipArea from './BattleShip/BattleShipArea';
 import ChatChannel from './ChatChannel';
 import ConnectFourArea from './ConnectFour/ConnectFourArea';
 import GameAreaInteractable from './GameArea';
@@ -100,6 +101,8 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
             <ConnectFourArea interactableID={interactableID} />
           ) : gameAreaController.toInteractableAreaModel().type === 'TicTacToeArea' ? (
             <TicTacToeArea interactableID={interactableID} />
+          ) : gameAreaController.toInteractableAreaModel().type === 'BattleShipArea' ? (
+            <BattleShipArea interactableID={interactableID} />
           ) : (
             <>{INVALID_GAME_AREA_TYPE_MESSAGE}</>
           )}
