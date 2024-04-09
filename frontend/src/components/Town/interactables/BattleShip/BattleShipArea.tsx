@@ -1,5 +1,9 @@
-import { GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
-import React, { useEffect, useState } from 'react';
+import {
+  BattleShipDatabaseEntry,
+  GameStatus,
+  InteractableID,
+} from '../../../../types/CoveyTownSocket';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useInteractableAreaController } from '../../../../classes/TownController';
 import BattleShipAreaController from '../../../../classes/interactable/BattleShipAreaController';
 import useTownController from '../../../../hooks/useTownController';
@@ -7,6 +11,8 @@ import PlayerController from '../../../../classes/PlayerController';
 import { Button, List, ListItem, useToast } from '@chakra-ui/react';
 import BattleShipOwnBoard from './BattleShipOwnBoard';
 import BattleShipOpponentBoard from './BattleShipOpponentBoard';
+import getBattleShipData from '../../../Database';
+import { get } from 'lodash';
 
 /**
  * The BattleShipArea component renders the Battleship game area.
@@ -56,6 +62,8 @@ export default function BattleShipArea({
   const [blue, setBlue] = useState<PlayerController | undefined>(gameAreaController.blue);
   const [green, setGreen] = useState<PlayerController | undefined>(gameAreaController.green);
   const [joiningGame, setJoiningGame] = useState(false);
+  const [blueData, setBlueData] = useState<BattleShipDatabaseEntry | undefined>(undefined);
+  const [greenData, setGreenData] = useState<BattleShipDatabaseEntry | undefined>(undefined);
 
   const [gameStatus, setGameStatus] = useState<GameStatus>(gameAreaController.status);
   const [moveCount, setMoveCount] = useState<number>(gameAreaController.moveCount);
@@ -161,11 +169,39 @@ export default function BattleShipArea({
       </b>
     );
   }
+  useEffect(() => {
+    const getBlueData = async () => {
+      if (blue) {
+        const newData = await getBattleShipData(blue.userName);
+        setBlueData(newData);
+      }
+    };
+
+    getBlueData();
+  }, [blue]);
+
+  useEffect(() => {
+    const getGreenData = async () => {
+      if (green) {
+        const newData = await getBattleShipData(green.userName);
+        setGreenData(newData);
+      }
+    };
+
+    getGreenData();
+  }, [green]);
+
   return (
     <>
       <List aria-label='list of players in the game'>
-        <ListItem>Blue: {blue?.userName || '(No player yet!)'}</ListItem>
-        <ListItem>Green: {green?.userName || '(No player yet!)'}</ListItem>
+        <ListItem>
+          Blue: {blue?.userName || '(No player yet!)'}{' '}
+          {blueData ? '(' + Math.round(blueData.elo) + ')' : ''}
+        </ListItem>
+        <ListItem>
+          Green: {green?.userName || '(No player yet!)'}{' '}
+          {greenData ? '(' + Math.round(greenData.elo) + ')' : ''}
+        </ListItem>
       </List>
       {['PLACING_BOATS', 'IN_PROGRESS'].includes(gameStatus) ? (
         <BattleShipOwnBoard gameAreaController={gameAreaController} />
