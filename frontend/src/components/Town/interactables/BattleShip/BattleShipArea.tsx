@@ -164,8 +164,8 @@ export default function BattleShipArea({
   return (
     <>
       <List aria-label='list of players in the game'>
-        <ListItem>Red: {blue?.userName || '(No player yet!)'}</ListItem>
-        <ListItem>Yellow: {green?.userName || '(No player yet!)'}</ListItem>
+        <ListItem>Blue: {blue?.userName || '(No player yet!)'}</ListItem>
+        <ListItem>Green: {green?.userName || '(No player yet!)'}</ListItem>
       </List>
       {['PLACING_BOATS', 'IN_PROGRESS'].includes(gameStatus) ? (
         <BattleShipOwnBoard gameAreaController={gameAreaController} />
