@@ -569,26 +569,21 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       }
       throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
     };
-    const color = removePlayer(player.id);
     switch (this.state.status) {
       case 'WAITING_TO_START':
-      case 'WAITING_FOR_PLAYERS':
-        // no-ops: nothing needs to happen here
+        removePlayer(player.id);
         this.state.status = 'WAITING_FOR_PLAYERS';
         break;
+      case 'WAITING_FOR_PLAYERS':
+        removePlayer(player.id);
+        break;
       case 'IN_PROGRESS':
-        this.state = {
-          ...this.state,
-          status: 'OVER',
-          winner: color === 'Blue' ? this.state.green : this.state.blue,
-        };
+        this.state.status = 'OVER';
+        this.state.winner = this.state.blue === player.id ? this.state.green : this.state.blue;
         break;
       case 'PLACING_BOATS':
-        this.state = {
-          ...this.state,
-          status: 'OVER',
-          winner: color === 'Blue' ? this.state.green : this.state.blue,
-        };
+        this.state.status = 'OVER';
+        this.state.winner = this.state.blue === player.id ? this.state.green : this.state.blue;
         break;
       default:
         // This behavior can be undefined :)
