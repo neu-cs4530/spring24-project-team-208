@@ -233,21 +233,22 @@ export default class BattleShipAreaController extends GameAreaController<
     const wasOurTurn = this.isOurTurn;
 
     if (newGame && this.isActive()) {
-      let newBoard = createEmptyBoard();
+      const newBlueBoard = createEmptyBoard();
 
       newGame.state.blueBoard.forEach(piece => {
-        newBoard[piece.row][piece.col] = piece;
+        newBlueBoard[piece.row][piece.col] = piece;
       });
-      if (!_.isEqual(newBoard, this._blueBoard)) {
-        this._blueBoard = newBoard;
+      if (!_.isEqual(newBlueBoard, this._blueBoard)) {
+        this._blueBoard = newBlueBoard;
         this.emit('blueBoardChanged', this._blueBoard);
       }
-      newBoard = createEmptyBoard();
+
+      const newGreenBoard = createEmptyBoard();
       newGame.state.greenBoard.forEach(piece => {
-        newBoard[piece.row][piece.col] = piece;
+        newGreenBoard[piece.row][piece.col] = piece;
       });
-      if (!_.isEqual(newBoard, this._greenBoard)) {
-        this._greenBoard = newBoard;
+      if (!_.isEqual(newGreenBoard, this._greenBoard)) {
+        this._greenBoard = newGreenBoard;
         this.emit('greenBoardChanged', this._greenBoard);
       }
     }

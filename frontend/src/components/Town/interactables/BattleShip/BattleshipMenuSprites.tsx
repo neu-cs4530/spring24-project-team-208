@@ -1,15 +1,16 @@
 import React from 'react';
+import { Image } from '@chakra-ui/react';
 const CELL_SIZE = 54;
 
 export const crosshair = (
-  <img
+  <Image
     src='./battleship_sprites/BattleshipMenuSprites/Crosshair.png'
     style={{ height: CELL_SIZE, width: CELL_SIZE, position: 'absolute' }}
   />
 );
 
 export const scratch = (
-  <img
+  <Image
     src='./battleship_sprites/BattleshipMenuSprites/Scratch.png'
     style={{
       height: 20,
@@ -23,33 +24,36 @@ export const scratch = (
 );
 
 export const smallNotebook = (
-  <img src='./battleship_sprites/BattleshipMenuSprites/Small_Notebook.png' style={{ width: 180 }} />
+  <Image
+    src='./battleship_sprites/BattleshipMenuSprites/Small_Notebook.png'
+    style={{ width: 180 }}
+  />
 );
 
 export const largeNotebook = (
-  <img src='./battleship_sprites/BattleshipMenuSprites/Large_Notebook.png' />
+  <Image src='./battleship_sprites/BattleshipMenuSprites/Large_Notebook.png' />
 );
 
 export const notebookExit = (
-  <img src='./battleship_sprites/BattleshipMenuSprites/Notebook_Exit.png' />
+  <Image src='./battleship_sprites/BattleshipMenuSprites/Notebook_Exit.png' />
 );
 
 export const battleshipLogo = (
-  <img
+  <Image
     src='./battleship_sprites/BattleshipMenuSprites/Battleship_Logo.png'
     style={{ width: 300, height: 140 }}
   />
 );
 
 export const awaitingButton = (
-  <img
+  <Image
     src='./battleship_sprites/BattleshipMenuSprites/awaiting.png'
     style={{ width: 40, height: 30 }}
   />
 );
 
 export const readyButton = (
-  <img
+  <Image
     src='./battleship_sprites/BattleshipMenuSprites/ready.png'
     style={{ width: 40, height: 30 }}
   />
@@ -94,5 +98,19 @@ export const battleshipWinnerLogo = (
   <img
     src='./battleship_sprites/BattleshipMenuSprites/Battleship_Winners_Logo.png'
     style={{ width: 466, height: 270 }}
+  />
+);
+
+export const verticalSwitch = (
+  <Image
+    src='./battleship_sprites/BattleshipMenuSprites/Vertical_Switch.png'
+    style={{ width: 75, height: 75 }}
+  />
+);
+
+export const verticalSwitchLever = (
+  <Image
+    src='./battleship_sprites/BattleshipMenuSprites/Vertical_Switch_Lever.png'
+    style={{ width: 75, height: 75 }}
   />
 );

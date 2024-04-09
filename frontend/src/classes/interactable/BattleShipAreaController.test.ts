@@ -4,11 +4,9 @@ import { nanoid } from 'nanoid';
 import {
   BattleshipBoatPiece,
   BattleShipCell,
-  BattleShipColIndex,
   BattleShipColor,
   BattleShipGuess,
   BattleShipPlacement,
-  BattleShipRowIndex,
   GameResult,
   GameStatus,
 } from '../../types/CoveyTownSocket';
@@ -55,20 +53,24 @@ describe('BattleShipAreaController', () => {
     const newState = Object.assign({}, nextGame.state);
     nextGame.state = newState;
     if (nextMove.gamePiece === 'Blue') {
-      newState.blueBoard = newState.blueBoard.concat({
-        type: nextMove.cell as BattleshipBoatPiece,
-        state: 'Safe',
-        row: nextMove.row,
-        col: nextMove.col,
-      });
+      newState.blueBoard = newState.blueBoard.concat([
+        {
+          type: nextMove.cell as BattleshipBoatPiece,
+          state: 'Safe',
+          row: nextMove.row,
+          col: nextMove.col,
+        },
+      ]);
     }
     if (nextMove.gamePiece === 'Green') {
-      newState.greenBoard = newState.greenBoard.concat({
-        type: nextMove.cell as BattleshipBoatPiece,
-        state: 'Safe',
-        row: nextMove.row,
-        col: nextMove.col,
-      });
+      newState.greenBoard = newState.greenBoard.concat([
+        {
+          type: nextMove.cell as BattleshipBoatPiece,
+          state: 'Safe',
+          row: nextMove.row,
+          col: nextMove.col,
+        },
+      ]);
     }
     controller.updateFrom(nextState, controller.occupants);
   }
