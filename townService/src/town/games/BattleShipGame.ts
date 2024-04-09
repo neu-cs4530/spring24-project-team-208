@@ -3,25 +3,74 @@ import InvalidParametersError, {
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
   MOVE_NOT_YOUR_TURN_MESSAGE,
-  BOARD_POSITION_NOT_VALID_MESSAGE,
   GAME_NOT_STARTABLE_MESSAGE,
   GAME_NOT_IN_PROGRESS_MESSAGE,
+  INVALID_MOVE_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
 import {
+  BattleShipColIndex,
+  BattleShipRowIndex,
   BattleShipColor,
   BattleShipGameState,
   BattleShipGuess,
-  BattleShipPiece,
+  BattleShipCell,
   BattleShipPlacement,
   GameMove,
   PlayerID,
+  BattleshipBoatPiece,
+  BattleShipCellState,
 } from '../../types/CoveyTownSocket';
 import Game from './Game';
 
-const GAME_NOT_WAITING_TO_START_MESSAGE = 'Game is not in waiting to start mode';
 const NOT_YOUR_BOARD_MESSAGE = 'Not your board';
-const MAX_BOAT_PIECES = 18;
+const MAX_BOAT_PIECES = 15;
+const ALL_BOATS: BattleshipBoatPiece[] = [
+  'Aircraft_Back',
+  'Aircraft_Middle_1',
+  'Aircraft_Middle_2',
+  'Aircraft_Front',
+  'Battleship_Back',
+  'Battleship_Middle_1',
+  'Battleship_Middle_2',
+  'Battleship_Middle_3',
+  'Battleship_Front',
+  'Cruiser_Back',
+  'Cruiser_Front',
+  'Destroyer',
+  'Submarine_Back',
+  'Submarine_Middle',
+  'Submarine_Front',
+];
+
+const BOAT_MAP = [
+  {
+    name: 'Battleship',
+    ships: [
+      'Battleship_Back',
+      'Battleship_Middle_1',
+      'Battleship_Middle_2',
+      'Battleship_Middle_3',
+      'Battleship_Front',
+    ],
+  },
+  {
+    name: 'Aircraft Carrier',
+    ships: ['Aircraft_Back', 'Aircraft_Middle_1', 'Aircraft_Middle_2', 'Aircraft_Front'],
+  },
+  {
+    name: 'Submarine',
+    ships: ['Submarine_Back', 'Submarine_Middle', 'Submarine_Front'],
+  },
+  {
+    name: 'Cruiser',
+    ships: ['Cruiser_Back', 'Cruiser_Front'],
+  },
+  {
+    name: 'Destroyer',
+    ships: ['Destroyer'],
+  },
+];
 
 function getOtherPlayerColor(color: BattleShipColor): BattleShipColor {
   if (color === 'Green') {
@@ -124,21 +173,39 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     col: number,
     nextRow: number,
     nextCol: number,
-    board: (BattleShipPiece | undefined)[][],
+    board: (BattleShipCell | undefined)[][],
   ): boolean {
+    const boatFronts = [
+      'Aircraft_Front',
+      'Battleship_Front',
+      'Cruiser_Front',
+      'Destroyer',
+      'Submarine_Front',
+    ];
+    const boatBacks = [
+      'Aircraft_Back',
+      'Battleship_Back',
+      'Cruiser_Back',
+      'Destroyer',
+      'Submarine_Back',
+    ];
     const currPiece = board[row][col];
     if (hasFront && currPiece === undefined) {
       hasFront = false;
     }
-    if (currPiece === 'Front' && board[nextRow][nextCol] !== undefined) {
+    if (currPiece && boatFronts.includes(currPiece.type) && board[nextRow][nextCol] !== undefined) {
       board[row][col] = undefined;
       hasFront = true;
     }
-    if (hasFront && currPiece === 'End') {
+    if (hasFront && currPiece && boatBacks.includes(currPiece.type)) {
       board[row][col] = undefined;
       hasFront = false;
     }
-    if (hasFront && currPiece === 'Middle') {
+    if (
+      hasFront &&
+      currPiece &&
+      (![...boatFronts, ...boatBacks].includes(currPiece.type) || currPiece.type === 'Destroyer')
+    ) {
       board[row][col] = undefined;
     }
     return hasFront;
@@ -150,18 +217,18 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * has the correct number of boat pieces. If incorrect, player will have
    * to reposition their boats to start the game
    */
-  protected _isValidBoard(boardPlacements: BattleShipPlacement[]): boolean {
+  protected _isValidBoard(boardCells: BattleShipCell[]): boolean {
     const numRows = 10;
     const numCols = 10;
 
     // Convert pieces to board
-    const board: (BattleShipPiece | undefined)[][] = new Array(numRows);
+    const board: (BattleShipCell | undefined)[][] = new Array(numRows);
     for (let i = 0; i < board.length; i++) {
       board[i] = new Array(numCols).fill(undefined);
     }
 
-    for (const piece of boardPlacements) {
-      board[piece.row][piece.col] = piece.boat;
+    for (const piece of boardCells) {
+      board[piece.row][piece.col] = piece;
     }
 
     let hasFront = false;
@@ -184,7 +251,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     // false if there are any non-undefined pieces left or if number of boat pieces is incorrect
     return (
       board.every(row => row.every(col => col === undefined)) &&
-      boardPlacements.length === MAX_BOAT_PIECES
+      boardCells.length === MAX_BOAT_PIECES
     );
   }
 
@@ -209,9 +276,9 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    */
   public startGame(player: Player): void {
     if (
-      this.state.status !== 'WAITING_TO_START' ||
-      (this.state.blue === player.id && !this._isValidBoard(this.state.blueBoard)) ||
-      (this.state.green === player.id && !this._isValidBoard(this.state.greenBoard))
+      this.state.status !== 'WAITING_TO_START'
+      // || (this.state.blue === player.id && !this._isValidBoard(this.state.blueBoard))
+      // || (this.state.green === player.id && !this._isValidBoard(this.state.greenBoard))
     ) {
       throw new InvalidParametersError(GAME_NOT_STARTABLE_MESSAGE);
     }
@@ -231,8 +298,27 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     }
     this.state = {
       ...this.state,
-      status: this.state.blueReady && this.state.greenReady ? 'IN_PROGRESS' : 'WAITING_TO_START',
+      status: this.state.blueReady && this.state.greenReady ? 'PLACING_BOATS' : 'WAITING_TO_START',
+      blueBoard: this._createNewBoard(),
+      greenBoard: this._createNewBoard(),
     };
+
+    // reset for use in boat placement phase
+    if (this.state.blueReady && this.state.greenReady) {
+      this.state.blueReady = false;
+      this.state.greenReady = false;
+    }
+  }
+
+  protected _createNewBoard(): Array<BattleShipCell> {
+    const newBoard: Array<BattleShipCell> = Array.from({ length: 100 }, (_, index) => ({
+      type: 'Ocean',
+      state: 'Safe',
+      row: Math.floor(index / 10) as BattleShipRowIndex,
+      col: (index % 10) as BattleShipColIndex,
+    }));
+
+    return newBoard;
   }
 
   /**
@@ -240,22 +326,51 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * Follows the rules of "Battle Ship"
    * @param placement
    */
-  protected _validatePlacement(placement: BattleShipPlacement): void {
-    let board;
+  protected _validatePlacement(placement: BattleShipPlacement, vertical: boolean): boolean {
+    let board: BattleShipCell[];
     if (placement.gamePiece === 'Blue') {
       board = this.state.blueBoard;
     } else {
       board = this.state.greenBoard;
     }
+    const boatLength = BOAT_MAP.find(boat => boat.name === placement.cell)?.ships.length || 0;
 
     // A placement is invalid if the maximum number of boat pieces have been placed
-    if (board.length >= MAX_BOAT_PIECES) {
-      throw new InvalidParametersError(BOARD_POSITION_NOT_VALID_MESSAGE);
+    if (board.filter(p => p.type !== 'Ocean').length >= MAX_BOAT_PIECES) {
+      return false;
     }
     // A placement is invalid if the given position (row, col) is full
-    if (board.filter(p => p.col === placement.col && p.row === placement.row).length > 0) {
-      throw new InvalidParametersError(BOARD_POSITION_NOT_VALID_MESSAGE);
+    if (
+      board.find(cell => cell.col === placement.col && cell.row === placement.row)?.type !== 'Ocean'
+    ) {
+      return false;
     }
+    // A placement is invalid if a vertical boat would be out of bounds
+    if (vertical && placement.row + boatLength > 10) {
+      return false;
+    }
+    // A placement is invalid if a horizontal boat would be out of bounds
+    if (!vertical && placement.col + boatLength > 10) {
+      return false;
+    }
+
+    // A placement is invlaid if a vertical boat would collide with another boat
+    if (vertical) {
+      for (let row = 0 + placement.row; row < placement.row + boatLength; row++) {
+        if (board.find(cell => cell.row === row && cell.col === placement.col)?.type !== 'Ocean') {
+          return false;
+        }
+      }
+    }
+    // A placement is invlaid if a horizontal boat would collide with another boat
+    if (!vertical) {
+      for (let col = 0 + placement.col; col < placement.col + boatLength; col++) {
+        if (board.find(cell => cell.row === placement.row && cell.col === col)?.type !== 'Ocean') {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   /**
@@ -269,13 +384,46 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     } else {
       board = this.state.greenBoard;
     }
-    const newPlacement = [...board, placement];
+    const oldIndex = board.findIndex(
+      (piece: BattleShipCell) => piece.col === placement.col && piece.row === placement.row,
+    );
+    const newPlacement = [...board];
+    newPlacement[oldIndex] = {
+      type: placement.cell as BattleshipBoatPiece,
+      state: 'Safe',
+      row: placement.row,
+      col: placement.col,
+    };
+
     const newState: BattleShipGameState = {
       ...this.state,
       ...(placement.gamePiece === 'Blue' && { blueBoard: newPlacement }),
       ...(placement.gamePiece === 'Green' && { greenBoard: newPlacement }),
     };
     this.state = newState;
+
+    // if there are no more boats to place player is ready for game phase
+    if (this._allBoatsPlaced(newPlacement)) {
+      if (placement.gamePiece === 'Blue') {
+        this.state.blueReady = true;
+      } else {
+        this.state.greenReady = true;
+      }
+    }
+    // if both players are ready for game phase set status to IN_PROGRESS
+    if (this.state.blueReady && this.state.greenReady) {
+      this.state.status = 'IN_PROGRESS';
+    }
+  }
+
+  /**
+   * Checks if all availible boats in a board have been placed and returns a boolean of the result
+   * @param newPlacement the board to check
+   */
+  protected _allBoatsPlaced(newPlacement: Array<BattleShipCell>): boolean {
+    const boatArr = newPlacement.filter(cell => cell.type !== 'Ocean').map(cell => cell.type);
+
+    return ALL_BOATS.every(item => boatArr.includes(item));
   }
 
   /**
@@ -284,9 +432,9 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @param position
    * @returns newPlacement
    */
-  protected _battleShipPlacement(position: GameMove<BattleShipPlacement>) {
-    if (this.state.status !== 'WAITING_TO_START') {
-      throw new InvalidParametersError(GAME_NOT_WAITING_TO_START_MESSAGE);
+  protected _battleShipPlacement(position: GameMove<BattleShipPlacement>): BattleShipPlacement {
+    if (this.state.status !== 'PLACING_BOATS') {
+      throw new InvalidParametersError('Game is not in placement phase');
     }
     if (
       (position.playerID === this.state.blue && position.move.gamePiece !== 'Blue') ||
@@ -306,7 +454,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
 
     const newPlacement = {
       gamePiece,
-      boat: position.move.boat,
+      cell: position.move.cell,
       col: position.move.col,
       row: position.move.row,
     };
@@ -330,10 +478,20 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @throws InvalidParametersError if the maximum number of boat pieces has been added to the board (BOARD_POSITION_NOT_VALID_MESSAGE)
    * @throws InvalidParametersError if trying to place on board that isn't theirs (NOT_YOUR_BOARD_MESSAGE)
    */
-  public placeBoat(position: GameMove<BattleShipPlacement>): void {
+  public placeBoat(position: GameMove<BattleShipPlacement>, vertical: boolean): void {
     const newPlacement = this._battleShipPlacement(position);
-    this._validatePlacement(newPlacement);
-    this._place(newPlacement);
+    if (this._validatePlacement(newPlacement, vertical)) {
+      BOAT_MAP.find(boatM => boatM.name === position.move.cell)?.ships.map((ship, index) =>
+        this._place({
+          gamePiece: position.playerID === this.state.blue ? 'Blue' : 'Green',
+          cell: ship as BattleshipBoatPiece,
+          col: (position.move.col + (vertical ? 0 : index)) as BattleShipColIndex,
+          row: (position.move.row + (vertical ? index : 0)) as BattleShipRowIndex,
+        }),
+      );
+    } else {
+      throw new Error(INVALID_MOVE_MESSAGE);
+    }
   }
 
   /**
@@ -425,6 +583,13 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
           winner: color === 'Blue' ? this.state.green : this.state.blue,
         };
         break;
+      case 'PLACING_BOATS':
+        this.state = {
+          ...this.state,
+          status: 'OVER',
+          winner: color === 'Blue' ? this.state.green : this.state.blue,
+        };
+        break;
       default:
         // This behavior can be undefined :)
         throw new Error(`Unexpected game status: ${this.state.status}`);
@@ -454,7 +619,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
   */
   private _gameIsWon(guesses: BattleShipGuess[]): boolean {
     // Checks if the locations of all the boats on on the board have been guessed, ignoring the gamePiece of the guesses
-    const boardIsGuessed = (board: BattleShipPlacement[], guessList: BattleShipGuess[]) => {
+    const boardIsGuessed = (board: BattleShipCell[], guessList: BattleShipGuess[]) => {
       for (const piece of board) {
         if (!guessList.some(guess => guess.row === piece.row && guess.col === piece.col)) {
           return false;
@@ -477,8 +642,19 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
 
   protected _applyMove(move: BattleShipGuess) {
     const newMoves = [...this.state.moves, move];
+    const boardToChange = move.gamePiece === 'Blue' ? this.state.greenBoard : this.state.blueBoard;
+
+    const newBoard = boardToChange.map((cell: BattleShipCell) => {
+      if (cell.row === move.row && cell.col === move.col) {
+        return { ...cell, state: 'Hit' as BattleShipCellState };
+      }
+      return cell;
+    });
+
     const newState: BattleShipGameState = {
       ...this.state,
+      ...(move.gamePiece === 'Green' && { blueBoard: newBoard }),
+      ...(move.gamePiece === 'Blue' && { greenBoard: newBoard }),
       moves: newMoves,
     };
 

@@ -28,6 +28,8 @@ export const NO_GAME_IN_PROGRESS_ERROR = 'No game in progress';
 
 export const NO_GAME_STARTABLE = 'No game startable';
 
+export const NOT_IN_PLACEMENT = 'Game is not in placement phase';
+
 /**
  * This class is the base class for all game controllers. It is responsible for managing the
  * state of the game, and for sending commands to the server to update the state of the game.
