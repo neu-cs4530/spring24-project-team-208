@@ -2,10 +2,14 @@ import { Button, ModalCloseButton, useToast } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import BattleShipAreaController from '../../../../classes/interactable/BattleShipAreaController';
 import PlayerController from '../../../../classes/PlayerController';
-import { useInteractableAreaController } from '../../../../classes/TownController';
 import useTownController from '../../../../hooks/useTownController';
 import { GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
-import { awaitingButton, battleshipLogo, joinGameButton, readyButton, soloGameButton, startGameButton } from './BattleshipMenuSprites';
+import {
+  battleshipLogo,
+  joinGameButton,
+  soloGameButton,
+  startGameButton,
+} from './BattleshipMenuSprites';
 
 export default function BattleshipMenu({
   gameAreaController,
@@ -14,7 +18,6 @@ export default function BattleshipMenu({
   gameAreaController: BattleShipAreaController;
   interactableID: InteractableID;
 }): JSX.Element {
-
   const townController = useTownController();
 
   const [blue, setBlue] = useState<PlayerController | undefined>(gameAreaController.blue);
@@ -22,7 +25,6 @@ export default function BattleshipMenu({
   const [green, setGreen] = useState<PlayerController | undefined>(gameAreaController.green);
   const [greenReady, setGreenReady] = useState(false);
   const [joiningGame, setJoiningGame] = useState(false);
-
 
   const [gameStatus, setGameStatus] = useState<GameStatus>(gameAreaController.status);
   const [moveCount, setMoveCount] = useState<number>(gameAreaController.moveCount);
@@ -65,11 +67,11 @@ export default function BattleshipMenu({
     };
   }, [townController, gameAreaController, toast]);
 
-  return(
+  return (
     <div
       style={{
         width: 661,
-        height:514,
+        height: 514,
         border: '3px solid black',
         borderRadius: 15,
         backgroundColor: '#6F6F78',
@@ -92,61 +94,33 @@ export default function BattleshipMenu({
           top: '18%',
           bottom: '2%',
         }}>
-          {/* <div
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-            }}> */}
-            <div
-              style={{
-                backgroundColor: '#1C1C1C',
-                color: '#24FF00',
-                borderRadius: 10,
-                width: 288,
-                height: 46,
-                fontSize: '1.4rem',
-                paddingLeft: 10,
-                paddingTop: 4,
-                marginBottom: 10,
-              }}>
-              {green?.userName || ''}
-            </div>
-            {/* <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-              }}>
-                {greenReady ? readyButton : awaitingButton}
-                Ready?
-            </div> */}
-          {/* </div> */}
-          {/* <div
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-            }}> */}
-            <div
-              style={{
-                backgroundColor: '#1C1C1C',
-                color: '#24FF00',
-                borderRadius: 10,
-                width: 288,
-                height: 46,
-                paddingLeft: 10,
-                paddingTop: 4,
-                fontSize: '1.4rem',
-              }}>
-                {blue?.userName || ''}
-            </div>
-            {/* <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-              }}>
-                {blueReady ? readyButton : awaitingButton}
-                Ready?
-            </div> */}
-          {/* </div> */}
+        <div
+          style={{
+            backgroundColor: '#1C1C1C',
+            color: '#24FF00',
+            borderRadius: 10,
+            width: 288,
+            height: 46,
+            fontSize: '1.4rem',
+            paddingLeft: 10,
+            paddingTop: 4,
+            marginBottom: 10,
+          }}>
+          {green?.userName || ''}
+        </div>
+        <div
+          style={{
+            backgroundColor: '#1C1C1C',
+            color: '#24FF00',
+            borderRadius: 10,
+            width: 288,
+            height: 46,
+            paddingLeft: 10,
+            paddingTop: 4,
+            fontSize: '1.4rem',
+          }}>
+          {blue?.userName || ''}
+        </div>
       </span>
       <div
         style={{
@@ -181,8 +155,7 @@ export default function BattleshipMenu({
             }
             setJoiningGame(false);
           }}
-          style={{ cursor: 'pointer' }}
-        >
+          style={{ cursor: 'pointer' }}>
           {joinGameButton}
         </span>
         <span
@@ -199,18 +172,17 @@ export default function BattleshipMenu({
             }
             setJoiningGame(false);
           }}
-          style={{ cursor: 'pointer' }}
-        >
+          style={{ cursor: 'pointer' }}>
           {startGameButton}
         </span>
         <span
           style={{
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}>
           {soloGameButton}
         </span>
       </div>
       <ModalCloseButton />
     </div>
-  )
+  );
 }

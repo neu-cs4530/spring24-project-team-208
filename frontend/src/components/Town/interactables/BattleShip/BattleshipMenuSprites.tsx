@@ -85,7 +85,7 @@ export const newGameButton = (
     src='./battleship_sprites/BattleshipMenuSprites/New_Game_Button.png'
     style={{ width: 127, height: 59 }}
   />
-)
+);
 
 export const gameOptionBackground = (
   <img

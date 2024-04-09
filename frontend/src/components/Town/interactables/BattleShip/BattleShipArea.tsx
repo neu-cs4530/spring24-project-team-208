@@ -92,22 +92,26 @@ export default function BattleShipArea({
       gameAreaController.removeListener('gameEnd', onGameEnd);
     };
   }, [townController, gameAreaController, toast]);
-  
+
   useEffect(() => {
-    const delay = 5000; 
+    const delay = 5000;
     const timeoutId = setTimeout(() => {
       setGameWon(false);
     }, delay);
 
-    return () => clearTimeout(timeoutId)
+    return () => clearTimeout(timeoutId);
   }, [gameWon]);
   return (
     <>
-      {gameWon 
-        ? <BattleshipEndScreen /> 
-        : gameStatus === 'WAITING_FOR_PLAYERS' || gameStatus === 'WAITING_TO_START' || gameStatus === 'OVER'
-          ? <BattleshipMenu gameAreaController={gameAreaController} interactableID={interactableID} />
-          : <BattleShipOwnBoard gameAreaController={gameAreaController} />}
+      {gameWon ? (
+        <BattleshipEndScreen />
+      ) : gameStatus === 'WAITING_FOR_PLAYERS' ||
+        gameStatus === 'WAITING_TO_START' ||
+        gameStatus === 'OVER' ? (
+        <BattleshipMenu gameAreaController={gameAreaController} interactableID={interactableID} />
+      ) : (
+        <BattleShipOwnBoard gameAreaController={gameAreaController} />
+      )}
     </>
   );
 }
