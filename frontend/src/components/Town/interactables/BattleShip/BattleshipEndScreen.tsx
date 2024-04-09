@@ -15,15 +15,27 @@ export default function BattleshipEndScreen() {
       <span
         style={{
           position: 'relative',
+          left: '17%',
         }}>
         {battleshipWinnerLogo}
       </span>
       <span
         style={{
           position: 'relative',
+          fontWeight: 'bold',
+          fontSize: '5rem',
+          left: '18%',
+          top: '7%',
+          color: 'gold',
+        }}>
+        YOU WIN!!!!
+      </span>
+      {/* <span
+        style={{
+          position: 'relative',
         }}>
           {newGameButton}
-      </span>
+      </span> */}
     </div>
   );
 }

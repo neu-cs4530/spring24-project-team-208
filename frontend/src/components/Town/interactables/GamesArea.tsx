@@ -153,9 +153,7 @@ export default function GameAreaWrapper(): JSX.Element {
             <ModalHeader>{gameArea.name}</ModalHeader>}
           {gameAreaController.toInteractableAreaModel().type !== 'BattleShipArea' &&
           <ModalCloseButton />}
-          <ModalBody>
-            <GameArea interactableID={gameArea.id} />
-          </ModalBody>
+          <GameArea interactableID={gameArea.id} />
         </ModalContent>
       </Modal>
     );

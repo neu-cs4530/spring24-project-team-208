@@ -56,6 +56,7 @@ export default function BattleShipArea({
   const townController = useTownController();
 
   const [gameStatus, setGameStatus] = useState<GameStatus>(gameAreaController.status);
+  const [gameWon, setGameWon] = useState<boolean>(false);
   const toast = useToast();
   useEffect(() => {
     const updateGameState = () => {
@@ -70,6 +71,7 @@ export default function BattleShipArea({
           status: 'info',
         });
       } else if (winner === townController.ourPlayer) {
+        setGameWon(true);
         toast({
           title: 'Game over',
           description: 'You won!',
@@ -90,11 +92,22 @@ export default function BattleShipArea({
       gameAreaController.removeListener('gameEnd', onGameEnd);
     };
   }, [townController, gameAreaController, toast]);
+  
+  useEffect(() => {
+    const delay = 5000; 
+    const timeoutId = setTimeout(() => {
+      setGameWon(false);
+    }, delay);
+
+    return () => clearTimeout(timeoutId)
+  }, [gameWon]);
   return (
     <>
-      {gameStatus === 'WAITING_FOR_PLAYERS' || gameStatus === 'WAITING_TO_START' || gameStatus === 'OVER'
-        ? <BattleshipMenu gameAreaController={gameAreaController} interactableID={interactableID} />
-        : <BattleShipOwnBoard gameAreaController={gameAreaController} />}
+      {gameWon 
+        ? <BattleshipEndScreen /> 
+        : gameStatus === 'WAITING_FOR_PLAYERS' || gameStatus === 'WAITING_TO_START' || gameStatus === 'OVER'
+          ? <BattleshipMenu gameAreaController={gameAreaController} interactableID={interactableID} />
+          : <BattleShipOwnBoard gameAreaController={gameAreaController} />}
     </>
   );
 }

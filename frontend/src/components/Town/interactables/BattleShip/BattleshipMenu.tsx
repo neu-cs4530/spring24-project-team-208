@@ -92,11 +92,11 @@ export default function BattleshipMenu({
           top: '18%',
           bottom: '2%',
         }}>
-          <div
+          {/* <div
             style={{
               display: 'flex',
               flexDirection: 'row',
-            }}>
+            }}> */}
             <div
               style={{
                 backgroundColor: '#1C1C1C',
@@ -104,23 +104,27 @@ export default function BattleshipMenu({
                 borderRadius: 10,
                 width: 288,
                 height: 46,
+                fontSize: '1.4rem',
+                paddingLeft: 10,
+                paddingTop: 4,
+                marginBottom: 10,
               }}>
               {green?.userName || ''}
             </div>
-            <div
+            {/* <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
               }}>
                 {greenReady ? readyButton : awaitingButton}
                 Ready?
-            </div>
-          </div>
-          <div
+            </div> */}
+          {/* </div> */}
+          {/* <div
             style={{
               display: 'flex',
               flexDirection: 'row',
-            }}>
+            }}> */}
             <div
               style={{
                 backgroundColor: '#1C1C1C',
@@ -128,18 +132,21 @@ export default function BattleshipMenu({
                 borderRadius: 10,
                 width: 288,
                 height: 46,
+                paddingLeft: 10,
+                paddingTop: 4,
+                fontSize: '1.4rem',
               }}>
                 {blue?.userName || ''}
             </div>
-            <div
+            {/* <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
               }}>
                 {blueReady ? readyButton : awaitingButton}
                 Ready?
-            </div>
-          </div>
+            </div> */}
+          {/* </div> */}
       </span>
       <div
         style={{

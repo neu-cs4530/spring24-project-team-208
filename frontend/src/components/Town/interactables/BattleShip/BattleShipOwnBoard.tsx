@@ -80,7 +80,6 @@ export default function BattleShipOwnBoard({
     gameAreaController.makeMove(chosenCell!.row, chosenCell!.col);
     setChosenCell(undefined);
   };
-  console.log(isOurTurn);
 
   useEffect(() => {
     const setIsOurTurnMini = () => {
@@ -152,6 +151,8 @@ export default function BattleShipOwnBoard({
         border: '3px solid black',
         borderRadius: '15px',
         padding: '10px',
+        position: 'absolute',
+        left: '-20%',
       }}>
       {isOpen && <CheatSheetNoteBookModal controller={gameAreaController} />}
       <div
