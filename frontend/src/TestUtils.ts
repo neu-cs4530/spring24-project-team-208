@@ -159,7 +159,7 @@ export async function mockTownControllerConnection(
       currentPlayers: [
         {
           id: ourUserID,
-          userName: testController.userName,
+          userName: testController.authToken,
           location: { moving: false, x: 0, y: 0, rotation: 'back' },
         },
       ],
