@@ -153,21 +153,14 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
       if (command.placement.gamePiece !== 'Blue' && command.placement.gamePiece !== 'Green') {
         throw new InvalidParametersError('Invalid game piece');
       }
-      if (command.placementType === 'Placement') {
-        game.placeBoat({
+      game.placeBoat(
+        {
           gameID: command.gameID,
           playerID: player.id,
           move: command.placement,
-        });
-      } else if (command.placementType === 'Removal') {
-        game.removeBoat({
-          gameID: command.gameID,
-          playerID: player.id,
-          move: command.placement,
-        });
-      } else {
-        throw new InvalidParametersError(INVALID_COMMAND_MESSAGE);
-      }
+        },
+        command.vertical,
+      );
       this._stateUpdated(game.toModel());
 
       return undefined as InteractableCommandReturnType<CommandType>;

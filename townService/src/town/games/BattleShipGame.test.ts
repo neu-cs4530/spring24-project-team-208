@@ -1,24 +1,20 @@
 import {
   BattleShipColIndex,
   BattleShipColor,
-  BattleShipPiece,
   BattleShipRowIndex,
-  Player,
 } from '../../types/CoveyTownSocket';
 import BattleShipGame from './BattleShipGame';
 import { createPlayerForTesting } from '../../TestUtils';
 import {
   GAME_FULL_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
-  BOARD_POSITION_NOT_VALID_MESSAGE,
   GAME_NOT_STARTABLE_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
+  INVALID_MOVE_MESSAGE,
 } from '../../lib/InvalidParametersError';
 
-const GAME_NOT_WAITING_TO_START_MESSAGE = 'Game is not in waiting to start mode';
 const NOT_YOUR_BOARD_MESSAGE = 'Not your board';
-const MAX_BOAT_PIECES = 18;
-
+const NOT_IN_PLACEMENT = 'Game is not in placement phase';
 /**
  * A helper function to apply a placement of moves to a game.
  * The pattern is a 2-d array of F, M, E, or _.
@@ -44,9 +40,10 @@ function createBoatPlacementsFromPattern(
   greenID: string,
 ) {
   type QueuedPlacement = {
-    boat: BattleShipPiece;
+    cell: any;
     rowIdx: BattleShipRowIndex;
     colIdx: BattleShipColIndex;
+    vertical: boolean;
   };
   const queues = {
     Board: [] as QueuedPlacement[],
@@ -55,88 +52,60 @@ function createBoatPlacementsFromPattern(
   // Construct the queues of moves to make from the board pattern
   pattern.forEach((row, rowIdx) => {
     row.forEach((col, colIdx) => {
-      if (col === 'F') {
-        queues.Board.push({
-          boat: 'Front' as BattleShipPiece,
-          rowIdx: rowIdx as BattleShipRowIndex,
-          colIdx: colIdx as BattleShipColIndex,
-        });
-      } else if (col === 'M') {
-        queues.Board.push({
-          boat: 'Middle' as BattleShipPiece,
-          rowIdx: rowIdx as BattleShipRowIndex,
-          colIdx: colIdx as BattleShipColIndex,
-        });
-      } else if (col === 'E') {
-        queues.Board.push({
-          boat: 'End' as BattleShipPiece,
-          rowIdx: rowIdx as BattleShipRowIndex,
-          colIdx: colIdx as BattleShipColIndex,
-        });
-      } else if (col !== '_') {
-        throw new Error(`Invalid pattern: ${pattern}, expecting 2-d array of F, M, E, or _`);
+      let boat = '';
+      switch (col.substring(0, 1)) {
+        case 'A': {
+          boat = 'Aircraft Carrier';
+          break;
+        }
+        case 'B': {
+          boat = 'Battleship';
+          break;
+        }
+        case 'S': {
+          boat = 'Submarine';
+          break;
+        }
+        case 'C': {
+          boat = 'Cruiser';
+          break;
+        }
+        case 'D': {
+          boat = 'Destroyer';
+          break;
+        }
+        default: {
+          return;
+        }
       }
+
+      queues.Board.push({
+        cell: boat,
+        rowIdx: rowIdx as BattleShipRowIndex,
+        colIdx: colIdx as BattleShipColIndex,
+        vertical: col.includes('V'),
+      });
     });
   });
 
   const queue = queues.Board;
   if (queue.length === 0) return;
   for (const move of queue) {
-    game.placeBoat({
-      gameID: game.id,
-      move: {
-        gamePiece,
-        boat: move.boat,
-        col: move.colIdx,
-        row: move.rowIdx,
+    game.placeBoat(
+      {
+        gameID: game.id,
+        move: {
+          gamePiece,
+          cell: move.cell,
+          col: move.colIdx,
+          row: move.rowIdx,
+        },
+        playerID: gamePiece === 'Blue' ? blueID : greenID,
       },
-      playerID: gamePiece === 'Blue' ? blueID : greenID,
-    });
+      move.vertical,
+    );
     queues.Board = queue.filter(m => m !== move);
   }
-}
-
-/**
- * A helper function that creates a placement of boat pieces for
- * both green and blue boards.
- */
-function createValidGame(game: BattleShipGame, blue: Player, green: Player) {
-  createBoatPlacementsFromPattern(
-    game,
-    'Blue',
-    [
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
-      ['_', 'F', 'M', 'M', 'M', 'E', '_', '_', '_', 'M'],
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
-      ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-      ['_', 'F', 'M', 'M', 'M', 'E', '_', 'M', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-    ],
-    blue.id,
-    green.id,
-  );
-  createBoatPlacementsFromPattern(
-    game,
-    'Green',
-    [
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
-      ['_', 'F', 'M', 'E', '_', 'F', 'E', '_', '_', 'M'],
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
-      ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-      ['_', 'F', 'M', 'M', 'M', 'E', '_', 'M', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-      ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-    ],
-    blue.id,
-    green.id,
-  );
 }
 
 describe('BattleShipGame', () => {
@@ -232,18 +201,15 @@ describe('BattleShipGame', () => {
         beforeEach(() => {
           game.join(blue);
           game.join(green);
-          createValidGame(game, blue, green);
-        });
-        test('if the player is blue, it sets the winner to green and status to OVER', () => {
           game.startGame(blue);
           game.startGame(green);
+        });
+        test('if the player is blue, it sets the winner to green and status to OVER', () => {
           game.leave(blue);
           expect(game.state.winner).toBe(green.id);
           expect(game.state.status).toBe('OVER');
         });
         test('if the player is green, it sets the winner to blue and status to OVER', () => {
-          game.startGame(blue);
-          game.startGame(green);
           game.leave(green);
           expect(game.state.winner).toBe(blue.id);
           expect(game.state.status).toBe('OVER');
@@ -254,7 +220,6 @@ describe('BattleShipGame', () => {
         const green = createPlayerForTesting();
         game.join(blue);
         game.join(green);
-        createValidGame(game, blue, green);
         game.startGame(blue);
         game.startGame(green);
         expect(game.state.green).toBe(green.id);
@@ -270,26 +235,7 @@ describe('BattleShipGame', () => {
         const green = createPlayerForTesting();
         test('if the player is blue, it sets blue to undefined and status to WAITING_FOR_PLAYERS', () => {
           game.join(blue);
-          expect(game.state.blueReady).toBeFalsy();
           game.join(green);
-          createBoatPlacementsFromPattern(
-            game,
-            'Blue',
-            [
-              ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
-              ['_', 'F', 'M', 'M', 'M', 'E', '_', '_', '_', 'M'],
-              ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
-              ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
-              ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-              ['_', 'F', 'M', 'M', 'M', 'E', '_', 'M', '_', '_'],
-              ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-              ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
-              ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-              ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-            ],
-            blue.id,
-            green.id,
-          );
           game.startGame(blue);
           expect(game.state.blueReady).toBeTruthy();
           game.leave(blue);
@@ -301,24 +247,6 @@ describe('BattleShipGame', () => {
           game.join(blue);
           game.join(green);
           expect(game.state.greenReady).toBeFalsy();
-          createBoatPlacementsFromPattern(
-            game,
-            'Green',
-            [
-              ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
-              ['_', 'F', 'M', 'E', '_', 'F', 'E', '_', '_', 'M'],
-              ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
-              ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
-              ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-              ['_', 'F', 'M', 'M', 'M', 'E', '_', 'M', '_', '_'],
-              ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-              ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
-              ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-              ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-            ],
-            blue.id,
-            green.id,
-          );
           game.startGame(green);
           expect(game.state.greenReady).toBeTruthy();
           game.leave(green);
@@ -393,39 +321,25 @@ describe('BattleShipGame', () => {
         PLAYER_NOT_IN_GAME_MESSAGE,
       );
     });
-    test('if no boat pieces in blue board when blue starts game, it throws an error', () => {
-      const blue = createPlayerForTesting();
-      const green = createPlayerForTesting();
-      game.join(blue);
-      game.join(green);
-      expect(game.state.status).toBe('WAITING_TO_START');
-      expect(() => game.startGame(blue)).toThrowError(GAME_NOT_STARTABLE_MESSAGE);
-    });
-    test('if no boat pieces in blue board when green starts game, it throws an error', () => {
-      const blue = createPlayerForTesting();
-      const green = createPlayerForTesting();
-      game.join(blue);
-      game.join(green);
-      expect(game.state.status).toBe('WAITING_TO_START');
-      expect(() => game.startGame(green)).toThrowError(GAME_NOT_STARTABLE_MESSAGE);
-    });
     test('if blue board has incorrect horizontal boats, it throws an error', () => {
       const blue = createPlayerForTesting();
       const green = createPlayerForTesting();
       game.join(blue);
       game.join(green);
+      game.startGame(blue);
+      game.startGame(green);
       createBoatPlacementsFromPattern(
         game,
         'Blue',
         [
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
-          ['_', 'F', 'M', 'M', 'M', '_', 'E', '_', '_', 'M'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
-          ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-          ['_', 'E', 'M', 'M', 'M', 'F', '_', 'M', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'SV'],
+          ['_', 'BH', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', 'AV', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', 'CH', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', 'DH', '_', '_', '_', '_', '_'],
           ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
           ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
         ],
@@ -439,208 +353,141 @@ describe('BattleShipGame', () => {
       const green = createPlayerForTesting();
       game.join(blue);
       game.join(green);
-      createBoatPlacementsFromPattern(
-        game,
-        'Green',
-        [
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
-          ['E', 'M', 'F', 'F', 'E', 'F', '_', '_', '_', 'M'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
-          ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-          ['_', 'F', 'M', 'M', 'E', '_', '_', 'M', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-        ],
-        blue.id,
-        green.id,
-      );
-      expect(game.state.greenBoard.length).toBe(18);
-      expect(() => game.startGame(green)).toThrowError(GAME_NOT_STARTABLE_MESSAGE);
+      game.startGame(blue);
+      game.startGame(green);
+      expect(() =>
+        createBoatPlacementsFromPattern(
+          game,
+          'Green',
+          [
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'SV'],
+            ['_', 'BH', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', 'AH', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', 'CH', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', 'DH', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ],
+          blue.id,
+          green.id,
+        ),
+      ).toThrowError();
     });
     test('if a horizontal and vertical boat invalidly intersect, should throw error', () => {
       const blue = createPlayerForTesting();
       const green = createPlayerForTesting();
       game.join(blue);
       game.join(green);
-      createBoatPlacementsFromPattern(
-        game,
-        'Blue',
-        [
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
-          ['_', 'F', 'M', 'M', 'M', 'E', '_', '_', '_', 'M'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', 'F', 'F'],
-          ['_', '_', '_', '_', '_', '_', '_', 'F', 'M', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'M', 'E', '_'],
-          ['_', 'F', 'M', 'M', 'M', '_', '_', 'E', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-        ],
-        blue.id,
-        green.id,
-      );
-
-      expect(() => game.startGame(blue)).toThrowError(GAME_NOT_STARTABLE_MESSAGE);
+      game.startGame(blue);
+      game.startGame(green);
+      expect(() =>
+        createBoatPlacementsFromPattern(
+          game,
+          'Blue',
+          [
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', 'BH', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', 'SV', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', 'AH', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', 'CH', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', 'DH', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ],
+          blue.id,
+          green.id,
+        ),
+      ).toThrowError();
     });
     test('if overlapping boats, it should not throw an error', () => {
       const blue = createPlayerForTesting();
       const green = createPlayerForTesting();
       game.join(blue);
       game.join(green);
+      game.startGame(blue);
+      game.startGame(green);
       createBoatPlacementsFromPattern(
         game,
         'Blue',
         [
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
-          ['_', 'F', 'M', 'M', 'M', 'E', '_', '_', '_', 'M'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', 'F', 'E'],
-          ['_', '_', '_', '_', '_', '_', '_', 'F', 'E', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-          ['_', 'F', 'M', 'M', 'M', 'E', '_', 'E', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'SV'],
+          ['_', 'BH', '_', '_', '_', '_', '_', '_', '_', '_'],
           ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', 'AV', '_', '_'],
           ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', 'CH', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', 'DH', '_', '_', '_', '_', '_'],
           ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
           ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
         ],
         blue.id,
         green.id,
       );
-      game.startGame(blue);
       expect(game.state.blueReady).toBe(true);
       expect(game.state.greenReady).toBeFalsy();
-      expect(game.state.status).toBe('WAITING_TO_START');
+      expect(game.state.status).toBe('PLACING_BOATS');
     });
     test('if blue board has incorrect vertical boats, it throws an error', () => {
       const blue = createPlayerForTesting();
       const green = createPlayerForTesting();
       game.join(blue);
       game.join(green);
-      createBoatPlacementsFromPattern(
-        game,
-        'Blue',
-        [
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
-          ['_', 'F', 'M', 'M', 'M', 'E', '_', '_', '_', 'M'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
-          ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-          ['_', 'F', 'M', 'M', 'M', 'E', '_', 'M', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-        ],
-        blue.id,
-        green.id,
-      );
-      expect(() => game.startGame(blue)).toThrowError(GAME_NOT_STARTABLE_MESSAGE);
+      game.startGame(blue);
+      game.startGame(green);
+      expect(() =>
+        createBoatPlacementsFromPattern(
+          game,
+          'Blue',
+          [
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', 'BH', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', 'AV', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', 'CH', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', 'DH', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'SV'],
+          ],
+          blue.id,
+          green.id,
+        ),
+      ).toThrowError(INVALID_MOVE_MESSAGE);
     });
     test('if green board has incorrect vertical boats, it throws an error', () => {
       const blue = createPlayerForTesting();
       const green = createPlayerForTesting();
       game.join(blue);
       game.join(green);
-      createBoatPlacementsFromPattern(
-        game,
-        'Green',
-        [
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
-          ['_', 'F', 'M', 'E', 'F', 'E', '_', '_', '_', 'M'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'M'],
-          ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'M', '_', 'E'],
-          ['_', 'F', 'M', 'M', 'M', 'E', '_', 'M', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-        ],
-        blue.id,
-        green.id,
-      );
-      expect(() => game.startGame(green)).toThrowError(GAME_NOT_STARTABLE_MESSAGE);
-    });
-    test('if blue board has incorrect vertical boats and repositions, does not throw error twice after fix', () => {
-      const blue = createPlayerForTesting();
-      const green = createPlayerForTesting();
-      game.join(blue);
-      game.join(green);
-      createBoatPlacementsFromPattern(
-        game,
-        'Blue',
-        [
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
-          ['_', 'F', 'M', 'M', 'M', 'E', '_', '_', '_', 'M'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
-          ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-          ['_', 'F', 'M', 'M', 'M', 'E', '_', 'M', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-        ],
-        blue.id,
-        green.id,
-      );
-      game.removeBoat({
-        gameID: game.id,
-        playerID: blue.id,
-        move: { gamePiece: 'Blue', boat: 'End', col: 7, row: 7 },
-      });
-      game.placeBoat({
-        gameID: game.id,
-        playerID: blue.id,
-        move: { gamePiece: 'Blue', boat: 'End', col: 7, row: 7 },
-      });
-
-      game.startGame(blue);
-      expect(game.state.blueReady).toBe(true);
-      expect(game.state.greenReady).toBeFalsy();
-      expect(game.state.status).toBe('WAITING_TO_START');
-    });
-    test('if green board has incorrect vertical boats and repositions, does not throw error twice after fix', () => {
-      const blue = createPlayerForTesting();
-      const green = createPlayerForTesting();
-      game.join(blue);
-      game.join(green);
-      createBoatPlacementsFromPattern(
-        game,
-        'Green',
-        [
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
-          ['_', 'F', 'M', 'M', 'M', 'E', '_', '_', '_', 'M'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
-          ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-          ['_', 'F', 'M', 'M', 'M', 'E', '_', 'M', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-        ],
-        blue.id,
-        green.id,
-      );
-      game.removeBoat({
-        gameID: game.id,
-        playerID: green.id,
-        move: { gamePiece: 'Green', boat: 'End', col: 7, row: 3 },
-      });
-      game.placeBoat({
-        gameID: game.id,
-        playerID: green.id,
-        move: { gamePiece: 'Green', boat: 'Front', col: 7, row: 3 },
-      });
-
       game.startGame(green);
-      expect(game.state.blueReady).toBeFalsy();
-      expect(game.state.greenReady).toBe(true);
-      expect(game.state.status).toBe('WAITING_TO_START');
+      game.startGame(blue);
+      expect(() =>
+        createBoatPlacementsFromPattern(
+          game,
+          'Green',
+          [
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', 'BH', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', 'AV', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', 'CH', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', 'DH', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', 'SV', '_'],
+          ],
+          blue.id,
+          green.id,
+        ),
+      ).toThrowError(INVALID_MOVE_MESSAGE);
     });
     describe('if the player is in the game', () => {
       const blue = createPlayerForTesting();
@@ -648,7 +495,6 @@ describe('BattleShipGame', () => {
       beforeEach(() => {
         game.join(blue);
         game.join(green);
-        createValidGame(game, blue, green);
       });
       test('if the player is blue, it sets blueReady to true', () => {
         game.startGame(blue);
@@ -662,12 +508,12 @@ describe('BattleShipGame', () => {
         expect(game.state.greenReady).toBe(true);
         expect(game.state.status).toBe('WAITING_TO_START');
       });
-      test('if both players are ready, it sets the status to IN_PROGRESS', () => {
+      test('if both players are ready, it sets the status to PLACING_BOATS', () => {
         game.startGame(blue);
         game.startGame(green);
-        expect(game.state.blueReady).toBe(true);
-        expect(game.state.greenReady).toBe(true);
-        expect(game.state.status).toBe('IN_PROGRESS');
+        expect(game.state.blueReady).toBe(false);
+        expect(game.state.greenReady).toBe(false);
+        expect(game.state.status).toBe('PLACING_BOATS');
       });
       test('if a player already reported ready, it does not change the status or throw an error', () => {
         game.startGame(blue);
@@ -678,217 +524,207 @@ describe('BattleShipGame', () => {
       });
     });
   });
-  describe('removeBoat', () => {
-    const blue = createPlayerForTesting();
-    const green = createPlayerForTesting();
-    beforeEach(() => {
-      game.join(blue);
-      game.join(green);
-    });
-    describe('when given a valid removal', () => {
-      it.each([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])(
-        'should remove boat placement from the game state in row/column %d and not throw an error for green board',
-        (idx: number) => {
-          game.placeBoat({
-            gameID: game.id,
-            playerID: green.id,
-            move: {
-              gamePiece: 'Green',
-              boat: 'Front',
-              col: idx as BattleShipColIndex,
-              row: idx as BattleShipRowIndex,
-            },
-          });
-          game.removeBoat({
-            gameID: game.id,
-            playerID: green.id,
-            move: {
-              gamePiece: 'Green',
-              boat: 'Front',
-              col: idx as BattleShipColIndex,
-              row: idx as BattleShipRowIndex,
-            },
-          });
-          expect(game.state.greenBoard.length).toEqual(0);
-        },
-      );
-      it('should remove boat placement from the game state in row 0 col 1 and not throw an error for blue board', () => {
-        game.placeBoat({
-          gameID: game.id,
-          playerID: blue.id,
-          move: { gamePiece: 'Blue', boat: 'Middle', col: 0, row: 1 },
-        });
-        game.removeBoat({
-          gameID: game.id,
-          playerID: blue.id,
-          move: { gamePiece: 'Blue', boat: 'Middle', col: 0, row: 1 },
-        });
-        expect(game.state.blueBoard.length).toEqual(0);
-      });
-      it.each(['Front' as BattleShipPiece, 'Middle' as BattleShipPiece, 'End' as BattleShipPiece])(
-        'should remove piece regardless of given boat type for removal for blue board',
-        (boatType: BattleShipPiece) => {
-          game.placeBoat({
-            gameID: game.id,
-            playerID: blue.id,
-            move: {
-              gamePiece: 'Blue',
-              boat: 'End',
-              col: 0,
-              row: 0,
-            },
-          });
-          game.removeBoat({
-            gameID: game.id,
-            playerID: blue.id,
-            move: {
-              gamePiece: 'Blue',
-              boat: boatType,
-              col: 0,
-              row: 0,
-            },
-          });
-          expect(game.state.blueBoard.length).toEqual(0);
-        },
-      );
-      it.each(['Front' as BattleShipPiece, 'Middle' as BattleShipPiece, 'End' as BattleShipPiece])(
-        'should remove piece regardless of given boat type for removal for green board',
-        (boatType: BattleShipPiece) => {
-          game.placeBoat({
-            gameID: game.id,
-            playerID: green.id,
-            move: {
-              gamePiece: 'Green',
-              boat: 'End',
-              col: 0,
-              row: 0,
-            },
-          });
-          game.removeBoat({
-            gameID: game.id,
-            playerID: green.id,
-            move: {
-              gamePiece: 'Green',
-              boat: boatType,
-              col: 0,
-              row: 0,
-            },
-          });
-          expect(game.state.greenBoard.length).toEqual(0);
-        },
-      );
-      it('should not throw an error if there is no boat in the requested removal space', () => {
-        game.removeBoat({
-          gameID: game.id,
-          playerID: blue.id,
-          move: { gamePiece: 'Blue', boat: 'Middle', col: 0, row: 0 },
-        });
-        expect(game.state.blueBoard.length).toEqual(0);
-      });
-    });
-  });
-  describe('when given an invlaid removal request', () => {
-    it('should throw an error if the game is not waiting to start', () => {
-      const player = createPlayerForTesting();
-      game.join(player);
+  //   describe('removeBoat', () => {
+  //     const blue = createPlayerForTesting();
+  //     const green = createPlayerForTesting();
+  //     beforeEach(() => {
+  //       game.join(blue);
+  //       game.join(green);
+  //     });
+  //     describe('when given a valid removal', () => {
+  //       it.each([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])(
+  //         'should remove boat placement from the game state in row/column %d and not throw an error for green board',
+  //         (idx: number) => {
+  //           game.placeBoat({
+  //             gameID: game.id,
+  //             playerID: green.id,
+  //             move: {
+  //               gamePiece: 'Green',
+  //               cell: 'Front',
+  //               col: idx as BattleShipColIndex,
+  //               row: idx as BattleShipRowIndex,
+  //             },
+  //           });
+  //           game.removeBoat({
+  //             gameID: game.id,
+  //             playerID: green.id,
+  //             move: {
+  //               gamePiece: 'Green',
+  //               cell: 'Front',
+  //               col: idx as BattleShipColIndex,
+  //               row: idx as BattleShipRowIndex,
+  //             },
+  //           });
+  //           expect(game.state.greenBoard.length).toEqual(0);
+  //         },
+  //       );
+  //       it('should remove boat placement from the game state in row 0 col 1 and not throw an error for blue board', () => {
+  //         game.placeBoat({
+  //           gameID: game.id,
+  //           playerID: blue.id,
+  //           move: { gamePiece: 'Blue', cell: 'Middle', col: 0, row: 1 },
+  //         });
+  //         game.removeBoat({
+  //           gameID: game.id,
+  //           playerID: blue.id,
+  //           move: { gamePiece: 'Blue', cell: 'Middle', col: 0, row: 1 },
+  //         });
+  //         expect(game.state.blueBoard.length).toEqual(0);
+  //       });
+  //       it.each(['Front' as BattleShipPiece, 'Middle' as BattleShipPiece, 'End' as BattleShipPiece])(
+  //         'should remove piece regardless of given boat type for removal for blue board',
+  //         (boatType: BattleShipPiece) => {
+  //           game.placeBoat({
+  //             gameID: game.id,
+  //             playerID: blue.id,
+  //             move: {
+  //               gamePiece: 'Blue',
+  //               cell: 'End',
+  //               col: 0,
+  //               row: 0,
+  //             },
+  //           });
+  //           game.removeBoat({
+  //             gameID: game.id,
+  //             playerID: blue.id,
+  //             move: {
+  //               gamePiece: 'Blue',
+  //               cell: boatType,
+  //               col: 0,
+  //               row: 0,
+  //             },
+  //           });
+  //           expect(game.state.blueBoard.length).toEqual(0);
+  //         },
+  //       );
+  //       it.each(['Front' as BattleShipPiece, 'Middle' as BattleShipPiece, 'End' as BattleShipPiece])(
+  //         'should remove piece regardless of given boat type for removal for green board',
+  //         (boatType: BattleShipPiece) => {
+  //           game.placeBoat({
+  //             gameID: game.id,
+  //             playerID: green.id,
+  //             move: {
+  //               gamePiece: 'Green',
+  //               cell: 'End',
+  //               col: 0,
+  //               row: 0,
+  //             },
+  //           });
+  //           game.removeBoat({
+  //             gameID: game.id,
+  //             playerID: green.id,
+  //             move: {
+  //               gamePiece: 'Green',
+  //               cell: boatType,
+  //               col: 0,
+  //               row: 0,
+  //             },
+  //           });
+  //           expect(game.state.greenBoard.length).toEqual(0);
+  //         },
+  //       );
+  //       it('should not throw an error if there is no boat in the requested removal space', () => {
+  //         game.removeBoat({
+  //           gameID: game.id,
+  //           playerID: blue.id,
+  //           move: { gamePiece: 'Blue', cell: 'Middle', col: 0, row: 0 },
+  //         });
+  //         expect(game.state.blueBoard.length).toEqual(0);
+  //       });
+  //     });
+  //   });
+  //   describe('when given an invlaid removal request', () => {
+  //     it('should throw an error if the game is not waiting to start', () => {
+  //       const player = createPlayerForTesting();
+  //       game.join(player);
 
-      expect(() =>
-        game.removeBoat({
-          gameID: game.id,
-          playerID: player.id,
-          move: { gamePiece: 'Blue', boat: 'End', col: 0, row: 0 },
-        }),
-      ).toThrowError(GAME_NOT_WAITING_TO_START_MESSAGE);
-    });
-    it('should throw an error if the player is not in game', () => {
-      const player = createPlayerForTesting();
-      const blue = createPlayerForTesting();
-      const green = createPlayerForTesting();
-      game.join(blue);
-      game.join(green);
+  //       expect(() =>
+  //         game.removeBoat({
+  //           gameID: game.id,
+  //           playerID: player.id,
+  //           move: { gamePiece: 'Blue', cell: 'End', col: 0, row: 0 },
+  //         }),
+  //       ).toThrowError(GAME_NOT_WAITING_TO_START_MESSAGE);
+  //     });
+  //     it('should throw an error if the player is not in game', () => {
+  //       const player = createPlayerForTesting();
+  //       const blue = createPlayerForTesting();
+  //       const green = createPlayerForTesting();
+  //       game.join(blue);
+  //       game.join(green);
 
-      expect(() =>
-        game.removeBoat({
-          gameID: game.id,
-          playerID: player.id,
-          move: { gamePiece: 'Blue', boat: 'End', col: 0, row: 0 },
-        }),
-      ).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
-    });
-    it('should throw an error if blue tries to remove a piece on the green board', () => {
-      const blue = createPlayerForTesting();
-      const green = createPlayerForTesting();
-      game.join(blue);
-      game.join(green);
+  //       expect(() =>
+  //         game.removeBoat({
+  //           gameID: game.id,
+  //           playerID: player.id,
+  //           move: { gamePiece: 'Blue', cell: 'End', col: 0, row: 0 },
+  //         }),
+  //       ).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
+  //     });
+  //     it('should throw an error if blue tries to remove a piece on the green board', () => {
+  //       const blue = createPlayerForTesting();
+  //       const green = createPlayerForTesting();
+  //       game.join(blue);
+  //       game.join(green);
 
-      expect(() =>
-        game.removeBoat({
-          gameID: game.id,
-          playerID: blue.id,
-          move: { gamePiece: 'Green', boat: 'End', col: 0, row: 0 },
-        }),
-      ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
-    });
-    it('should throw an error if green tries to remove a piece on the blue board', () => {
-      const blue = createPlayerForTesting();
-      const green = createPlayerForTesting();
-      game.join(blue);
-      game.join(green);
+  //       expect(() =>
+  //         game.removeBoat({
+  //           gameID: game.id,
+  //           playerID: blue.id,
+  //           move: { gamePiece: 'Green', cell: 'End', col: 0, row: 0 },
+  //         }),
+  //       ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
+  //     });
+  //     it('should throw an error if green tries to remove a piece on the blue board', () => {
+  //       const blue = createPlayerForTesting();
+  //       const green = createPlayerForTesting();
+  //       game.join(blue);
+  //       game.join(green);
 
-      expect(() =>
-        game.removeBoat({
-          gameID: game.id,
-          playerID: green.id,
-          move: { gamePiece: 'Blue', boat: 'End', col: 0, row: 0 },
-        }),
-      ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
-    });
-  });
+  //       expect(() =>
+  //         game.removeBoat({
+  //           gameID: game.id,
+  //           playerID: green.id,
+  //           move: { gamePiece: 'Blue', cell: 'End', col: 0, row: 0 },
+  //         }),
+  //       ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
+  //     });
+  //   });
   describe('placeBoat', () => {
     const blue = createPlayerForTesting();
     const green = createPlayerForTesting();
     beforeEach(() => {
       game.join(blue);
       game.join(green);
+      game.startGame(blue);
+      game.startGame(green);
     });
     describe('when given a valid move', () => {
-      it.each([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])(
-        'should add boat placement to the game state in row/column %d and not throw an error',
-        (idx: number) => {
-          game.placeBoat({
+      it('should place a boat piece in row 0 column 0 for blue board without error', () => {
+        game.placeBoat(
+          {
             gameID: game.id,
             playerID: blue.id,
             move: {
               gamePiece: 'Blue',
-              boat: 'End',
-              col: idx as BattleShipColIndex,
-              row: idx as BattleShipRowIndex,
+              cell: 'Battleship',
+              col: 0 as BattleShipColIndex,
+              row: 0 as BattleShipRowIndex,
             },
-          });
-          expect(game.state.blueBoard[0]).toEqual({
-            gamePiece: 'Blue',
-            boat: 'End',
-            col: idx as BattleShipRowIndex,
-            row: idx as BattleShipColIndex,
-          });
-        },
-      );
-      it('should place a boat piece in row 0 column 0 for green board without error', () => {
-        game.placeBoat({
-          gameID: game.id,
-          playerID: green.id,
-          move: {
-            gamePiece: 'Green',
-            boat: 'Middle',
-            col: 0,
-            row: 0,
           },
-        });
-        expect(game.state.greenBoard[0]).toEqual({
-          gamePiece: 'Green',
-          boat: 'Middle',
-          col: 0,
+          true,
+        );
+        expect(game.state.blueBoard[0]).toEqual({
+          type: 'Battleship_Back',
+          state: 'Safe',
           row: 0,
+          col: 0,
+        });
+        expect(game.state.blueBoard[4]).toEqual({
+          type: 'Ocean',
+          state: 'Safe',
+          row: 0,
+          col: 4,
         });
       });
       it('should place max boat pieces in game state without throwing an error for blue board', () => {
@@ -896,152 +732,162 @@ describe('BattleShipGame', () => {
           game,
           'Blue',
           [
-            ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
-            ['_', 'F', 'M', 'M', 'M', 'E', '_', '_', '_', 'M'],
-            ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
-            ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
-            ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-            ['_', 'F', 'M', 'M', 'M', 'E', '_', 'M', '_', '_'],
-            ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-            ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'CV'],
+            ['_', 'AH', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', 'BV', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', 'SH', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', 'DH', '_', '_', '_'],
             ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
             ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
           ],
           blue.id,
           green.id,
         );
-        expect(game.state.blueBoard.length).toEqual(MAX_BOAT_PIECES);
+        expect(game.state.blueBoard.length).toEqual(100);
       });
       it('should place max boat pieces in game state without throwing an error for green board', () => {
         createBoatPlacementsFromPattern(
           game,
           'Green',
           [
-            ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
-            ['_', 'F', 'M', 'M', 'M', 'E', '_', '_', '_', 'M'],
-            ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
-            ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
-            ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-            ['_', 'F', 'M', 'M', 'M', 'E', '_', 'M', '_', '_'],
-            ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-            ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'CV'],
+            ['_', 'AH', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', 'BV', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', 'SH', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', 'DH', '_', '_', '_'],
             ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
             ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
           ],
           blue.id,
           green.id,
         );
-        expect(game.state.greenBoard.length).toEqual(MAX_BOAT_PIECES);
+        expect(game.state.greenBoard.length).toEqual(100);
       });
-    });
-  });
-  describe('when given an invlaid placement request', () => {
-    it('should throw an error if the game is not waiting to start', () => {
-      const player = createPlayerForTesting();
-      game.join(player);
+      describe('when given an invalid placement request', () => {
+        beforeEach(() => {
+          game = new BattleShipGame();
+          game.join(blue);
+          game.join(green);
+        });
+        it('should throw an error if the player is not in game', () => {
+          const player = createPlayerForTesting();
+          game.startGame(blue);
+          game.startGame(green);
 
-      expect(() =>
-        game.placeBoat({
-          gameID: game.id,
-          playerID: player.id,
-          move: { gamePiece: 'Blue', boat: 'End', col: 0, row: 0 },
-        }),
-      ).toThrowError(GAME_NOT_WAITING_TO_START_MESSAGE);
-    });
-    it('should throw an error if the player is not in game', () => {
-      const player = createPlayerForTesting();
-      const blue = createPlayerForTesting();
-      const green = createPlayerForTesting();
-      game.join(blue);
-      game.join(green);
+          expect(() =>
+            game.placeBoat(
+              {
+                gameID: game.id,
+                playerID: player.id,
+                move: { gamePiece: 'Blue', cell: 'Battleship', col: 0, row: 0 },
+              },
+              true,
+            ),
+          ).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
+        });
+        it('should throw an error if the game is not in the placement phase', () => {
+          expect(() =>
+            game.placeBoat(
+              {
+                gameID: game.id,
+                playerID: green.id,
+                move: { gamePiece: 'Blue', cell: 'Battleship', col: 0, row: 0 },
+              },
+              true,
+            ),
+          ).toThrowError(NOT_IN_PLACEMENT);
+        });
+        it('should throw an error if blue tries to place a piece on the green board', () => {
+          game.startGame(blue);
+          game.startGame(green);
 
-      expect(() =>
-        game.placeBoat({
-          gameID: game.id,
-          playerID: player.id,
-          move: { gamePiece: 'Blue', boat: 'End', col: 0, row: 0 },
-        }),
-      ).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
-    });
-    it('should throw an error if blue tries to place a piece on the green board', () => {
-      const blue = createPlayerForTesting();
-      const green = createPlayerForTesting();
-      game.join(blue);
-      game.join(green);
+          expect(() =>
+            game.placeBoat(
+              {
+                gameID: game.id,
+                playerID: blue.id,
+                move: { gamePiece: 'Green', cell: 'Battleship', col: 0, row: 0 },
+              },
+              true,
+            ),
+          ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
+        });
+        it('should throw an error if green tries to place a piece on the blue board', () => {
+          game.startGame(blue);
+          game.startGame(green);
+          expect(() =>
+            game.placeBoat(
+              {
+                gameID: game.id,
+                playerID: green.id,
+                move: { gamePiece: 'Blue', cell: 'Battleship', col: 0, row: 0 },
+              },
+              true,
+            ),
+          ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
+        });
+        it('should throw an error if there is already a piece in the given position', () => {
+          game.startGame(blue);
+          game.startGame(green);
+          game.placeBoat(
+            {
+              gameID: game.id,
+              playerID: blue.id,
+              move: { gamePiece: 'Blue', cell: 'Battleship', col: 0, row: 0 },
+            },
+            true,
+          );
+          expect(() =>
+            game.placeBoat(
+              {
+                gameID: game.id,
+                playerID: blue.id,
+                move: { gamePiece: 'Blue', cell: 'Aircraft Carrier', col: 0, row: 0 },
+              },
+              false,
+            ),
+          ).toThrowError(INVALID_MOVE_MESSAGE);
+        });
+        it('should throw an error if max number of boats have been placed on the board', () => {
+          game.startGame(blue);
+          game.startGame(green);
+          createBoatPlacementsFromPattern(
+            game,
+            'Blue',
+            [
+              ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'CV'],
+              ['_', 'AH', '_', '_', '_', '_', '_', '_', '_', '_'],
+              ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+              ['_', 'BV', '_', '_', '_', '_', '_', '_', '_', '_'],
+              ['_', '_', '_', '_', '_', 'SH', '_', '_', '_', '_'],
+              ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+              ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+              ['_', '_', '_', '_', '_', '_', 'DH', '_', '_', '_'],
+              ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+              ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ],
+            blue.id,
+            green.id,
+          );
 
-      expect(() =>
-        game.placeBoat({
-          gameID: game.id,
-          playerID: blue.id,
-          move: { gamePiece: 'Green', boat: 'End', col: 0, row: 0 },
-        }),
-      ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
-    });
-    it('should throw an error if green tries to place a piece on the blue board', () => {
-      const blue = createPlayerForTesting();
-      const green = createPlayerForTesting();
-      game.join(blue);
-      game.join(green);
-
-      expect(() =>
-        game.placeBoat({
-          gameID: game.id,
-          playerID: green.id,
-          move: { gamePiece: 'Blue', boat: 'End', col: 0, row: 0 },
-        }),
-      ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
-    });
-    it('should throw an error if there is already a piece in the given position', () => {
-      const blue = createPlayerForTesting();
-      const green = createPlayerForTesting();
-      game.join(blue);
-      game.join(green);
-
-      game.placeBoat({
-        gameID: game.id,
-        playerID: blue.id,
-        move: { gamePiece: 'Blue', boat: 'End', col: 0, row: 0 },
+          expect(() =>
+            game.placeBoat(
+              {
+                gameID: game.id,
+                playerID: blue.id,
+                move: { gamePiece: 'Blue', cell: 'Battleship', col: 0, row: 0 },
+              },
+              true,
+            ),
+          ).toThrowError(INVALID_MOVE_MESSAGE);
+        });
       });
-      expect(() =>
-        game.placeBoat({
-          gameID: game.id,
-          playerID: blue.id,
-          move: { gamePiece: 'Blue', boat: 'End', col: 0, row: 0 },
-        }),
-      ).toThrowError(BOARD_POSITION_NOT_VALID_MESSAGE);
-    });
-    it('should throw an error if max number of boats have been placed on the board', () => {
-      const blue = createPlayerForTesting();
-      const green = createPlayerForTesting();
-      game.join(blue);
-      game.join(green);
-
-      createBoatPlacementsFromPattern(
-        game,
-        'Blue',
-        [
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'F'],
-          ['_', 'F', 'M', 'M', 'M', 'E', '_', '_', '_', 'M'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', 'E'],
-          ['_', '_', '_', '_', '_', '_', '_', 'F', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-          ['_', 'F', 'M', 'M', 'M', 'E', '_', 'M', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'M', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', 'E', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
-        ],
-        blue.id,
-        green.id,
-      );
-
-      expect(() =>
-        game.placeBoat({
-          gameID: game.id,
-          playerID: blue.id,
-          move: { gamePiece: 'Blue', boat: 'End', col: 0, row: 0 },
-        }),
-      ).toThrowError(BOARD_POSITION_NOT_VALID_MESSAGE);
     });
   });
 });

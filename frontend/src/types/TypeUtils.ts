@@ -5,6 +5,7 @@ import {
   ViewingArea,
   GameArea,
   ConnectFourGameState,
+  BattleShipGameState,
 } from './CoveyTownSocket';
 
 /**
@@ -30,4 +31,10 @@ export function isConnectFourArea(
   interactable: Interactable,
 ): interactable is GameArea<ConnectFourGameState> {
   return interactable.type === 'ConnectFourArea';
+}
+
+export function isBattleShipGameArea(
+  interactable: Interactable,
+): interactable is GameArea<BattleShipGameState> {
+  return interactable.type === 'BattleShipArea';
 }

@@ -27,11 +27,13 @@ import {
   ViewingArea as ViewingAreaModel,
 } from '../types/CoveyTownSocket';
 import {
+  isBattleShipGameArea,
   isConnectFourArea,
   isConversationArea,
   isTicTacToeArea,
   isViewingArea,
 } from '../types/TypeUtils';
+import BattleShipAreaController from './interactable/BattleShipAreaController';
 import ConnectFourAreaController from './interactable/ConnectFourAreaController';
 import ConversationAreaController from './interactable/ConversationAreaController';
 import GameAreaController, { GameEventTypes } from './interactable/GameAreaController';
@@ -630,6 +632,10 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
             this._interactableControllers.push(
               new ConnectFourAreaController(eachInteractable.id, eachInteractable, this),
             );
+          } else if (isBattleShipGameArea(eachInteractable)) {
+            this._interactableControllers.push(
+              new BattleShipAreaController(eachInteractable.id, eachInteractable, this),
+            );
           }
         });
         this._userID = initialData.userID;
@@ -775,6 +781,7 @@ export function useInteractableAreaController<T>(interactableAreaID: string): T 
   const interactableAreaController = townController.gameAreas.find(
     eachArea => eachArea.id == interactableAreaID,
   );
+  // console.log(townController.gameAreas)
   if (!interactableAreaController) {
     throw new Error(`Requested interactable area ${interactableAreaID} does not exist`);
   }
