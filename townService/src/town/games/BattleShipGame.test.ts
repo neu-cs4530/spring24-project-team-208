@@ -1,6 +1,7 @@
 import {
   BattleShipColIndex,
   BattleShipColor,
+  BattleShipGuess,
   BattleShipRowIndex,
 } from '../../types/CoveyTownSocket';
 import BattleShipGame from './BattleShipGame';
@@ -887,6 +888,94 @@ describe('BattleShipGame', () => {
             ),
           ).toThrowError(INVALID_MOVE_MESSAGE);
         });
+      });
+    });
+  });
+  describe('winning game', () => {
+    const blue = createPlayerForTesting();
+    const green = createPlayerForTesting();
+    beforeEach(() => {
+      game.join(blue);
+      game.join(green);
+      game.startGame(blue);
+      game.startGame(green);
+    });
+    describe('when given a winning move ', () => {
+      it('should should set a winning state', () => {
+        createBoatPlacementsFromPattern(
+          game,
+          'Blue',
+          [
+            ['BV', 'AV', 'SV', 'CV', 'DV', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ],
+          blue.id,
+          green.id,
+        );
+        createBoatPlacementsFromPattern(
+          game,
+          'Green',
+          [
+            ['BV', 'AV', 'SV', 'CV', 'DV', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ],
+          blue.id,
+          green.id,
+        );
+        for (let col = 0; col < 4; col++) {
+          for (let row = 4 - col; row >= 0; row--) {
+            const blueMove: BattleShipGuess = {
+              col: col as BattleShipColIndex,
+              row: row as BattleShipRowIndex,
+              gamePiece: 'Blue',
+            };
+            game.applyMove({
+              gameID: game.id,
+              playerID: blue.id,
+              move: blueMove,
+            });
+
+            const greenMove: BattleShipGuess = {
+              col: col as BattleShipColIndex,
+              row: row as BattleShipRowIndex,
+              gamePiece: 'Green',
+            };
+            game.applyMove({
+              gameID: game.id,
+              playerID: green.id,
+              move: greenMove,
+            });
+          }
+        }
+        const blueMove: BattleShipGuess = {
+          col: 4 as BattleShipColIndex,
+          row: 0 as BattleShipRowIndex,
+          gamePiece: 'Blue',
+        };
+        game.applyMove({
+          gameID: game.id,
+          playerID: blue.id,
+          move: blueMove,
+        });
+
+        expect(game.state.status).toEqual('OVER');
+        expect(game.state.winner).toEqual(blue.id);
       });
     });
   });
