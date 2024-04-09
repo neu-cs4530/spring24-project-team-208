@@ -35,36 +35,53 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
     return playerElo + 32 * (realScore - expectedScore);
   }
 
-  private async _updatePlayerStats(playerName: string, won: boolean, opponentName: string) {
-    try {
-      const playerDocRef = db.collection('battleship').doc(playerName);
-      const opponentDocRef = db.collection('battleship').doc(opponentName);
-      const playerDoc = await playerDocRef.get();
-      const opponentDoc = await opponentDocRef.get();
-      const playerData = playerDoc.data();
-      const opponentData = opponentDoc.data();
+  private _updatePlayerStats(
+    playerData: BattleShipDatabaseEntry,
+    won: boolean,
+    opponentData: BattleShipDatabaseEntry,
+    opponentName: string,
+  ): BattleShipDatabaseEntry {
+    const updatedData: BattleShipDatabaseEntry = {
+      wins: won ? playerData.wins + 1 : playerData.wins,
+      losses: won ? playerData.losses : playerData.losses + 1,
+      elo: this._updatedElo(playerData.elo, opponentData.elo, won),
+      history: [{ opponent: opponentName, result: won ? 'win' : 'loss' }, ...playerData.history],
+    };
+    return updatedData;
+  }
 
-      if (!playerData || !opponentData) {
+  private async _updateDatabase(blueName: string, greenName: string, winnerName: string) {
+    try {
+      const blueDocRef = db.collection('battleship').doc(blueName);
+      const greenDocRef = db.collection('battleship').doc(greenName);
+      const blueDoc = await blueDocRef.get();
+      const greenDoc = await greenDocRef.get();
+      const blueData = blueDoc.data();
+      const greenData = greenDoc.data();
+
+      if (!blueData || !greenData) {
         throw new Error(
           'A document in the database should have been made for the players when they joined the game',
         );
       }
-      const updatedData: BattleShipDatabaseEntry = {
-        wins: won ? playerData.wins + 1 : playerData.wins,
-        losses: won ? playerData.losses : playerData.losses + 1,
-        elo: this._updatedElo(playerData.elo, opponentData.elo, won),
-        history: [{ opponent: opponentName, result: won ? 'win' : 'loss' }, ...playerData.history],
-      };
+      const newBlueData = await this._updatePlayerStats(
+        blueData as BattleShipDatabaseEntry,
+        blueName === winnerName,
+        greenData as BattleShipDatabaseEntry,
+        greenName,
+      );
+      const newGreenData = await this._updatePlayerStats(
+        greenData as BattleShipDatabaseEntry,
+        greenName === winnerName,
+        blueData as BattleShipDatabaseEntry,
+        blueName,
+      );
 
-      playerDocRef.set(updatedData);
+      blueDocRef.set(newBlueData);
+      greenDocRef.set(newGreenData);
     } catch (error) {
       throw new Error(`Error updating player stats: ${error}`);
     }
-  }
-
-  private async _updateDatabase(blueName: string, greenName: string, winner: string) {
-    await this._updatePlayerStats(blueName, winner === blueName, greenName);
-    await this._updatePlayerStats(greenName, winner === greenName, blueName);
   }
 
   private async _stateUpdated(updatedState: GameInstance<BattleShipGameState>) {
@@ -78,6 +95,7 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
             this._occupants.find(eachPlayer => eachPlayer.id === blue)?.userName || blue;
           const greenName =
             this._occupants.find(eachPlayer => eachPlayer.id === green)?.userName || green;
+          const winnerName = blue === winner ? blueName : greenName;
           this._history.push({
             gameID,
             scores: {
@@ -86,7 +104,7 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
             },
           });
           this._emitAreaChanged();
-          await this._updateDatabase(blueName, greenName, winner);
+          await this._updateDatabase(blueName, greenName, winnerName);
         } else {
           throw new Error('Game is over, but the game state is not properly set.');
         }
