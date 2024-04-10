@@ -1,7 +1,7 @@
 import React from 'react';
 import BattleShipAreaController from '../../../../../classes/interactable/BattleShipAreaController';
 import useTownController from '../../../../../hooks/useTownController';
-import { BattleShipCell, BattleshipBoatPiece } from '../../../../../types/CoveyTownSocket';
+import { BattleShipCell, BattleShipBoatPiece } from '../../../../../types/CoveyTownSocket';
 import { awaitingButton, readyButton } from '../BattleshipMenuSprites';
 
 function validChosenCellPlacement(cell: BattleShipCell) {
@@ -19,7 +19,7 @@ export default function ButtonStatus({
 }: {
   controller: BattleShipAreaController;
   chosenCell?: BattleShipCell;
-  chosenBoat?: BattleshipBoatPiece;
+  chosenBoat?: BattleShipBoatPiece;
 }) {
   const townController = useTownController();
   const inPlacementPhase = controller.status === 'PLACING_BOATS';

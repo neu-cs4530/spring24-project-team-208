@@ -182,7 +182,14 @@ export interface BattleShipGameState extends WinnableGameState {
   greenReady?: boolean;
   // The color of the player who will make the first move
   firstPlayer: BattleShipColor;
+  // The theme of all battleship pieces on the board
+  theme: BattleShipTheme;
 }
+
+/**
+ * 
+ */
+export type BattleshipTheme = 'Barbie' | 'Military';
 
 /**
  * Type for a move in BattleShip
@@ -208,7 +215,7 @@ export interface BattleShipGuess {
  */
 export interface BattleShipPlacement { 
   gamePiece: BattleShipColor;
-  cell: BattleshipBoatPiece | BattleshipBoat;
+  cell: BattleShipBoatPiece | BattleshipBoat;
   col: BattleShipColIndex;
   row: BattleShipRowIndex;
 }
@@ -232,26 +239,53 @@ export type BattleShipColor = 'Blue' | 'Green';
 
 
 export type BattleshipBoat = "Battleship" | "Aircraft Carrier" | "Submarine" | "Cruiser" | "Destroyer";
+
 /**
- * Each possible individual section of a boat
+ * Every type of individual boat piece
+ */
+export type BattleShipBoatPiece = MilitaryBoatPiece | BarbieBoatPiece
+
+/**
+ * Each possible individual section of a boat in the military theme
  * Full boats should start with a 'Back' piece and end with a 'Front' piece
  */
-export type BattleshipBoatPiece = 
-    "Aircraft_Back" 
-  | "Aircraft_Middle_1"
-  | "Aircraft_Middle_2"
-  | "Aircraft_Front"
-  | "Battleship_Back"
-  | "Battleship_Middle_1"
-  | "Battleship_Middle_2"
-  | "Battleship_Middle_3"
-  | "Battleship_Front"
-  | "Cruiser_Back"
-  | "Cruiser_Front"
-  | "Destroyer"
-  | "Submarine_Back"
-  | "Submarine_Middle"
-  | "Submarine_Front";
+export type MilitaryBoatPiece = 
+    "Aircraft_Back_Military" 
+  | "Aircraft_Middle_1_Military"
+  | "Aircraft_Middle_2_Military"
+  | "Aircraft_Front_Military"
+  | "Battleship_Back_Military"
+  | "Battleship_Middle_1_Military"
+  | "Battleship_Middle_2_Military"
+  | "Battleship_Middle_3_Military"
+  | "Battleship_Front_Military"
+  | "Cruiser_Back_Military"
+  | "Cruiser_Front_Military"
+  | "Destroyer_Military"
+  | "Submarine_Back_Military"
+  | "Submarine_Middle_Military"
+  | "Submarine_Front_Military";
+
+  /**
+   * Each possible individual section of a boat in the Barbie theme
+   * Full boats should start with a 'Back' piece and end with a 'Front' piece
+   */
+  export type BarbieBoatPiece = 
+    "Aircraft_Back_Barbie" 
+  | "Aircraft_Middle_1_Barbie"
+  | "Aircraft_Middle_2_Barbie"
+  | "Aircraft_Front_Barbie"
+  | "Battleship_Back_Barbie"
+  | "Battleship_Middle_1_Barbie"
+  | "Battleship_Middle_2_Barbie"
+  | "Battleship_Middle_3_Barbie"
+  | "Battleship_Front_Barbie"
+  | "Cruiser_Back_Barbie"
+  | "Cruiser_Front_Barbie"
+  | "Destroyer_Barbie"
+  | "Submarine_Back_Barbie"
+  | "Submarine_Middle_Barbie"
+  | "Submarine_Front_Barbie";
 
 /**
  * Whether or not a cell has been guessed or not, 'Hit' if guessed and 'Safe' if not
@@ -329,7 +363,7 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<BattleShipGuess> | SetUpGameMove | StartGameCommand | LeaveGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<BattleShipGuess> | ChangeTheme | SetUpGameMove | StartGameCommand | LeaveGameCommand;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;
@@ -356,6 +390,10 @@ export interface SetUpGameMove {
   placement: BattleShipPlacement; // TODO can be generalized to any game in future
   vertical: boolean; // orientation of the boat
   // placementType: 'Placement' | 'Removal';
+}
+export interface ChangeTheme {
+  type: 'ChangeTheme';
+  theme: string;
 }
 export type InteractableCommandReturnType<CommandType extends InteractableCommand> = 
   CommandType extends JoinGameCommand ? { gameID: string}:
@@ -388,4 +426,16 @@ export interface ClientToServerEvents {
   playerMovement: (movementData: PlayerLocation) => void;
   interactableUpdate: (update: Interactable) => void;
   interactableCommand: (command: InteractableCommand & InteractableCommandBase) => void;
+}
+
+export type BattleShipGameOutcome = {
+  opponent: string;
+  result: 'win' | 'loss';
+}
+
+export type BattleShipDatabaseEntry = {
+  wins: number;
+  losses: number;
+  elo: number;
+  history: BattleShipGameOutcome[];
 }

@@ -10,8 +10,16 @@ import { smallNotebook } from '../BattleshipMenuSprites';
 // }
 
 export function CheatSheetNoteBookSmall({ openModal }: { openModal: any }) {
+  const handleClick = () => {
+    openModal();
+  };
   return (
-    <span className='green_shadow' onClick={() => openModal}>
+    <span
+      className='green_shadow'
+      onClick={handleClick}
+      style={{
+        cursor: 'pointer',
+      }}>
       {smallNotebook}
     </span>
   );

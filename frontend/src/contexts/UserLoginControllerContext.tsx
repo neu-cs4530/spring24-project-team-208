@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserController } from '../classes/UserController';
+import UserController from '../classes/UserController';
 import { UsersService } from '../generated/client';
 
 export type UserLoginController = {

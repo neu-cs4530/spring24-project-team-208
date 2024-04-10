@@ -40,6 +40,7 @@ jest.mock('socket.io-client', () => {
 describe('TownController', () => {
   let mockTownLoginController: MockProxy<TownLoginController>;
   let userName: string;
+  let authToken: string;
   let townID: string;
   beforeAll(() => {
     mockTownLoginController = mock<TownLoginController>();
@@ -82,10 +83,10 @@ describe('TownController', () => {
 
   beforeEach(() => {
     mockClear(mockSocket);
-    userName = nanoid();
+    authToken = nanoid();
     townID = nanoid();
     testController = new TownController({
-      userName,
+      authToken,
       townID,
       townLoginController: mockTownLoginController,
     });

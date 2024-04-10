@@ -1,6 +1,9 @@
 import {
+  BattleshipBoat,
+  BattleShipBoatPiece,
   BattleShipColIndex,
   BattleShipColor,
+  BattleShipGuess,
   BattleShipRowIndex,
 } from '../../types/CoveyTownSocket';
 import BattleShipGame from './BattleShipGame';
@@ -11,6 +14,8 @@ import {
   GAME_NOT_STARTABLE_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
   INVALID_MOVE_MESSAGE,
+  MOVE_NOT_YOUR_TURN_MESSAGE,
+  GAME_NOT_IN_PROGRESS_MESSAGE,
 } from '../../lib/InvalidParametersError';
 
 const NOT_YOUR_BOARD_MESSAGE = 'Not your board';
@@ -40,7 +45,7 @@ function createBoatPlacementsFromPattern(
   greenID: string,
 ) {
   type QueuedPlacement = {
-    cell: any;
+    cell: BattleShipBoatPiece | BattleshipBoat;
     rowIdx: BattleShipRowIndex;
     colIdx: BattleShipColIndex;
     vertical: boolean;
@@ -80,7 +85,7 @@ function createBoatPlacementsFromPattern(
       }
 
       queues.Board.push({
-        cell: boat,
+        cell: boat as BattleShipBoatPiece,
         rowIdx: rowIdx as BattleShipRowIndex,
         colIdx: colIdx as BattleShipColIndex,
         vertical: col.includes('V'),
@@ -194,7 +199,6 @@ describe('BattleShipGame', () => {
       expect(() => game.leave(createPlayerForTesting())).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
     });
     describe('when the player is in the game', () => {
-      // NOTE: Below tests are meant to pass but currently fail because startGame not implemented yet
       describe('when the game is in progress', () => {
         const blue = createPlayerForTesting();
         const green = createPlayerForTesting();
@@ -374,7 +378,7 @@ describe('BattleShipGame', () => {
           blue.id,
           green.id,
         ),
-      ).toThrowError();
+      ).toThrowError(INVALID_MOVE_MESSAGE);
     });
     test('if a horizontal and vertical boat invalidly intersect, should throw error', () => {
       const blue = createPlayerForTesting();
@@ -402,7 +406,35 @@ describe('BattleShipGame', () => {
           blue.id,
           green.id,
         ),
-      ).toThrowError();
+      ).toThrowError(INVALID_MOVE_MESSAGE);
+    });
+    test('if two vertical boats invalidly intersect, should throw error', () => {
+      const blue = createPlayerForTesting();
+      const green = createPlayerForTesting();
+      game.join(blue);
+      game.join(green);
+      game.startGame(blue);
+      game.startGame(green);
+      expect(() =>
+        createBoatPlacementsFromPattern(
+          game,
+          'Blue',
+          [
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', 'AV', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', 'SV', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ],
+          blue.id,
+          green.id,
+        ),
+      ).toThrowError(INVALID_MOVE_MESSAGE);
     });
     test('if overlapping boats, it should not throw an error', () => {
       const blue = createPlayerForTesting();
@@ -524,172 +556,169 @@ describe('BattleShipGame', () => {
       });
     });
   });
-  //   describe('removeBoat', () => {
-  //     const blue = createPlayerForTesting();
-  //     const green = createPlayerForTesting();
-  //     beforeEach(() => {
-  //       game.join(blue);
-  //       game.join(green);
-  //     });
-  //     describe('when given a valid removal', () => {
-  //       it.each([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])(
-  //         'should remove boat placement from the game state in row/column %d and not throw an error for green board',
-  //         (idx: number) => {
-  //           game.placeBoat({
-  //             gameID: game.id,
-  //             playerID: green.id,
-  //             move: {
-  //               gamePiece: 'Green',
-  //               cell: 'Front',
-  //               col: idx as BattleShipColIndex,
-  //               row: idx as BattleShipRowIndex,
-  //             },
-  //           });
-  //           game.removeBoat({
-  //             gameID: game.id,
-  //             playerID: green.id,
-  //             move: {
-  //               gamePiece: 'Green',
-  //               cell: 'Front',
-  //               col: idx as BattleShipColIndex,
-  //               row: idx as BattleShipRowIndex,
-  //             },
-  //           });
-  //           expect(game.state.greenBoard.length).toEqual(0);
-  //         },
-  //       );
-  //       it('should remove boat placement from the game state in row 0 col 1 and not throw an error for blue board', () => {
-  //         game.placeBoat({
-  //           gameID: game.id,
-  //           playerID: blue.id,
-  //           move: { gamePiece: 'Blue', cell: 'Middle', col: 0, row: 1 },
-  //         });
-  //         game.removeBoat({
-  //           gameID: game.id,
-  //           playerID: blue.id,
-  //           move: { gamePiece: 'Blue', cell: 'Middle', col: 0, row: 1 },
-  //         });
-  //         expect(game.state.blueBoard.length).toEqual(0);
-  //       });
-  //       it.each(['Front' as BattleShipPiece, 'Middle' as BattleShipPiece, 'End' as BattleShipPiece])(
-  //         'should remove piece regardless of given boat type for removal for blue board',
-  //         (boatType: BattleShipPiece) => {
-  //           game.placeBoat({
-  //             gameID: game.id,
-  //             playerID: blue.id,
-  //             move: {
-  //               gamePiece: 'Blue',
-  //               cell: 'End',
-  //               col: 0,
-  //               row: 0,
-  //             },
-  //           });
-  //           game.removeBoat({
-  //             gameID: game.id,
-  //             playerID: blue.id,
-  //             move: {
-  //               gamePiece: 'Blue',
-  //               cell: boatType,
-  //               col: 0,
-  //               row: 0,
-  //             },
-  //           });
-  //           expect(game.state.blueBoard.length).toEqual(0);
-  //         },
-  //       );
-  //       it.each(['Front' as BattleShipPiece, 'Middle' as BattleShipPiece, 'End' as BattleShipPiece])(
-  //         'should remove piece regardless of given boat type for removal for green board',
-  //         (boatType: BattleShipPiece) => {
-  //           game.placeBoat({
-  //             gameID: game.id,
-  //             playerID: green.id,
-  //             move: {
-  //               gamePiece: 'Green',
-  //               cell: 'End',
-  //               col: 0,
-  //               row: 0,
-  //             },
-  //           });
-  //           game.removeBoat({
-  //             gameID: game.id,
-  //             playerID: green.id,
-  //             move: {
-  //               gamePiece: 'Green',
-  //               cell: boatType,
-  //               col: 0,
-  //               row: 0,
-  //             },
-  //           });
-  //           expect(game.state.greenBoard.length).toEqual(0);
-  //         },
-  //       );
-  //       it('should not throw an error if there is no boat in the requested removal space', () => {
-  //         game.removeBoat({
-  //           gameID: game.id,
-  //           playerID: blue.id,
-  //           move: { gamePiece: 'Blue', cell: 'Middle', col: 0, row: 0 },
-  //         });
-  //         expect(game.state.blueBoard.length).toEqual(0);
-  //       });
-  //     });
-  //   });
-  //   describe('when given an invlaid removal request', () => {
-  //     it('should throw an error if the game is not waiting to start', () => {
-  //       const player = createPlayerForTesting();
-  //       game.join(player);
+  describe('removeBoat', () => {
+    const blue = createPlayerForTesting();
+    const green = createPlayerForTesting();
+    beforeEach(() => {
+      game.join(blue);
+      game.join(green);
+      game.startGame(blue);
+      game.startGame(green);
+    });
+    describe('when given a valid removal', () => {
+      it('should remove boat placement from the game state in row 0 col 1 and not throw an error for green board', () => {
+        game.placeBoat(
+          {
+            gameID: game.id,
+            playerID: green.id,
+            move: { gamePiece: 'Green', cell: 'Cruiser_Front_Military', col: 1, row: 0 },
+          },
+          false,
+        );
+        game.removeBoat({
+          gameID: game.id,
+          playerID: green.id,
+          move: { gamePiece: 'Green', cell: 'Cruiser_Front_Military', col: 1, row: 0 },
+        });
+        expect(game.state.greenBoard[1]).toEqual({
+          type: 'Ocean',
+          state: 'Safe',
+          row: 0,
+          col: 1,
+        });
+      });
+      it('should remove boat placement from the game state in row 0 col 1 and not throw an error for blue board', () => {
+        game.placeBoat(
+          {
+            gameID: game.id,
+            playerID: blue.id,
+            move: { gamePiece: 'Blue', cell: 'Cruiser_Front_Military', col: 1, row: 0 },
+          },
+          false,
+        );
+        game.removeBoat({
+          gameID: game.id,
+          playerID: blue.id,
+          move: { gamePiece: 'Blue', cell: 'Cruiser_Front_Military', col: 1, row: 0 },
+        });
+        expect(game.state.greenBoard[1]).toEqual({
+          type: 'Ocean',
+          state: 'Safe',
+          row: 0,
+          col: 1,
+        });
+      });
+      it('should remove piece regardless of given boat type for removal for blue board', () => {
+        game.placeBoat(
+          {
+            gameID: game.id,
+            playerID: blue.id,
+            move: {
+              gamePiece: 'Blue',
+              cell: 'Aircraft_Middle_1_Military',
+              col: 0,
+              row: 0,
+            },
+          },
+          false,
+        );
+        game.removeBoat({
+          gameID: game.id,
+          playerID: blue.id,
+          move: {
+            gamePiece: 'Blue',
+            cell: 'Battleship_Middle_2_Military',
+            col: 0,
+            row: 0,
+          },
+        });
+        expect(game.state.greenBoard[0]).toEqual({
+          type: 'Ocean',
+          state: 'Safe',
+          row: 0,
+          col: 0,
+        });
+      });
+      it('should remove piece regardless of given boat type for removal for green board', () => {
+        game.placeBoat(
+          {
+            gameID: game.id,
+            playerID: blue.id,
+            move: {
+              gamePiece: 'Blue',
+              cell: 'Battleship',
+              col: 0 as BattleShipColIndex,
+              row: 0 as BattleShipRowIndex,
+            },
+          },
+          true,
+        );
+        game.removeBoat({
+          gameID: game.id,
+          playerID: green.id,
+          move: {
+            gamePiece: 'Green',
+            cell: 'Battleship',
+            col: 0,
+            row: 0,
+          },
+        });
+        expect(game.state.greenBoard[0]).toEqual({
+          type: 'Ocean',
+          state: 'Safe',
+          row: 0,
+          col: 0,
+        });
+      });
+      it('should not throw an error if there is no boat in the requested removal space', () => {
+        game.removeBoat({
+          gameID: game.id,
+          playerID: blue.id,
+          move: { gamePiece: 'Blue', cell: 'Battleship', col: 0, row: 0 },
+        });
+        expect(game.state.blueBoard.length).toBeGreaterThan(0);
+      });
+    });
+  });
+  describe('when given an invlaid removal request', () => {
+    const blue = createPlayerForTesting();
+    const green = createPlayerForTesting();
+    beforeEach(() => {
+      game.join(blue);
+      game.join(green);
+      game.startGame(blue);
+      game.startGame(green);
+    });
+    it('should throw an error if the player is not in game', () => {
+      const player = createPlayerForTesting();
 
-  //       expect(() =>
-  //         game.removeBoat({
-  //           gameID: game.id,
-  //           playerID: player.id,
-  //           move: { gamePiece: 'Blue', cell: 'End', col: 0, row: 0 },
-  //         }),
-  //       ).toThrowError(GAME_NOT_WAITING_TO_START_MESSAGE);
-  //     });
-  //     it('should throw an error if the player is not in game', () => {
-  //       const player = createPlayerForTesting();
-  //       const blue = createPlayerForTesting();
-  //       const green = createPlayerForTesting();
-  //       game.join(blue);
-  //       game.join(green);
-
-  //       expect(() =>
-  //         game.removeBoat({
-  //           gameID: game.id,
-  //           playerID: player.id,
-  //           move: { gamePiece: 'Blue', cell: 'End', col: 0, row: 0 },
-  //         }),
-  //       ).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
-  //     });
-  //     it('should throw an error if blue tries to remove a piece on the green board', () => {
-  //       const blue = createPlayerForTesting();
-  //       const green = createPlayerForTesting();
-  //       game.join(blue);
-  //       game.join(green);
-
-  //       expect(() =>
-  //         game.removeBoat({
-  //           gameID: game.id,
-  //           playerID: blue.id,
-  //           move: { gamePiece: 'Green', cell: 'End', col: 0, row: 0 },
-  //         }),
-  //       ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
-  //     });
-  //     it('should throw an error if green tries to remove a piece on the blue board', () => {
-  //       const blue = createPlayerForTesting();
-  //       const green = createPlayerForTesting();
-  //       game.join(blue);
-  //       game.join(green);
-
-  //       expect(() =>
-  //         game.removeBoat({
-  //           gameID: game.id,
-  //           playerID: green.id,
-  //           move: { gamePiece: 'Blue', cell: 'End', col: 0, row: 0 },
-  //         }),
-  //       ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
-  //     });
-  //   });
+      expect(() =>
+        game.removeBoat({
+          gameID: game.id,
+          playerID: player.id,
+          move: { gamePiece: 'Blue', cell: 'Battleship', col: 0, row: 0 },
+        }),
+      ).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
+    });
+    it('should throw an error if blue tries to remove a piece on the green board', () => {
+      expect(() =>
+        game.removeBoat({
+          gameID: game.id,
+          playerID: blue.id,
+          move: { gamePiece: 'Green', cell: 'Aircraft Carrier', col: 0, row: 0 },
+        }),
+      ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
+    });
+    it('should throw an error if green tries to remove a piece on the blue board', () => {
+      expect(() =>
+        game.removeBoat({
+          gameID: game.id,
+          playerID: green.id,
+          move: { gamePiece: 'Blue', cell: 'Battleship_Middle_3_Military', col: 0, row: 0 },
+        }),
+      ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
+    });
+  });
   describe('placeBoat', () => {
     const blue = createPlayerForTesting();
     const green = createPlayerForTesting();
@@ -715,7 +744,7 @@ describe('BattleShipGame', () => {
           true,
         );
         expect(game.state.blueBoard[0]).toEqual({
-          type: 'Battleship_Back',
+          type: 'Battleship_Back_Military',
           state: 'Safe',
           row: 0,
           col: 0,
@@ -887,6 +916,464 @@ describe('BattleShipGame', () => {
             ),
           ).toThrowError(INVALID_MOVE_MESSAGE);
         });
+      });
+    });
+  });
+  describe('making moves', () => {
+    const blue = createPlayerForTesting();
+    const green = createPlayerForTesting();
+    beforeEach(() => {
+      game.join(blue);
+      game.join(green);
+      game.startGame(blue);
+      game.startGame(green);
+    });
+    it("should throw an error if a player tries to make a move when it's not their turn", () => {
+      createBoatPlacementsFromPattern(
+        game,
+        'Green',
+        [
+          ['BV', 'AV', 'SV', 'CV', 'DV', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+        ],
+        blue.id,
+        green.id,
+      );
+      createBoatPlacementsFromPattern(
+        game,
+        'Blue',
+        [
+          ['BV', 'AV', 'SV', 'CV', 'DV', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+        ],
+        blue.id,
+        green.id,
+      );
+      const greenMove: BattleShipGuess = {
+        col: 4 as BattleShipColIndex,
+        row: 0 as BattleShipRowIndex,
+        gamePiece: 'Green',
+      };
+
+      expect(() =>
+        game.applyMove({
+          gameID: game.id,
+          playerID: green.id,
+          move: greenMove,
+        }),
+      ).toThrowError(MOVE_NOT_YOUR_TURN_MESSAGE);
+    });
+    it('should throw an error if a player tries to make a move when the game is not in progress', () => {
+      const greenMove: BattleShipGuess = {
+        col: 4 as BattleShipColIndex,
+        row: 0 as BattleShipRowIndex,
+        gamePiece: 'Green',
+      };
+
+      expect(() =>
+        game.applyMove({
+          gameID: game.id,
+          playerID: green.id,
+          move: greenMove,
+        }),
+      ).toThrowError(GAME_NOT_IN_PROGRESS_MESSAGE);
+    });
+    it('should throw an error if a player tries to make a move when they are not in the game', () => {
+      createBoatPlacementsFromPattern(
+        game,
+        'Green',
+        [
+          ['BV', 'AV', 'SV', 'CV', 'DV', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+        ],
+        blue.id,
+        green.id,
+      );
+      createBoatPlacementsFromPattern(
+        game,
+        'Blue',
+        [
+          ['BV', 'AV', 'SV', 'CV', 'DV', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+        ],
+        blue.id,
+        green.id,
+      );
+      const newPlayer = createPlayerForTesting();
+      const invalidMove: BattleShipGuess = {
+        col: 4 as BattleShipColIndex,
+        row: 0 as BattleShipRowIndex,
+        gamePiece: 'Green',
+      };
+
+      expect(() =>
+        game.applyMove({
+          gameID: game.id,
+          playerID: newPlayer.id,
+          move: invalidMove,
+        }),
+      ).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
+    });
+    describe('when given a winning move ', () => {
+      it('should should set a winning state for blue if blue is the first player', () => {
+        createBoatPlacementsFromPattern(
+          game,
+          'Blue',
+          [
+            ['BV', 'AV', 'SV', 'CV', 'DV', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ],
+          blue.id,
+          green.id,
+        );
+        createBoatPlacementsFromPattern(
+          game,
+          'Green',
+          [
+            ['BV', 'AV', 'SV', 'CV', 'DV', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ],
+          blue.id,
+          green.id,
+        );
+        for (let col = 0; col < 4; col++) {
+          for (let row = 4 - col; row >= 0; row--) {
+            const blueMove: BattleShipGuess = {
+              col: col as BattleShipColIndex,
+              row: row as BattleShipRowIndex,
+              gamePiece: 'Blue',
+            };
+            game.applyMove({
+              gameID: game.id,
+              playerID: blue.id,
+              move: blueMove,
+            });
+
+            const greenMove: BattleShipGuess = {
+              col: col as BattleShipColIndex,
+              row: row as BattleShipRowIndex,
+              gamePiece: 'Green',
+            };
+            game.applyMove({
+              gameID: game.id,
+              playerID: green.id,
+              move: greenMove,
+            });
+          }
+        }
+        const blueMove: BattleShipGuess = {
+          col: 4 as BattleShipColIndex,
+          row: 0 as BattleShipRowIndex,
+          gamePiece: 'Blue',
+        };
+        game.applyMove({
+          gameID: game.id,
+          playerID: blue.id,
+          move: blueMove,
+        });
+
+        expect(game.state.status).toEqual('OVER');
+        expect(game.state.winner).toEqual(blue.id);
+      });
+      it('should should set a winning state for green', () => {
+        createBoatPlacementsFromPattern(
+          game,
+          'Green',
+          [
+            ['BV', 'AV', 'SV', 'CV', 'DV', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ],
+          blue.id,
+          green.id,
+        );
+        createBoatPlacementsFromPattern(
+          game,
+          'Blue',
+          [
+            ['BV', 'AV', 'SV', 'CV', 'DV', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ],
+          blue.id,
+          green.id,
+        );
+        for (let col = 0; col < 4; col++) {
+          for (let row = 4 - col; row >= 0; row--) {
+            const blueMove: BattleShipGuess = {
+              col: col as BattleShipColIndex,
+              row: row as BattleShipRowIndex,
+              gamePiece: 'Blue',
+            };
+            game.applyMove({
+              gameID: game.id,
+              playerID: blue.id,
+              move: blueMove,
+            });
+            const greenMove: BattleShipGuess = {
+              col: col as BattleShipColIndex,
+              row: row as BattleShipRowIndex,
+              gamePiece: 'Green',
+            };
+            game.applyMove({
+              gameID: game.id,
+              playerID: green.id,
+              move: greenMove,
+            });
+          }
+        }
+        const blueMove: BattleShipGuess = {
+          col: 9 as BattleShipColIndex,
+          row: 9 as BattleShipRowIndex,
+          gamePiece: 'Blue',
+        };
+        game.applyMove({
+          gameID: game.id,
+          playerID: blue.id,
+          move: blueMove,
+        });
+        const greenMove: BattleShipGuess = {
+          col: 4 as BattleShipColIndex,
+          row: 0 as BattleShipRowIndex,
+          gamePiece: 'Green',
+        };
+        game.applyMove({
+          gameID: game.id,
+          playerID: green.id,
+          move: greenMove,
+        });
+
+        expect(game.state.status).toEqual('OVER');
+        expect(game.state.winner).toEqual(green.id);
+      });
+      it('should should set a winning state for blue if green is the first player', () => {
+        expect(game.state.firstPlayer).toEqual('Blue');
+        const game2 = new BattleShipGame(game);
+        const newPlayer = createPlayerForTesting();
+        game2.join(newPlayer);
+        game2.join(green);
+        game2.startGame(newPlayer);
+        game2.startGame(green);
+        expect(game2.state.firstPlayer).toEqual('Green');
+        createBoatPlacementsFromPattern(
+          game2,
+          'Blue',
+          [
+            ['BV', 'AV', 'SV', 'CV', 'DV', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ],
+          newPlayer.id,
+          green.id,
+        );
+        createBoatPlacementsFromPattern(
+          game2,
+          'Green',
+          [
+            ['BV', 'AV', 'SV', 'CV', 'DV', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ],
+          newPlayer.id,
+          green.id,
+        );
+        for (let col = 0; col < 4; col++) {
+          for (let row = 4 - col; row >= 0; row--) {
+            const greenMove: BattleShipGuess = {
+              col: col as BattleShipColIndex,
+              row: row as BattleShipRowIndex,
+              gamePiece: 'Green',
+            };
+            game2.applyMove({
+              gameID: game2.id,
+              playerID: green.id,
+              move: greenMove,
+            });
+
+            const blueMove: BattleShipGuess = {
+              col: col as BattleShipColIndex,
+              row: row as BattleShipRowIndex,
+              gamePiece: 'Blue',
+            };
+            game2.applyMove({
+              gameID: game2.id,
+              playerID: newPlayer.id,
+              move: blueMove,
+            });
+          }
+        }
+        const blueMove2: BattleShipGuess = {
+          col: 4 as BattleShipColIndex,
+          row: 0 as BattleShipRowIndex,
+          gamePiece: 'Green',
+        };
+        game2.applyMove({
+          gameID: game2.id,
+          playerID: green.id,
+          move: blueMove2,
+        });
+        expect(game2.state.status).toEqual('OVER');
+        expect(game2.state.winner).toEqual(green.id);
+      });
+      it('should should set a winning state for blue if green leaves the game', () => {
+        createBoatPlacementsFromPattern(
+          game,
+          'Blue',
+          [
+            ['BV', 'AV', 'SV', 'CV', 'DV', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ],
+          blue.id,
+          green.id,
+        );
+        createBoatPlacementsFromPattern(
+          game,
+          'Green',
+          [
+            ['BV', 'AV', 'SV', 'CV', 'DV', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ],
+          blue.id,
+          green.id,
+        );
+        game.leave(green);
+
+        expect(game.state.status).toEqual('OVER');
+        expect(game.state.winner).toEqual(blue.id);
+      });
+      it('should should set a winning state for green if blue leaves the game', () => {
+        createBoatPlacementsFromPattern(
+          game,
+          'Blue',
+          [
+            ['BV', 'AV', 'SV', 'CV', 'DV', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ],
+          blue.id,
+          green.id,
+        );
+        createBoatPlacementsFromPattern(
+          game,
+          'Green',
+          [
+            ['BV', 'AV', 'SV', 'CV', 'DV', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+            ['_', '_', '_', '_', '_', '_', '_', '_', '_', '_'],
+          ],
+          blue.id,
+          green.id,
+        );
+        game.leave(blue);
+
+        expect(game.state.status).toEqual('OVER');
+        expect(game.state.winner).toEqual(green.id);
       });
     });
   });
