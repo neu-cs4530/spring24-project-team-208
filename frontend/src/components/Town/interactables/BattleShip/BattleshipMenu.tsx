@@ -27,7 +27,6 @@ export default function BattleshipMenu({
   const toast = useToast();
 
   const handleThemeSwitch = async () => {
-    // setTheme(theme === 'Military' ? 'Barbie' : 'Military');
     await gameAreaController.changeTheme(theme === 'Military' ? 'Barbie' : 'Military');
   };
 
@@ -108,8 +107,9 @@ export default function BattleshipMenu({
             paddingTop: 4,
             marginBottom: 10,
             overflow: 'hidden',
+            fontFamily: 'Digital Numbers Regular',
           }}>
-          {green?.userName || ''}
+          {green?.userName.substring(0, 15) || ''}
         </div>
         <div
           style={{
@@ -122,8 +122,9 @@ export default function BattleshipMenu({
             paddingTop: 4,
             fontSize: '1.4rem',
             overflow: 'hidden',
+            fontFamily: 'Digital Numbers Regular',
           }}>
-          {blue?.userName || ''}
+          {blue?.userName.substring(0, 15) || ''}
         </div>
       </span>
       <div
@@ -196,9 +197,15 @@ export default function BattleshipMenu({
           left: '20%',
           bottom: '10%',
         }}>
-        <p style={{ rotate: '-20deg', width: 'fitContent' }}>{`Current theme - ${
-          theme || 'None'
-        }`}</p>
+        <p
+          style={{
+            rotate: '-20deg',
+            width: 'fitContent',
+            fontFamily: 'Scribble',
+            fontSize: '2rem',
+          }}>
+          {`Current theme - ${theme || 'None'}`}
+        </p>
       </span>
       <ModalCloseButton />
     </div>

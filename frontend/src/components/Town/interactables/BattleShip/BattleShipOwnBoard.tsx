@@ -1,4 +1,4 @@
-import { Modal, ModalContent, ModalOverlay, useDisclosure } from '@chakra-ui/react';
+import { Modal, ModalCloseButton, ModalContent, ModalOverlay, useDisclosure } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import BattleShipAreaController from '../../../../classes/interactable/BattleShipAreaController';
 import useTownController from '../../../../hooks/useTownController';
@@ -202,8 +202,8 @@ export default function BattleShipOwnBoard({
         <span
           style={{
             position: 'relative',
-            top: '25%',
-            right: '-40%',
+            top: '40%',
+            left: '30%',
           }}>
           <VerticalSwitchButton
             controller={gameAreaController}
@@ -214,7 +214,7 @@ export default function BattleShipOwnBoard({
         <span
           style={{
             position: 'relative',
-            top: '38%',
+            top: '10%',
             right: '10%',
           }}>
           <EnemyCounter
@@ -257,6 +257,7 @@ export default function BattleShipOwnBoard({
           <CheatSheetNoteBookSmall openModal={onOpen} />
         </span>
       </div>
+      <ModalCloseButton />
     </div>
   );
 }

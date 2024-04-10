@@ -63,3 +63,24 @@
   height: 220px;
   width: 400px;
 }
+
+@font-face {
+  font-family: 'Digital Numbers Regular';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Digital Numbers Regular'), url('../public/Fonts/DigitalNumbers-Regular.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Scribble';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Scribble'), url('../public/Fonts/Scribble.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'First Writing';
+  font-style: normal;
+  font-weight: normal;
+  src: local('First Writing'), url('../public/Fonts/FirstWriting.woff') format('woff');
+}

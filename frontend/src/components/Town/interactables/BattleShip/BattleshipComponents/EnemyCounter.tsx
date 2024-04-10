@@ -115,10 +115,16 @@ export function EnemyCounter({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <h3 className='just-me-again-down-here' style={{ textDecoration: 'underline' }}>
+      <h3 style={{ textDecoration: 'underline', fontFamily: 'Scribble', fontSize: '1.4rem' }}>
         {inPlacement ? 'Ship Placements Remaining:' : 'Enemy Ships Remaining:'}
       </h3>
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          fontFamily: 'Scribble',
+          fontSize: '1.2rem',
+        }}>
         {SHIPS.map((name: BattleshipBoat, index) => (
           <span
             style={{ cursor: 'pointer', position: 'relative' }}
