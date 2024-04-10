@@ -214,50 +214,6 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
   }
 
   /**
-   * Determines if the finalized pre-game board consists of only valid boats.
-   * A board is valid if it has a start and end piece for every boat and
-   * has the correct number of boat pieces. If incorrect, player will have
-   * to reposition their boats to start the game
-   */
-  protected _isValidBoard(boardCells: BattleShipCell[]): boolean {
-    const numRows = BATTLESHIP_ROWS;
-    const numCols = BATTLESHIP_COLS;
-
-    // Convert pieces to board
-    const board: (BattleShipCell | undefined)[][] = new Array(numRows);
-    for (let i = 0; i < board.length; i++) {
-      board[i] = new Array(numCols).fill(undefined);
-    }
-
-    for (const piece of boardCells) {
-      board[piece.row][piece.col] = piece;
-    }
-
-    let hasFront = false;
-    // check if all vertical boats have a front and end piece
-    for (let col = 0; col < board[0].length; col++) {
-      for (let row = 0; row < board.length - 1; row++) {
-        hasFront = this._isValidBoat(hasFront, row, col, row + 1, col, board);
-      }
-      hasFront = false;
-    }
-
-    // check if all horizontal boats have a front and end piece
-    for (let row = 0; row < board.length; row++) {
-      for (let col = 0; col < board[row].length - 1; col++) {
-        hasFront = this._isValidBoat(hasFront, row, col, row, col + 1, board);
-      }
-      hasFront = false;
-    }
-
-    // false if there are any non-undefined pieces left or if number of boat pieces is incorrect
-    return (
-      board.every(row => row.every(col => col === undefined)) &&
-      boardCells.length === MAX_BOAT_PIECES
-    );
-  }
-
-  /**
    * Indicates that a player is ready to start the game.
    *
    * Updates the game state to indicate that the player is ready to start the game.
