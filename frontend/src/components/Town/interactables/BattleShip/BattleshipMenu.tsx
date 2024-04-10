@@ -171,9 +171,18 @@ export default function BattleshipMenu({
           {startGameButton}
         </span>
         <span
-          style={{
-            cursor: 'pointer',
-          }}>
+          onClick={async () => {
+            try {
+              await gameAreaController.soloGame();
+            } catch (err) {
+              toast({
+                title: 'Error initiating solo game',
+                description: (err as Error).toString(),
+                status: 'error',
+              });
+            }
+          }}
+          style={{ cursor: 'pointer' }}>
           {soloGameButton}
         </span>
       </div>
