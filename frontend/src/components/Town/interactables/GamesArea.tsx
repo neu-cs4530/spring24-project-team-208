@@ -10,7 +10,6 @@ import {
   List,
   ListItem,
   Modal,
-  ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalHeader,

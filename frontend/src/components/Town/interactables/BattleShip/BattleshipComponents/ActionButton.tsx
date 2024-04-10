@@ -11,7 +11,7 @@ export default function ActionButton({
   controller: BattleShipAreaController;
   chosenCell: BattleShipCell | undefined;
   chosenBoat: BattleShipBoatPiece | undefined;
-  doAction: any;
+  doAction: () => void;
 }) {
   const inPlacement = controller.status === 'PLACING_BOATS';
   const handleClick = () => {

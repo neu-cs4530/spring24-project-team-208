@@ -21,8 +21,8 @@ export function BattleShipBoardCell({
 }: {
   controller: BattleShipAreaController;
   cell: BattleShipCell;
-  chooseCell: any;
-  chosenCell: any;
+  chooseCell: (cell: BattleShipCell) => void;
+  chosenCell: BattleShipCell | undefined;
 }) {
   const pieceStore = controller.theme === 'Barbie' ? BARBIE_PIECE_STORE : MILITARY_PIECE_STORE;
   const inPlacement = controller.status === 'PLACING_BOATS';

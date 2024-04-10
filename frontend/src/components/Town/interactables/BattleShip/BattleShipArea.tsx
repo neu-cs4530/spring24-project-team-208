@@ -1,20 +1,12 @@
-import {
-  BattleShipDatabaseEntry,
-  GameStatus,
-  InteractableID,
-} from '../../../../types/CoveyTownSocket';
-import React, { useCallback, useEffect, useState } from 'react';
+import { GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
+import React, { useEffect, useState } from 'react';
 import { useInteractableAreaController } from '../../../../classes/TownController';
 import BattleShipAreaController from '../../../../classes/interactable/BattleShipAreaController';
 import useTownController from '../../../../hooks/useTownController';
-import PlayerController from '../../../../classes/PlayerController';
-import { Button, List, ListItem, useToast } from '@chakra-ui/react';
+import { useToast } from '@chakra-ui/react';
 import BattleShipOwnBoard from './BattleShipOwnBoard';
-import BattleShipOpponentBoard from './BattleShipOpponentBoard';
 import BattleshipMenu from './BattleshipMenu';
 import BattleshipEndScreen from './BattleshipEndScreen';
-import getBattleShipData from '../../../Database';
-import { get } from 'lodash';
 
 /**
  * The BattleShipArea component renders the Battleship game area.
@@ -60,12 +52,6 @@ export default function BattleShipArea({
   const gameAreaController =
     useInteractableAreaController<BattleShipAreaController>(interactableID);
   const townController = useTownController();
-
-  const [blue, setBlue] = useState<PlayerController | undefined>(gameAreaController.blue);
-  const [green, setGreen] = useState<PlayerController | undefined>(gameAreaController.green);
-  const [joiningGame, setJoiningGame] = useState(false);
-  const [blueData, setBlueData] = useState<BattleShipDatabaseEntry | undefined>(undefined);
-  const [greenData, setGreenData] = useState<BattleShipDatabaseEntry | undefined>(undefined);
 
   const [gameStatus, setGameStatus] = useState<GameStatus>(gameAreaController.status);
   const [gameWon, setGameWon] = useState<boolean>(false);

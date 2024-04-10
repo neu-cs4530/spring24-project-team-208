@@ -7,9 +7,6 @@ import {
   BattleShipColIndex,
   BattleShipRowIndex,
   BattleShipBoatPiece,
-  BarbieBoatPiece,
-  MilitaryBoatPiece,
-  BattleShipPlacement,
   BattleShipCell,
   BattleShipGuess,
   BattleshipTheme,
@@ -22,6 +19,7 @@ import GameAreaController, {
   NO_GAME_STARTABLE,
   PLAYER_NOT_IN_GAME_ERROR,
 } from './GameAreaController';
+import assert from 'assert';
 
 /**
  * For BattleShipAreaController
@@ -292,7 +290,6 @@ export default class BattleShipAreaController extends GameAreaController<
   }
 
   public async changeTheme(theme: string) {
-    const instanceID = this._instanceID;
     await this._townController.sendInteractableCommand(this.id, {
       type: 'ChangeTheme',
       theme,
@@ -348,8 +345,9 @@ export default class BattleShipAreaController extends GameAreaController<
     if (!instanceID || this._model.game?.state.status !== 'IN_PROGRESS') {
       throw new Error(NO_GAME_IN_PROGRESS_ERROR);
     }
+    assert(this.whatColor !== undefined);
     const move: BattleShipGuess = {
-      gamePiece: this.whatColor!,
+      gamePiece: this.whatColor,
       col,
       row,
     };

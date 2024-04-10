@@ -27,7 +27,7 @@ const NOT_YOUR_BOARD_MESSAGE = 'Not your board';
 const MAX_BOAT_PIECES = 15;
 const BATTLESHIP_COLS = 10;
 const BATTLESHIP_ROWS = 10;
-const allBoats: any = [
+const ALL_BOATS: string[] = [
   'Aircraft_Back',
   'Aircraft_Middle_1',
   'Aircraft_Middle_2',
@@ -377,16 +377,16 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    */
   protected _allBoatsPlaced(newPlacement: Array<BattleShipCell>): boolean {
     const stripTheme = (boat: string) => {
-      let newBoat: any = boat.split('_');
+      const newBoat: string[] = boat.split('_');
       newBoat.pop();
-      newBoat = newBoat.join('_');
-      return newBoat;
+      const newBoatStr = newBoat.join('_');
+      return newBoatStr;
     };
     const boatArr = newPlacement
       .filter(cell => cell.type !== 'Ocean')
       .map(cell => stripTheme(cell.type));
 
-    return allBoats.every((item: any) => boatArr.includes(item));
+    return ALL_BOATS.every((item: string) => boatArr.includes(item));
   }
 
   /**

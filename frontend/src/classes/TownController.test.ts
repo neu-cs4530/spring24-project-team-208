@@ -39,7 +39,6 @@ jest.mock('socket.io-client', () => {
 
 describe('TownController', () => {
   let mockTownLoginController: MockProxy<TownLoginController>;
-  let userName: string;
   let authToken: string;
   let townID: string;
   beforeAll(() => {

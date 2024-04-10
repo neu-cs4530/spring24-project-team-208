@@ -23,6 +23,7 @@ import ButtonStatus from './BattleshipComponents/ButtonStatus';
 import ActionButton from './BattleshipComponents/ActionButton';
 import VerticalSwitchButton from './BattleshipComponents/VerticalSwitch';
 import getBattleShipData from '../../../Database';
+import assert from 'assert';
 
 export type BattleShipGameProps = {
   gameAreaController: BattleShipAreaController;
@@ -53,7 +54,7 @@ export type BattleShipGameProps = {
  * turn, then the StyledBattleShipSquare will be disabled.
  *
  * @param gameAreaController the controller for the BattleShip game
- */ //CHANGE
+ */
 export default function BattleShipOwnBoard({
   gameAreaController,
 }: BattleShipGameProps): JSX.Element {
@@ -74,16 +75,19 @@ export default function BattleShipOwnBoard({
   const [isVertical, setIsVertical] = useState<boolean>(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const inPlacement = gameAreaController.status === 'PLACING_BOATS';
-  const [green, setGreen] = useState<BattleShipDatabaseEntry | null>(null);
+  const [green] = useState<BattleShipDatabaseEntry | null>(null);
   const [blue, setBlue] = useState<BattleShipDatabaseEntry | null>(null);
 
   const placeBoat = () => {
-    gameAreaController.placeBoatPiece(chosenBoat!, chosenCell!.row, chosenCell!.col, isVertical);
+    assert(chosenBoat !== undefined);
+    assert(chosenCell !== undefined);
+    gameAreaController.placeBoatPiece(chosenBoat, chosenCell.row, chosenCell.col, isVertical);
     setChosenCell(undefined);
     setChosenBoat(undefined);
   };
   const fireBoat = () => {
-    gameAreaController.makeMove(chosenCell!.row, chosenCell!.col);
+    assert(chosenCell !== undefined);
+    gameAreaController.makeMove(chosenCell.row, chosenCell.col);
     setChosenCell(undefined);
   };
 
@@ -143,7 +147,7 @@ export default function BattleShipOwnBoard({
       );
       gameAreaController.removeListener('turnChanged', setIsOurTurnMini);
     };
-  }, [gameAreaController]);
+  }, [gameAreaController, townController.ourPlayer]);
   useEffect(() => {
     const getData = async () => {
       const blueData = await getBattleShipData(gameAreaController.blue?.userName || '');

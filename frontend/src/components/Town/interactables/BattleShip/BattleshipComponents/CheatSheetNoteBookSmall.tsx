@@ -9,7 +9,7 @@ import { smallNotebook } from '../BattleshipMenuSprites';
 //     box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
 // }
 
-export function CheatSheetNoteBookSmall({ openModal }: { openModal: any }) {
+export function CheatSheetNoteBookSmall({ openModal }: { openModal: () => void }) {
   const handleClick = () => {
     openModal();
   };
