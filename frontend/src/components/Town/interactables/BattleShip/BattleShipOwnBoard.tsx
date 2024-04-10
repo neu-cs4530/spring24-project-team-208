@@ -75,7 +75,7 @@ export default function BattleShipOwnBoard({
   const [isVertical, setIsVertical] = useState<boolean>(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const inPlacement = gameAreaController.status === 'PLACING_BOATS';
-  const [green] = useState<BattleShipDatabaseEntry | null>(null);
+  const [green, setGreen] = useState<BattleShipDatabaseEntry | null>(null);
   const [blue, setBlue] = useState<BattleShipDatabaseEntry | null>(null);
 
   const placeBoat = () => {
