@@ -184,6 +184,8 @@ export interface BattleShipGameState extends WinnableGameState {
   firstPlayer: BattleShipColor;
   // The theme of all battleship pieces on the board
   theme: BattleShipTheme;
+  // Whether this game is a solo game against the computer
+  soloGame: boolean;
 }
 
 /**
@@ -363,7 +365,7 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<BattleShipGuess> | ChangeTheme | SetUpGameMove | StartGameCommand | LeaveGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<BattleShipGuess> | ChangeTheme | SetUpGameMove | StartGameCommand | LeaveGameCommand | SoloGameCommand;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;
@@ -394,6 +396,10 @@ export interface SetUpGameMove {
 export interface ChangeTheme {
   type: 'ChangeTheme';
   theme: string;
+}
+export interface SoloGameCommand {
+  type: 'SoloGame';
+  gameID: GameInstanceID;
 }
 export type InteractableCommandReturnType<CommandType extends InteractableCommand> = 
   CommandType extends JoinGameCommand ? { gameID: string}:

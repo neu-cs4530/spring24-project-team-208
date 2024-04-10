@@ -90,8 +90,12 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
 
   private _preferredGreen?: PlayerID;
 
+  private _safeCellsBlue: Array<{ row: BattleShipRowIndex; col: BattleShipColIndex }>;
+
+  private _safeCellsGreen: Array<{ row: BattleShipRowIndex; col: BattleShipColIndex }>;
+
   /**
-   * Creates a new ConnectFourGame.
+   * Creates a new BattleShipGame.
    * @param priorGame If provided, the new game will be created such that if either player
    * from the prior game joins, they will be the same color. When the game begins, the default
    * first player is blue, but if either player from the prior game joins the new game
@@ -105,9 +109,19 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       status: 'WAITING_FOR_PLAYERS',
       firstPlayer: getOtherPlayerColor(priorGame?.state.firstPlayer || 'Green'),
       theme: 'Military',
+      soloGame: false,
     });
     this._preferredBlue = priorGame?.state.blue;
     this._preferredGreen = priorGame?.state.green;
+    this._safeCellsBlue = [];
+    this._safeCellsGreen = [];
+
+    for (let i = 0; i < BATTLESHIP_ROWS; i++) {
+      for (let j = 0; j < BATTLESHIP_COLS; j++) {
+        this._safeCellsBlue.push({ row: i as BattleShipRowIndex, col: j as BattleShipColIndex });
+        this._safeCellsGreen.push({ row: i as BattleShipRowIndex, col: j as BattleShipColIndex });
+      }
+    }
   }
 
   /**
@@ -157,6 +171,35 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     if (this.state.blue && this.state.green) {
       this.state.status = 'WAITING_TO_START';
     }
+  }
+
+  /**
+   * Starts a solo game with the given player.
+   * - Assigns the AI to the opposite color of the player.
+   * - Updates the game status to WAITING_TO_START.
+   *
+   * @throws InvalidParametersError if the game is not in the WAITING_FOR_PLAYERS state
+   * @throws InvalidParametersError if the player is not in the game (PLAYER_NOT_IN_GAME_MESSAGE)
+   * @param player the player to start the solo game with
+   */
+  public soloGame(player: Player): void {
+    if (this.state.status !== 'WAITING_FOR_PLAYERS') {
+      throw new InvalidParametersError('Solo game is unavailable at this time.');
+    }
+    if (this.state.blue !== player.id && this.state.green !== player.id) {
+      throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
+    }
+
+    this.state.soloGame = true;
+
+    // Assign the AI (constant playerID) to the opposite color of the player
+    if (this.state.blue === player.id) {
+      this.state.green = 'AI_OPPONENT';
+    } else {
+      this.state.blue = 'AI_OPPONENT';
+    }
+
+    this.state.status = 'WAITING_TO_START';
   }
 
   /**
@@ -215,6 +258,77 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
   }
 
   /**
+   * Initializes the game board for the AI opponent.
+   * Makes random but valid placements on the board.
+   */
+  private _initializeAIBoard(): void {
+    const aiColor = this.state.blue === 'AI_OPPONENT' ? 'Blue' : 'Green';
+    const board:
+      | BattleShipCell[]
+      | {
+          type: BattleShipBoatPiece;
+          state: string;
+          row: BattleShipRowIndex;
+          col: BattleShipColIndex;
+        }[] = [];
+
+    // Helper function to check if a position is valid for a boat
+    const isPositionValid = (
+      row: number,
+      col: number,
+      boatLength: number,
+      vertical: boolean,
+    ): boolean => {
+      if (vertical && row + boatLength > BATTLESHIP_ROWS) return false;
+      if (!vertical && col + boatLength > BATTLESHIP_COLS) return false;
+
+      for (let i = 0; i < boatLength; i++) {
+        const currentRow = vertical ? row + i : row;
+        const currentCol = vertical ? col : col + i;
+        if (board.some(cell => cell.row === currentRow && cell.col === currentCol)) {
+          return false;
+        }
+      }
+
+      return true;
+    };
+
+    // Function to place a boat
+    const placeBoat = (boat: any, vertical: boolean, startRow: number, startCol: number): void => {
+      boat.ships.forEach((part: string, index: number) => {
+        const row = vertical ? startRow + index : startRow;
+        const col = vertical ? startCol : startCol + index;
+        board.push({
+          type: part as BattleShipBoatPiece,
+          state: 'Safe' as BattleShipCellState,
+          row: row as BattleShipRowIndex,
+          col: col as BattleShipColIndex,
+        });
+      });
+    };
+
+    BOAT_MAP.forEach(boat => {
+      let placed = false;
+      while (!placed) {
+        const vertical = Math.random() < 0.5;
+        const startRow = Math.floor(Math.random() * BATTLESHIP_ROWS);
+        const startCol = Math.floor(Math.random() * BATTLESHIP_COLS);
+
+        if (isPositionValid(startRow, startCol, boat.ships.length, vertical)) {
+          placeBoat(boat, vertical, startRow, startCol);
+          placed = true;
+        }
+      }
+    });
+
+    // Apply the board to the AI player
+    this.state[aiColor === 'Blue' ? 'blueBoard' : 'greenBoard'] = board.map(cell => ({
+      ...cell,
+      state: 'Safe' as BattleShipCellState,
+    }));
+  }
+
+  /**
    * Indicates that a player is ready to start the game.
    *
    * Updates the game state to indicate that the player is ready to start the game.
@@ -222,7 +336,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * If both players are ready, the game will start.
    *
    * The first player (blue or green) is determined as follows:
-   *   - If neither player was in the last game in this area (or there was no prior game), the first player is red.
+   *   - If neither player was in the last game in this area (or there was no prior game), the first player is blue.
    *   - If at least one player was in the last game in this area, then the first player will be the other color from last game.
    *   - If a player from the last game *left* the game and then joined this one, they will be treated as a new player (not given the same color by preference).
    *
@@ -246,22 +360,41 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     if (this.state.green === player.id) {
       this.state.greenReady = true;
     }
-    // if none of the players from the last game are in this game, then the first
-    // player is blue
-    if (!(this._preferredBlue === this.state.blue || this._preferredGreen === this.state.green)) {
-      this.state.firstPlayer = 'Blue';
-    }
-    this.state = {
-      ...this.state,
-      status: this.state.blueReady && this.state.greenReady ? 'PLACING_BOATS' : 'WAITING_TO_START',
-      blueBoard: this._createNewBoard(),
-      greenBoard: this._createNewBoard(),
-    };
 
-    // reset for use in boat placement phase
-    if (this.state.blueReady && this.state.greenReady) {
-      this.state.blueReady = false;
-      this.state.greenReady = false;
+    if (this.state.soloGame) {
+      // For solo games, check if the human player is ready
+      const playerColor = this.state.blue === player.id ? 'Blue' : 'Green';
+
+      if (
+        (playerColor === 'Blue' && this.state.blueReady) ||
+        (playerColor === 'Green' && this.state.greenReady)
+      ) {
+        // Initialize the AI's board
+        this._initializeAIBoard();
+
+        // Directly start the game
+        this.state.status = 'IN_PROGRESS';
+        this.state.firstPlayer = playerColor; // Human player goes first in solo mode
+      }
+    } else {
+      // if none of the players from the last game are in this game, then the first
+      // player is blue
+      if (!(this._preferredBlue === this.state.blue || this._preferredGreen === this.state.green)) {
+        this.state.firstPlayer = 'Blue';
+      }
+      this.state = {
+        ...this.state,
+        status:
+          this.state.blueReady && this.state.greenReady ? 'PLACING_BOATS' : 'WAITING_TO_START',
+        blueBoard: this._createNewBoard(),
+        greenBoard: this._createNewBoard(),
+      };
+
+      // reset for use in boat placement phase
+      if (this.state.blueReady && this.state.greenReady) {
+        this.state.blueReady = false;
+        this.state.greenReady = false;
+      }
     }
   }
 
@@ -554,11 +687,19 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
         break;
       case 'IN_PROGRESS':
         this.state.status = 'OVER';
-        this.state.winner = this.state.blue === player.id ? this.state.green : this.state.blue;
+        if (this.state.soloGame) {
+          this.state.winner = undefined;
+        } else {
+          this.state.winner = this.state.blue === player.id ? this.state.green : this.state.blue;
+        }
         break;
       case 'PLACING_BOATS':
         this.state.status = 'OVER';
-        this.state.winner = this.state.blue === player.id ? this.state.green : this.state.blue;
+        if (this.state.soloGame) {
+          this.state.winner = undefined;
+        } else {
+          this.state.winner = this.state.blue === player.id ? this.state.green : this.state.blue;
+        }
         break;
       default:
         // This behavior can be undefined :)
@@ -609,6 +750,13 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       return cell;
     });
 
+    // Remove the guessed cell from the safe cells list
+    const safeCells = move.gamePiece === 'Blue' ? this._safeCellsGreen : this._safeCellsBlue;
+    const cellIndex = safeCells.findIndex(cell => cell.row === move.row && cell.col === move.col);
+    if (cellIndex > -1) {
+      safeCells.splice(cellIndex, 1);
+    }
+
     const newState: BattleShipGameState = {
       ...this.state,
       ...(move.gamePiece === 'Green' && { blueBoard: newBoard }),
@@ -621,6 +769,33 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       newState.winner = move.gamePiece === 'Blue' ? this.state.blue : this.state.green;
     }
     this.state = newState;
+  }
+
+  /**
+   * Makes a guess for the AI opponent.
+   * The AI opponent will make a random guess from the list of safe cells.
+   */
+  private _makeAiGuess(): void {
+    if (this.state.status !== 'IN_PROGRESS') {
+      throw new InvalidParametersError('Game not in progress');
+    }
+
+    const aiColor = this.state.blue === 'AI_OPPONENT' ? 'Blue' : 'Green';
+    const safeCells = aiColor === 'Blue' ? this._safeCellsGreen : this._safeCellsBlue;
+
+    if (safeCells.length === 0) {
+      throw new Error('No more moves available');
+    }
+
+    // Select a random cell from the list of safe cells
+    const randomIndex = Math.floor(Math.random() * safeCells.length);
+    const { row, col } = safeCells[randomIndex];
+
+    // Remove the selected cell from the list
+    safeCells.splice(randomIndex, 1);
+
+    // Apply the guess
+    this._applyMove({ gamePiece: aiColor, row, col });
   }
 
   /**
@@ -658,5 +833,10 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     };
     this._validateGuess(newMove);
     this._applyMove(newMove);
+
+    // If it's a solo game and the player who just moved isn't the AI, make the AI's move
+    if (this.state.soloGame && move.playerID !== 'AI_OPPONENT') {
+      this._makeAiGuess();
+    }
   }
 }
