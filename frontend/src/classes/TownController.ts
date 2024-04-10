@@ -183,6 +183,12 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   private _userID?: string;
 
   /**
+   * The user name of the player whose browser created this TownController. The user name is set by the backend townsService, and
+   * is only available after the service is connected.
+   */
+  private _userName?: string;
+
+  /**
    * A reference to the Player object that represents the player whose browser created this TownController.
    */
   private _ourPlayer?: PlayerController;
@@ -260,7 +266,9 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   }
 
   public get userName() {
-    return this._ourPlayer?.userName;
+    const ret = this._ourPlayer;
+    assert(ret);
+    return ret.userName;
   }
 
   public get friendlyName() {
