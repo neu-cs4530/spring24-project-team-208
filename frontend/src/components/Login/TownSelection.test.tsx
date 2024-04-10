@@ -9,12 +9,15 @@ import { nanoid } from 'nanoid';
 import { act } from 'react-dom/test-utils';
 import * as TownController from '../../classes/TownController';
 import { TownLoginController } from '../../contexts/TownLoginControllerContext';
-import { CancelablePromise, Town, TownsService } from '../../generated/client';
+import { CancelablePromise, Town, TownsService, UsersService } from '../../generated/client';
 import * as useTownLoginController from '../../hooks/useTownLoginController';
 import { mockTownController } from '../../TestUtils';
 import TownSelection from './TownSelection';
-import UserController from '../../classes/UserController';
-import { wait } from '@testing-library/user-event/dist/types/utils';
+import * as UserController from '../../classes/UserController';
+import { UserLoginController } from '../../contexts/UserLoginControllerContext';
+import * as useUserLoginController from '../../hooks/useUserLoginController';
+import { User } from 'firebase/auth';
+import * as useUserController from '../../hooks/useUserController';
 
 const mockConnect = jest.fn(() => Promise.resolve());
 
@@ -100,20 +103,38 @@ describe('Town Selection', () => {
     TownController.default,
     [TownController.ConnectionProperties]
   >;
-  let mockUserController: MockProxy<UserController>;
+
+  let mockUsersService: MockProxy<UsersService>;
+  let useUserLoginControllerSpy: jest.SpyInstance<UserLoginController, []>;
+  let mockUserLoginController: MockProxy<UserLoginController>;
+  let userControllerConstructorSpy: jest.SpyInstance<
+    UserController.default,
+    [User, UserLoginController]
+  >;
+
+  let mockedUserController: MockProxy<UserController.default>;
   let mockedTownController: MockProxy<TownController.default>;
+
   const expectedProviderVideoToken = nanoid();
+
+  let useUserControllerSpy: jest.SpyInstance<UserController.default, []>;
 
   beforeAll(() => {
     mockTownsService = mock<TownsService>();
     useTownLoginControllerSpy = jest.spyOn(useTownLoginController, 'default');
     mockTownLoginController = mock<TownLoginController>();
-    mockUserController = mock<UserController>();
     mockTownLoginController.townsService = mockTownsService;
-
     mockedTownController = mockTownController({ providerVideoToken: expectedProviderVideoToken });
-
     coveyTownControllerConstructorSpy = jest.spyOn(TownController, 'default');
+
+    mockUsersService = mock<UsersService>();
+    useUserLoginControllerSpy = jest.spyOn(useUserLoginController, 'default');
+    mockUserLoginController = mock<UserLoginController>();
+    mockUserLoginController.usersService = mockUsersService;
+    mockedUserController = mock<UserController.default>();
+    userControllerConstructorSpy = jest.spyOn(UserController, 'default');
+
+    useUserControllerSpy = jest.spyOn(useUserController, 'default');
   });
   beforeEach(() => {
     jest.useFakeTimers();
@@ -122,11 +143,23 @@ describe('Town Selection', () => {
     mockClear(mockTownLoginController);
     mockClear(mockedTownController);
     mockClear(coveyTownControllerConstructorSpy);
-    mockClear(mockUserController);
+
+    mockReset(mockUsersService);
+    mockClear(useUserLoginControllerSpy);
+    mockClear(mockUserLoginController);
+    mockClear(mockedUserController);
+    mockClear(userControllerConstructorSpy);
+    mockClear(useUserControllerSpy);
     useTownLoginControllerSpy.mockReturnValue(mockTownLoginController);
     coveyTownControllerConstructorSpy.mockReturnValue(mockedTownController);
     mockedTownController.connect.mockReturnValue(Promise.resolve());
-    mockUserController.getAuthToken.mockReturnValue(Promise.resolve('token'));
+
+    useUserLoginControllerSpy.mockReturnValue(mockUserLoginController);
+    userControllerConstructorSpy.mockReturnValue(mockedUserController);
+    mockedUserController.getAuthToken.mockReturnValue(Promise.resolve('token'));
+    mockedUserController.logOut.mockReturnValue(Promise.resolve());
+
+    useUserControllerSpy.mockReturnValue(mockedUserController);
   });
   describe('Listing public towns', () => {
     it('is called when rendering (hopefully by a useeffect, this will be checked manually)', async () => {
@@ -338,6 +371,7 @@ describe('Town Selection', () => {
           // Check for call sequence
           await waitFor(() =>
             expect(coveyTownControllerConstructorSpy).toBeCalledWith({
+              authToken: 'token',
               townID: coveyTownID,
               townLoginController: mockTownLoginController,
             }),
@@ -372,7 +406,7 @@ describe('Town Selection', () => {
             coveyTownID,
           });
 
-          await waitFor(() => expect(mockUserController.getAuthToken).toBeCalled());
+          await waitFor(() => expect(mockedUserController.getAuthToken).toBeCalled());
           // Check for call sequence
           await waitFor(() =>
             expect(mockToast).toBeCalledWith({
@@ -401,6 +435,7 @@ describe('Town Selection', () => {
 
                 await waitFor(() =>
                   expect(coveyTownControllerConstructorSpy).toBeCalledWith({
+                    authToken: 'token',
                     townID: town.townID,
                     townLoginController: mockTownLoginController,
                   }),
@@ -562,6 +597,7 @@ describe('Town Selection', () => {
             // Check for call sequence
             await waitFor(() =>
               expect(coveyTownControllerConstructorSpy).toBeCalledWith({
+                authToken: 'token',
                 townID: townID,
                 townLoginController: mockTownLoginController,
               }),

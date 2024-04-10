@@ -10,6 +10,6 @@ import UserControllerContext from '../contexts/UserControllerContext';
  */
 export default function useUserController(): UserController {
   const ctx = useContext(UserControllerContext);
-  //assert(ctx, 'UserController context should be defined in order to use this hook.');
-  return ctx!; // uncomment assertion and remove non-null assertion ! once user conroller is mocked properly in TownSelection tests
+  assert(ctx, 'UserController context should be defined in order to use this hook.');
+  return ctx;
 }
