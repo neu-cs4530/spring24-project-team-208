@@ -299,6 +299,17 @@ export default class BattleShipAreaController extends GameAreaController<
     });
   }
 
+  public async soloGame() {
+    const instanceID = this._instanceID;
+    if (!instanceID || this._model.game?.state.status !== 'WAITING_TO_START') {
+      throw new Error(NO_GAME_STARTABLE);
+    }
+    await this._townController.sendInteractableCommand(this.id, {
+      gameID: instanceID,
+      type: 'SoloGame',
+    });
+  }
+
   /**
    * Places a boat piece in the pre-game phase based on a given row and
    * column.
