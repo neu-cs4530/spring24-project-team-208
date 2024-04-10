@@ -31,7 +31,7 @@ export const smallNotebook = (
 );
 
 export const largeNotebook = (
-  <Image src='./battleship_sprites/BattleshipMenuSprites/Large_Notebook.png' />
+  <Image src='./battleship_sprites/BattleshipMenuSprites/Open_Notebook.png' />
 );
 
 export const notebookExit = (
