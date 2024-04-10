@@ -83,7 +83,6 @@ describe('TownController', () => {
 
   beforeEach(() => {
     mockClear(mockSocket);
-    userName = nanoid();
     authToken = nanoid();
     townID = nanoid();
     testController = new TownController({
