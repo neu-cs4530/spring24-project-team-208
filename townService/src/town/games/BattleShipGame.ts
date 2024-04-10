@@ -27,7 +27,7 @@ const NOT_YOUR_BOARD_MESSAGE = 'Not your board';
 const MAX_BOAT_PIECES = 15;
 const BATTLESHIP_COLS = 10;
 const BATTLESHIP_ROWS = 10;
-const ALL_BOATS: any = [
+const allBoats: any = [
   'Aircraft_Back',
   'Aircraft_Middle_1',
   'Aircraft_Middle_2',
@@ -430,7 +430,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       .filter(cell => cell.type !== 'Ocean')
       .map(cell => stripTheme(cell.type));
 
-    return ALL_BOATS.every((item: any) => boatArr.includes(item));
+    return allBoats.every((item: any) => boatArr.includes(item));
   }
 
   /**
