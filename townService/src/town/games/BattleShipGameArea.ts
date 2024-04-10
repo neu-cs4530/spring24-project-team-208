@@ -140,6 +140,8 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
    * - GameMove (applies a move to the game)
    * - SetUpGameMove (applies a set up move before the game starts)
    * - LeaveGame (leaves the game)
+   * - ChangeTheme (changes the theme of the game)
+   * - SoloGame (starts a solo game against computer)
    *
    * If the command ended the game, records the outcome in this._history
    * If the command is successful (does not throw an error), calls this._emitAreaChanged (necessary
@@ -244,6 +246,18 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
         throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
       }
       game.state.theme = command.theme;
+      this._stateUpdated(game.toModel());
+      return undefined as InteractableCommandReturnType<CommandType>;
+    }
+    if (command.type === 'SoloGame') {
+      const game = this._game;
+      if (!game) {
+        throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+      }
+      if (this._game?.id !== command.gameID) {
+        throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
+      }
+      game.soloGame(player);
       this._stateUpdated(game.toModel());
       return undefined as InteractableCommandReturnType<CommandType>;
     }
