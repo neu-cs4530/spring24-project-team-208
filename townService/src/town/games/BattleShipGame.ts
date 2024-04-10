@@ -674,11 +674,19 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
         break;
       case 'IN_PROGRESS':
         this.state.status = 'OVER';
-        this.state.winner = this.state.blue === player.id ? this.state.green : this.state.blue;
+        if (this.state.soloGame) {
+          this.state.winner = undefined;
+        } else {
+          this.state.winner = this.state.blue === player.id ? this.state.green : this.state.blue;
+        }
         break;
       case 'PLACING_BOATS':
         this.state.status = 'OVER';
-        this.state.winner = this.state.blue === player.id ? this.state.green : this.state.blue;
+        if (this.state.soloGame) {
+          this.state.winner = undefined;
+        } else {
+          this.state.winner = this.state.blue === player.id ? this.state.green : this.state.blue;
+        }
         break;
       default:
         // This behavior can be undefined :)
