@@ -737,6 +737,13 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       return cell;
     });
 
+    // Remove the guessed cell from the safe cells list
+    const safeCells = move.gamePiece === 'Blue' ? this._safeCellsGreen : this._safeCellsBlue;
+    const cellIndex = safeCells.findIndex(cell => cell.row === move.row && cell.col === move.col);
+    if (cellIndex > -1) {
+      safeCells.splice(cellIndex, 1);
+    }
+
     const newState: BattleShipGameState = {
       ...this.state,
       ...(move.gamePiece === 'Green' && { blueBoard: newBoard }),
