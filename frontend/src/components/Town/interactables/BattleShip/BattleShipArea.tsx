@@ -1,5 +1,20 @@
-import { InteractableID } from '../../../../types/CoveyTownSocket';
-import React from 'react';
+import {
+  BattleShipDatabaseEntry,
+  GameStatus,
+  InteractableID,
+} from '../../../../types/CoveyTownSocket';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useInteractableAreaController } from '../../../../classes/TownController';
+import BattleShipAreaController from '../../../../classes/interactable/BattleShipAreaController';
+import useTownController from '../../../../hooks/useTownController';
+import PlayerController from '../../../../classes/PlayerController';
+import { Button, List, ListItem, useToast } from '@chakra-ui/react';
+import BattleShipOwnBoard from './BattleShipOwnBoard';
+import BattleShipOpponentBoard from './BattleShipOpponentBoard';
+import BattleshipMenu from './BattleshipMenu';
+import BattleshipEndScreen from './BattleshipEndScreen';
+import getBattleShipData from '../../../Database';
+import { get } from 'lodash';
 
 /**
  * The BattleShipArea component renders the Battleship game area.
@@ -42,5 +57,73 @@ export default function BattleShipArea({
 }: {
   interactableID: InteractableID;
 }): JSX.Element {
-  return <>Implement this to show battleship area corresponding to ID {interactableID}</>;
+  const gameAreaController =
+    useInteractableAreaController<BattleShipAreaController>(interactableID);
+  const townController = useTownController();
+
+  const [blue, setBlue] = useState<PlayerController | undefined>(gameAreaController.blue);
+  const [green, setGreen] = useState<PlayerController | undefined>(gameAreaController.green);
+  const [joiningGame, setJoiningGame] = useState(false);
+  const [blueData, setBlueData] = useState<BattleShipDatabaseEntry | undefined>(undefined);
+  const [greenData, setGreenData] = useState<BattleShipDatabaseEntry | undefined>(undefined);
+
+  const [gameStatus, setGameStatus] = useState<GameStatus>(gameAreaController.status);
+  const [gameWon, setGameWon] = useState<boolean>(false);
+  const toast = useToast();
+  useEffect(() => {
+    const updateGameState = () => {
+      setGameStatus(gameAreaController.status || 'WAITING_TO_START');
+    };
+    const onGameEnd = () => {
+      const winner = gameAreaController.winner;
+      if (!winner) {
+        toast({
+          title: 'Game over',
+          description: 'Game ended in a tie',
+          status: 'info',
+        });
+      } else if (winner === townController.ourPlayer) {
+        setGameWon(true);
+        toast({
+          title: 'Game over',
+          description: 'You won!',
+          status: 'success',
+        });
+      } else {
+        toast({
+          title: 'Game over',
+          description: `You lost :(`,
+          status: 'error',
+        });
+      }
+    };
+    gameAreaController.addListener('gameUpdated', updateGameState);
+    gameAreaController.addListener('gameEnd', onGameEnd);
+    return () => {
+      gameAreaController.removeListener('gameUpdated', updateGameState);
+      gameAreaController.removeListener('gameEnd', onGameEnd);
+    };
+  }, [townController, gameAreaController, toast]);
+
+  useEffect(() => {
+    const delay = 5000;
+    const timeoutId = setTimeout(() => {
+      setGameWon(false);
+    }, delay);
+
+    return () => clearTimeout(timeoutId);
+  }, [gameWon]);
+  return (
+    <>
+      {gameWon ? (
+        <BattleshipEndScreen />
+      ) : gameStatus === 'WAITING_FOR_PLAYERS' ||
+        gameStatus === 'WAITING_TO_START' ||
+        gameStatus === 'OVER' ? (
+        <BattleshipMenu gameAreaController={gameAreaController} interactableID={interactableID} />
+      ) : (
+        <BattleShipOwnBoard gameAreaController={gameAreaController} />
+      )}
+    </>
+  );
 }

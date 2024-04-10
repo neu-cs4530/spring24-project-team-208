@@ -74,7 +74,7 @@ export interface ViewingArea extends Interactable {
   elapsedTimeSec: number;
 }
 
-export type GameStatus = 'IN_PROGRESS' | 'WAITING_TO_START' | 'OVER' | 'WAITING_FOR_PLAYERS';
+export type GameStatus = 'IN_PROGRESS' | 'WAITING_TO_START' | 'OVER' | 'WAITING_FOR_PLAYERS' | 'PLACING_BOATS';
 /**
  * Base type for the state of a game
  */
@@ -169,23 +169,31 @@ export interface BattleShipGameState extends WinnableGameState {
   // The moves in this game
   moves: ReadonlyArray<BattleShipGuess>;
   // The blue player's board
-  blueBoard: Array<BattleShipPlacement>;
+  blueBoard: Array<BattleShipCell>;
   // The green player's board
-  greenBoard: Array<BattleShipPlacement>;
+  greenBoard: Array<BattleShipCell>;
   // The playerID of the blue player, if any
   blue?: PlayerID;
   // The playerID of the green player, if any
   green?: PlayerID;
-  // Whether the blue player has set up all ships and is ready to start game
+  // Whether the blue player is ready to start placement phase, then if the player is ready to start game phase
   blueReady?: boolean;
-  // Whether the green player has set up all ships and is ready to start game
+  // Whether the green player is ready to start placement phase, then if the player is ready to start game phase
   greenReady?: boolean;
   // The color of the player who will make the first move
   firstPlayer: BattleShipColor;
+  // The theme of all battleship pieces on the board
+  theme: BattleShipTheme;
 }
 
 /**
+ * 
+ */
+export type BattleshipTheme = 'Barbie' | 'Military';
+
+/**
  * Type for a move in BattleShip
+ * Gamepiece is which player is making a guess
  * Columns are lettered A-J, with A being the leftmost column
  * Rows are numbered 0-9, with 0 being the top row
  */
@@ -195,15 +203,19 @@ export interface BattleShipGuess {
   row: BattleShipRowIndex;
 }
 
+// The size of each cell square (in pixels)
+// export const Cell_SIZE = 40
 
 /**
  * Type for repositioning a boat in BattleShip during pre-game phase
+ * Gamepiece is which player is making a placement
+ * Cell is which boat the player wants to place
  * Columns are lettered A-J, with A being the leftmost column
  * Rows are numbered 0-9, with 0 being the top row
  */
-export interface BattleShipPlacement {
+export interface BattleShipPlacement { 
   gamePiece: BattleShipColor;
-  boat: BattleShipPiece;
+  cell: BattleShipBoatPiece | BattleshipBoat;
   col: BattleShipColIndex;
   row: BattleShipRowIndex;
 }
@@ -225,11 +237,76 @@ export type BattleShipColIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
  */
 export type BattleShipColor = 'Blue' | 'Green';
 
+
+export type BattleshipBoat = "Battleship" | "Aircraft Carrier" | "Submarine" | "Cruiser" | "Destroyer";
+
 /**
- * Different ship pieces that are possible to place on the board. A
- * ship must start and end with a front and end piece.
+ * Every type of individual boat piece
  */
-export type BattleShipPiece = 'Front' | 'Middle' | 'End';
+export type BattleShipBoatPiece = MilitaryBoatPiece | BarbieBoatPiece
+
+/**
+ * Each possible individual section of a boat in the military theme
+ * Full boats should start with a 'Back' piece and end with a 'Front' piece
+ */
+export type MilitaryBoatPiece = 
+    "Aircraft_Back_Military" 
+  | "Aircraft_Middle_1_Military"
+  | "Aircraft_Middle_2_Military"
+  | "Aircraft_Front_Military"
+  | "Battleship_Back_Military"
+  | "Battleship_Middle_1_Military"
+  | "Battleship_Middle_2_Military"
+  | "Battleship_Middle_3_Military"
+  | "Battleship_Front_Military"
+  | "Cruiser_Back_Military"
+  | "Cruiser_Front_Military"
+  | "Destroyer_Military"
+  | "Submarine_Back_Military"
+  | "Submarine_Middle_Military"
+  | "Submarine_Front_Military";
+
+  /**
+   * Each possible individual section of a boat in the Barbie theme
+   * Full boats should start with a 'Back' piece and end with a 'Front' piece
+   */
+  export type BarbieBoatPiece = 
+    "Aircraft_Back_Barbie" 
+  | "Aircraft_Middle_1_Barbie"
+  | "Aircraft_Middle_2_Barbie"
+  | "Aircraft_Front_Barbie"
+  | "Battleship_Back_Barbie"
+  | "Battleship_Middle_1_Barbie"
+  | "Battleship_Middle_2_Barbie"
+  | "Battleship_Middle_3_Barbie"
+  | "Battleship_Front_Barbie"
+  | "Cruiser_Back_Barbie"
+  | "Cruiser_Front_Barbie"
+  | "Destroyer_Barbie"
+  | "Submarine_Back_Barbie"
+  | "Submarine_Middle_Barbie"
+  | "Submarine_Front_Barbie";
+
+/**
+ * Whether or not a cell has been guessed or not, 'Hit' if guessed and 'Safe' if not
+ */
+export type BattleShipCellState = "Hit" | "Safe";
+
+/**
+ * A BattleShipCell can either be "Ocean", representing 1 of 4 ocean tiles or a BattleShipCell, representing
+ *  one of the many Battleship pieces. 
+ * A BattleShipCell is either "Hit", meaning it has been chosen during a turn or "Safe", meaning it has not been.
+ */
+export type BattleShipCell = {
+  // Whether the cell is an ocean or a boat cell, and which kind of boat
+  type: BattleshipBoatPiece | "Ocean";
+  // If a cell has been guessed or not
+  state: BattleShipCellState;
+  // The row of the cell
+  row: BattleShipRowIndex;
+  // The col of the cell
+  col: BattleShipColIndex;
+}
 
 export type InteractableID = string;
 export type GameInstanceID = string;
@@ -286,7 +363,7 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<BattleShipGuess> | SetUpGameMove | StartGameCommand | LeaveGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<BattleShipGuess> | ChangeTheme | SetUpGameMove | StartGameCommand | LeaveGameCommand;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;
@@ -311,7 +388,12 @@ export interface SetUpGameMove {
   type: 'SetUpGameMove';
   gameID: GameInstanceID;
   placement: BattleShipPlacement; // TODO can be generalized to any game in future
-  placementType: 'Placement' | 'Removal';
+  vertical: boolean; // orientation of the boat
+  // placementType: 'Placement' | 'Removal';
+}
+export interface ChangeTheme {
+  type: 'ChangeTheme';
+  theme: string;
 }
 export type InteractableCommandReturnType<CommandType extends InteractableCommand> = 
   CommandType extends JoinGameCommand ? { gameID: string}:
@@ -344,4 +426,16 @@ export interface ClientToServerEvents {
   playerMovement: (movementData: PlayerLocation) => void;
   interactableUpdate: (update: Interactable) => void;
   interactableCommand: (command: InteractableCommand & InteractableCommandBase) => void;
+}
+
+export type BattleShipGameOutcome = {
+  opponent: string;
+  result: 'win' | 'loss';
+}
+
+export type BattleShipDatabaseEntry = {
+  wins: number;
+  losses: number;
+  elo: number;
+  history: BattleShipGameOutcome[];
 }

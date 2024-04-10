@@ -7,12 +7,16 @@ import {
   InteractableCommandReturnType,
   BattleShipGameState,
   GameInstance,
+  BattleShipDatabaseEntry,
 } from '../../types/CoveyTownSocket';
 import InvalidParametersError, {
   GAME_ID_MISSMATCH_MESSAGE,
   GAME_NOT_IN_PROGRESS_MESSAGE,
   INVALID_COMMAND_MESSAGE,
 } from '../../lib/InvalidParametersError';
+import db from '../../lib/firebaseData';
+
+const DEFAULT_ELO = 1000;
 
 /**
  * A BattleShipGameArea is a GameArea that hosts a BattleShipGame.
@@ -25,17 +29,73 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
     return 'BattleShipArea';
   }
 
-  private _stateUpdated(updatedState: GameInstance<BattleShipGameState>) {
+  private _updatedElo(playerElo: number, opponentElo: number, won: boolean): number {
+    const expectedScore = 1 / (1 + 10 ** ((opponentElo - playerElo) / 400));
+    const realScore = won ? 1 : 0;
+    return playerElo + 32 * (realScore - expectedScore);
+  }
+
+  private _updatePlayerStats(
+    playerData: BattleShipDatabaseEntry,
+    won: boolean,
+    opponentData: BattleShipDatabaseEntry,
+    opponentName: string,
+  ): BattleShipDatabaseEntry {
+    const updatedData: BattleShipDatabaseEntry = {
+      wins: won ? playerData.wins + 1 : playerData.wins,
+      losses: won ? playerData.losses : playerData.losses + 1,
+      elo: this._updatedElo(playerData.elo, opponentData.elo, won),
+      history: [{ opponent: opponentName, result: won ? 'win' : 'loss' }, ...playerData.history],
+    };
+    return updatedData;
+  }
+
+  private async _updateDatabase(blueName: string, greenName: string, winnerName: string) {
+    try {
+      const blueDocRef = db.collection('battleship').doc(blueName);
+      const greenDocRef = db.collection('battleship').doc(greenName);
+      const blueDoc = await blueDocRef.get();
+      const greenDoc = await greenDocRef.get();
+      const blueData = blueDoc.data();
+      const greenData = greenDoc.data();
+
+      if (!blueData || !greenData) {
+        throw new Error(
+          'A document in the database should have been made for the players when they joined the game',
+        );
+      }
+      const newBlueData = await this._updatePlayerStats(
+        blueData as BattleShipDatabaseEntry,
+        blueName === winnerName,
+        greenData as BattleShipDatabaseEntry,
+        greenName,
+      );
+      const newGreenData = await this._updatePlayerStats(
+        greenData as BattleShipDatabaseEntry,
+        greenName === winnerName,
+        blueData as BattleShipDatabaseEntry,
+        blueName,
+      );
+
+      blueDocRef.set(newBlueData);
+      greenDocRef.set(newGreenData);
+    } catch (error) {
+      throw new Error(`Error updating player stats: ${error}`);
+    }
+  }
+
+  private async _stateUpdated(updatedState: GameInstance<BattleShipGameState>) {
     if (updatedState.state.status === 'OVER') {
       // If we haven't yet recorded the outcome, do so now.
       const gameID = this._game?.id;
       if (gameID && !this._history.find(eachResult => eachResult.gameID === gameID)) {
-        const { blue, green } = updatedState.state;
-        if (blue && green) {
+        const { blue, green, winner } = updatedState.state;
+        if (blue && green && winner) {
           const blueName =
             this._occupants.find(eachPlayer => eachPlayer.id === blue)?.userName || blue;
           const greenName =
             this._occupants.find(eachPlayer => eachPlayer.id === green)?.userName || green;
+          const winnerName = blue === winner ? blueName : greenName;
           this._history.push({
             gameID,
             scores: {
@@ -43,10 +103,33 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
               [greenName]: updatedState.state.winner === green ? 1 : 0,
             },
           });
+          this._emitAreaChanged();
+          await this._updateDatabase(blueName, greenName, winnerName);
+        } else {
+          throw new Error('Game is over, but the game state is not properly set.');
         }
       }
+    } else {
+      this._emitAreaChanged();
     }
-    this._emitAreaChanged();
+  }
+
+  private async _makeDefaultDatabaseEntry(playerName: string) {
+    try {
+      const playerDocRef = db.collection('battleship').doc(playerName);
+      const playerDoc = await playerDocRef.get();
+
+      if (!playerDoc.exists) {
+        playerDocRef.set({
+          wins: 0,
+          losses: 0,
+          elo: DEFAULT_ELO,
+          history: [],
+        });
+      }
+    } catch (error) {
+      throw new Error(`Error creating default database entry: ${error}`);
+    }
   }
 
   /**
@@ -88,21 +171,14 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
       if (command.placement.gamePiece !== 'Blue' && command.placement.gamePiece !== 'Green') {
         throw new InvalidParametersError('Invalid game piece');
       }
-      if (command.placementType === 'Placement') {
-        game.placeBoat({
+      game.placeBoat(
+        {
           gameID: command.gameID,
           playerID: player.id,
           move: command.placement,
-        });
-      } else if (command.placementType === 'Removal') {
-        game.removeBoat({
-          gameID: command.gameID,
-          playerID: player.id,
-          move: command.placement,
-        });
-      } else {
-        throw new InvalidParametersError(INVALID_COMMAND_MESSAGE);
-      }
+        },
+        command.vertical,
+      );
       this._stateUpdated(game.toModel());
 
       return undefined as InteractableCommandReturnType<CommandType>;
@@ -133,6 +209,7 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
         game = new BattleShipGame(this._game);
         this._game = game;
       }
+      this._makeDefaultDatabaseEntry(player.userName);
       game.join(player);
       this._stateUpdated(game.toModel());
       return { gameID: game.id } as InteractableCommandReturnType<CommandType>;
@@ -158,6 +235,15 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
         throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
       }
       game.startGame(player);
+      this._stateUpdated(game.toModel());
+      return undefined as InteractableCommandReturnType<CommandType>;
+    }
+    if (command.type === 'ChangeTheme') {
+      const game = this._game;
+      if (!game) {
+        throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+      }
+      game.state.theme = command.theme;
       this._stateUpdated(game.toModel());
       return undefined as InteractableCommandReturnType<CommandType>;
     }

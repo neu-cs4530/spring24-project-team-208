@@ -6,11 +6,19 @@ import {
   BattleShipColor,
   BattleShipColIndex,
   BattleShipRowIndex,
-  BattleShipPiece,
+  BattleShipBoatPiece,
+  BarbieBoatPiece,
+  MilitaryBoatPiece,
+  BattleShipPlacement,
+  BattleShipCell,
+  BattleShipGuess,
+  BattleshipTheme,
 } from '../../types/CoveyTownSocket';
 import PlayerController from '../PlayerController';
 import GameAreaController, {
   GameEventTypes,
+  NOT_IN_PLACEMENT,
+  NO_GAME_IN_PROGRESS_ERROR,
   NO_GAME_STARTABLE,
   PLAYER_NOT_IN_GAME_ERROR,
 } from './GameAreaController';
@@ -18,7 +26,7 @@ import GameAreaController, {
 /**
  * For BattleShipAreaController
  */
-export type BattleShipCell = BattleShipPiece | undefined;
+// export type BattleShipCell = BattleShipCell | undefined;
 export type BattleShipEvents = GameEventTypes & {
   boardChanged: (board: BattleShipCell[][]) => void;
   turnChanged: (isOurTurn: boolean) => void;
@@ -30,8 +38,18 @@ export const SPACE_FULL_MESSAGE = 'The space is full';
 
 function createEmptyBoard(): BattleShipCell[][] {
   const board = new Array(BATTLESHIP_ROWS);
-  for (let i = 0; i < BATTLESHIP_ROWS; i++) {
-    board[i] = new Array(BATTLESHIP_COLS).fill(undefined);
+
+  for (let row = 0; row < BATTLESHIP_ROWS; row++) {
+    board[row] = new Array(BATTLESHIP_COLS);
+
+    for (let col = 0; col < BATTLESHIP_COLS; col++) {
+      board[row][col] = {
+        type: 'Ocean',
+        state: 'Safe',
+        row: row as BattleShipRowIndex,
+        col: col as BattleShipColIndex,
+      };
+    }
   }
   return board;
 }
@@ -46,6 +64,8 @@ export default class BattleShipAreaController extends GameAreaController<
   protected _blueBoard: BattleShipCell[][] = createEmptyBoard();
 
   protected _greenBoard: BattleShipCell[][] = createEmptyBoard();
+
+  protected _theme: BattleshipTheme = 'Military';
 
   /**
    * Returns the current state of the blue board.
@@ -81,6 +101,13 @@ export default class BattleShipAreaController extends GameAreaController<
   }
 
   /**
+   * Returns the theme of the game
+   */
+  get theme(): BattleshipTheme {
+    return this._theme;
+  }
+
+  /**
    * Returns the player with the 'Green' board, if there is one, or undefined otherwise
    */
   get green(): PlayerController | undefined {
@@ -89,6 +116,17 @@ export default class BattleShipAreaController extends GameAreaController<
       return this.occupants.find(eachOccupant => eachOccupant.id === green);
     }
     return undefined;
+  }
+
+  /**
+   * Returns what color the current player is
+   */
+  get whatColor(): BattleShipColor | undefined {
+    if (this.isPlayer) {
+      return this._townController.ourPlayer.id === this._model.game?.state.blue ? 'Blue' : 'Green';
+    } else {
+      return undefined;
+    }
   }
 
   /**
@@ -203,28 +241,36 @@ export default class BattleShipAreaController extends GameAreaController<
   protected _updateFrom(newModel: GameArea<BattleShipGameState>): void {
     super._updateFrom(newModel);
     const newGame = newModel.game;
-    if (newGame) {
-      const gamePiece = this.gamePiece;
-      const newBoard = createEmptyBoard();
+    const wasOurTurn = this.isOurTurn;
 
-      if (gamePiece === 'Blue') {
-        newGame.state.blueBoard.forEach(piece => {
-          newBoard[piece.row][piece.col] = piece.boat;
-        });
-        if (!_.isEqual(newBoard, this._blueBoard)) {
-          this._blueBoard = newBoard;
-          this.emit('boardChanged', this._blueBoard);
-        }
-      } else if (gamePiece === 'Green') {
-        newGame.state.greenBoard.forEach(piece => {
-          newBoard[piece.row][piece.col] = piece.boat;
-        });
-        if (!_.isEqual(newBoard, this._greenBoard)) {
-          this._greenBoard = newBoard;
-          this.emit('boardChanged', this._greenBoard);
-        }
+    if (newGame && this.isActive()) {
+      const newBlueBoard = createEmptyBoard();
+
+      newGame.state.blueBoard.forEach(piece => {
+        newBlueBoard[piece.row][piece.col] = piece;
+      });
+      if (!_.isEqual(newBlueBoard, this._blueBoard)) {
+        this._blueBoard = newBlueBoard;
+        this.emit('blueBoardChanged', this._blueBoard);
+      }
+
+      const newGreenBoard = createEmptyBoard();
+      newGame.state.greenBoard.forEach(piece => {
+        newGreenBoard[piece.row][piece.col] = piece;
+      });
+      if (!_.isEqual(newGreenBoard, this._greenBoard)) {
+        this._greenBoard = newGreenBoard;
+        this.emit('greenBoardChanged', this._greenBoard);
       }
     }
+
+    if (newGame?.state.theme != this.theme) {
+      this._theme = newGame?.state.theme;
+      this.emit('themeChanged', this._theme);
+    }
+
+    const isOurTurn = this.isOurTurn;
+    if (wasOurTurn !== isOurTurn) this.emit('turnChanged', isOurTurn);
   }
 
   /**
@@ -245,15 +291,47 @@ export default class BattleShipAreaController extends GameAreaController<
     });
   }
 
+  public async changeTheme(theme: string) {
+    const instanceID = this._instanceID;
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'ChangeTheme',
+      theme,
+    });
+  }
+
   /**
    * Places a boat piece in the pre-game phase based on a given row and
    * column.
+   * If a entire boat is selected it places each piece of the boat
    * Does not check if placement is valid (invalid if no more pieces to place on board).
    *
    * @throws an error with message NO_GAME_IN_PROGRESS_ERROR if there is no game in progress
    */
-  public async placeBoatPiece(row: BattleShipRowIndex, col: BattleShipColIndex): Promise<void> {
-    throw new Error('Not implemented');
+  public async placeBoatPiece(
+    boat: BattleShipBoatPiece,
+    row: BattleShipRowIndex,
+    col: BattleShipColIndex,
+    vertical: boolean,
+  ): Promise<void> {
+    const instanceID = this._instanceID;
+    if (!instanceID || this._model.game?.state.status !== 'PLACING_BOATS') {
+      throw new Error(NOT_IN_PLACEMENT);
+    }
+
+    const gamePiece =
+      this._townController.ourPlayer.id === this._model.game?.state.blue ? 'Blue' : 'Green';
+
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'SetUpGameMove',
+      gameID: instanceID,
+      placement: {
+        gamePiece,
+        cell: boat,
+        col: col,
+        row: row,
+      },
+      vertical,
+    });
   }
 
   /**
@@ -266,6 +344,19 @@ export default class BattleShipAreaController extends GameAreaController<
    * @param col Column to place guess in
    */
   public async makeMove(row: BattleShipRowIndex, col: BattleShipColIndex): Promise<void> {
-    throw new Error('Not implemented');
+    const instanceID = this._instanceID;
+    if (!instanceID || this._model.game?.state.status !== 'IN_PROGRESS') {
+      throw new Error(NO_GAME_IN_PROGRESS_ERROR);
+    }
+    const move: BattleShipGuess = {
+      gamePiece: this.whatColor!,
+      col,
+      row,
+    };
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'GameMove',
+      gameID: instanceID,
+      move,
+    });
   }
 }

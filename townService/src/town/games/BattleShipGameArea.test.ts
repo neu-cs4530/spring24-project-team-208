@@ -1,8 +1,10 @@
 import { nanoid } from 'nanoid';
 import { mock } from 'jest-mock-extended';
+import { DocumentReference, DocumentSnapshot, WriteResult } from 'firebase-admin/firestore';
 import Player from '../../lib/Player';
 import {
   BattleShipColor,
+  BattleShipDatabaseEntry,
   BattleShipGameState,
   BattleShipGuess,
   BattleShipPlacement,
@@ -33,6 +35,7 @@ class TestingGame extends Game<BattleShipGameState, BattleShipGuess> {
       greenBoard: [],
       status: 'WAITING_TO_START',
       firstPlayer: 'Blue',
+      theme: 'Military',
     });
   }
 
@@ -70,6 +73,10 @@ describe('BattleShipGameArea', () => {
   let interactableUpdateSpy: jest.SpyInstance;
   const gameConstructorSpy = jest.spyOn(BattleShipGameModule, 'default');
   let game: TestingGame;
+  const firebaseSetSpy = jest.spyOn(DocumentReference.prototype, 'set');
+  const firebaseGetSpy = jest.spyOn(DocumentReference.prototype, 'get');
+  let databaseReturn: DocumentSnapshot;
+  let databaseEntry: BattleShipDatabaseEntry;
 
   beforeEach(() => {
     gameConstructorSpy.mockClear();
@@ -92,6 +99,20 @@ describe('BattleShipGameArea', () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore (Test requires access to protected method)
     interactableUpdateSpy = jest.spyOn(gameArea, '_emitAreaChanged');
+
+    firebaseGetSpy.mockClear();
+    firebaseSetSpy.mockClear();
+    databaseEntry = {
+      losses: 0,
+      wins: 0,
+      elo: 1000,
+      history: [],
+    };
+    databaseReturn = {
+      data: () => databaseEntry,
+    } as unknown as DocumentSnapshot;
+    firebaseGetSpy.mockResolvedValue(databaseReturn);
+    firebaseSetSpy.mockResolvedValue({} as WriteResult);
   });
 
   describe('[T3.1] JoinGame command', () => {
@@ -111,7 +132,7 @@ describe('BattleShipGameArea', () => {
       expect(gameID).toEqual(game.id);
       expect(interactableUpdateSpy).toHaveBeenCalled();
       expect(gameConstructorSpy).toHaveBeenCalledTimes(1);
-      game.endGame();
+      game.endGame(blue.id);
 
       gameConstructorSpy.mockClear();
       const { gameID: newGameID } = gameArea.handleCommand({ type: 'JoinGame' }, blue);
@@ -200,8 +221,8 @@ describe('BattleShipGameArea', () => {
         gameArea.handleCommand(
           {
             type: 'SetUpGameMove',
-            placement: { col: 0, row: 0, gamePiece: 'Blue', boat: 'Front' },
-            placementType: 'Placement',
+            placement: { col: 0, row: 0, gamePiece: 'Blue', cell: 'Aircraft_Middle_1_Military' },
+            vertical: true,
             gameID: nanoid(),
           },
           blue,
@@ -221,8 +242,8 @@ describe('BattleShipGameArea', () => {
           gameArea.handleCommand(
             {
               type: 'SetUpGameMove',
-              placement: { col: 0, row: 0, gamePiece: 'Blue', boat: 'Front' },
-              placementType: 'Placement',
+              placement: { col: 0, row: 0, gamePiece: 'Blue', cell: 'Aircraft_Middle_1_Military' },
+              vertical: true,
               gameID: nanoid(),
             },
             blue,
@@ -230,39 +251,52 @@ describe('BattleShipGameArea', () => {
         ).toThrowError(GAME_ID_MISSMATCH_MESSAGE);
       });
       it('should call placeBoat on the game and call _emitAreaChanged', () => {
-        const placement: BattleShipPlacement = { col: 0, row: 0, gamePiece: 'Blue', boat: 'End' };
+        const placement: BattleShipPlacement = {
+          col: 0,
+          row: 0,
+          gamePiece: 'Blue',
+          cell: 'Aircraft Carrier',
+        };
         const placeBoatSpy = jest.spyOn(game, 'placeBoat');
         gameArea.handleCommand(
-          { type: 'SetUpGameMove', placement, placementType: 'Placement', gameID },
+          {
+            type: 'SetUpGameMove',
+            placement,
+            vertical: true,
+            gameID,
+          },
           blue,
         );
-        expect(placeBoatSpy).toHaveBeenCalledWith({
-          gameID: game.id,
-          playerID: blue.id,
-          move: {
-            ...placement,
-            gamePiece: 'Blue',
+        expect(placeBoatSpy).toHaveBeenCalledWith(
+          {
+            gameID: game.id,
+            playerID: blue.id,
+            move: {
+              ...placement,
+              gamePiece: 'Blue',
+            },
           },
-        });
-        expect(interactableUpdateSpy).toHaveBeenCalledTimes(1);
-      });
-      it('should call removeBoat on the game and call _emitAreaChanged', () => {
-        const placement: BattleShipPlacement = { col: 0, row: 0, gamePiece: 'Blue', boat: 'End' };
-        const removeBoatSpy = jest.spyOn(game, 'removeBoat');
-        gameArea.handleCommand(
-          { type: 'SetUpGameMove', placement, placementType: 'Removal', gameID },
-          blue,
+          true,
         );
-        expect(removeBoatSpy).toHaveBeenCalledWith({
-          gameID: game.id,
-          playerID: blue.id,
-          move: {
-            ...placement,
-            gamePiece: 'Blue',
-          },
-        });
         expect(interactableUpdateSpy).toHaveBeenCalledTimes(1);
       });
+      // it('should call removeBoat on the game and call _emitAreaChanged', () => {
+      //   const placement: BattleShipPlacement = { col: 0, row: 0, gamePiece: 'Blue', boat: 'End' };
+      //   const removeBoatSpy = jest.spyOn(game, 'removeBoat');
+      //   gameArea.handleCommand(
+      //     { type: 'SetUpGameMove', placement, placementType: 'Removal', gameID },
+      //     blue,
+      //   );
+      //   expect(removeBoatSpy).toHaveBeenCalledWith({
+      //     gameID: game.id,
+      //     playerID: blue.id,
+      //     move: {
+      //       ...placement,
+      //       gamePiece: 'Blue',
+      //     },
+      //   });
+      //   expect(interactableUpdateSpy).toHaveBeenCalledTimes(1);
+      // });
     });
   });
   describe('[T3.3] GameMove command', () => {
@@ -348,23 +382,6 @@ describe('BattleShipGameArea', () => {
             expect(interactableUpdateSpy).toHaveBeenCalledTimes(1);
           },
         );
-        test('when the game results in a tie', () => {
-          const finalMove: BattleShipGuess = { col: 0, row: 0, gamePiece: 'Blue' };
-          jest.spyOn(game, 'applyMove').mockImplementationOnce(() => {
-            game.endGame();
-          });
-          gameArea.handleCommand({ type: 'GameMove', move: finalMove, gameID }, blue);
-          expect(game.state.status).toEqual('OVER');
-          expect(gameArea.history.length).toEqual(1);
-          expect(gameArea.history[0]).toEqual({
-            gameID: game.id,
-            scores: {
-              [blue.userName]: 0,
-              [green.userName]: 0,
-            },
-          });
-          expect(interactableUpdateSpy).toHaveBeenCalledTimes(1);
-        });
       });
     });
   });
