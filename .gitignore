@@ -119,3 +119,5 @@ ngrok.yml
 .netlify
 
 townService/firebaseAdminKey.json
+
+.DS_Store
