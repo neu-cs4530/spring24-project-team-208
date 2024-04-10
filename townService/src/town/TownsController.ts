@@ -230,7 +230,7 @@ export class TownsController extends Controller {
         interactables: town.interactables.map(eachInteractable => eachInteractable.toModel()),
       });
     } catch (err) {
-      throw new InvalidParametersError('Failed to authenticate');
+      throw new InvalidParametersError(`Failed to authenticate: ${err}`);
     }
   }
 }
