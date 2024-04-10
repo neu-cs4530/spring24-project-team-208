@@ -9,6 +9,7 @@ import {
   BattleShipPlacement,
   GameResult,
   GameStatus,
+  PlayerID,
 } from '../../types/CoveyTownSocket';
 import PlayerController from '../PlayerController';
 import TownController from '../TownController';
@@ -37,8 +38,8 @@ describe('BattleShipAreaController', () => {
   Object.defineProperty(mockTownController, 'players', {
     get: () => [ourPlayer, ...otherPlayers],
   });
-  mockTownController.getPlayer.mockImplementation(playerID => {
-    const p = mockTownController.players.find(player => player.id === playerID);
+  mockTownController.getPlayer.mockImplementation((playerID: PlayerID) => {
+    const p = mockTownController.players.find((player: { id: PlayerID }) => player.id === playerID);
     assert(p);
     return p;
   });
@@ -130,6 +131,7 @@ describe('BattleShipAreaController', () => {
                 greenBoard: greenBoard || [],
                 winner: winner,
                 firstPlayer: firstPlayer || 'Blue',
+                soloGame: false,
                 theme: 'Military',
               },
             },
@@ -138,7 +140,9 @@ describe('BattleShipAreaController', () => {
     );
     if (players) {
       ret.occupants = players
-        .map(eachID => mockTownController.players.find(eachPlayer => eachPlayer.id === eachID))
+        .map(eachID =>
+          mockTownController.players.find((eachPlayer: { id: string }) => eachPlayer.id === eachID),
+        )
         .filter(eachPlayer => eachPlayer) as PlayerController[];
     }
     return ret;
