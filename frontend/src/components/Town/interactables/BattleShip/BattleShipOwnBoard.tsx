@@ -145,6 +145,8 @@ export default function BattleShipOwnBoard({
         border: '3px solid black',
         borderRadius: '15px',
         padding: '10px',
+        position: 'absolute',
+        left: '-20%',
       }}>
       <Modal isOpen={isOpen} onClose={onClose} size='xl'>
         <ModalOverlay />

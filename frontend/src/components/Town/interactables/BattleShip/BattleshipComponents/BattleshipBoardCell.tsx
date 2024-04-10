@@ -35,8 +35,10 @@ export function BattleShipBoardCell({
       : controller.greenBoard;
   const shouldRotate =
     cell.type !== 'Ocean' &&
-    ((cell.row + 1 < BATTLESHIP_ROWS && board[cell.row + 1][cell.col].type !== 'Ocean') ||
-      (cell.row - 1 >= 0 && board[cell.row - 1][cell.col].type !== 'Ocean'));
+    ((cell.row + 1 < BATTLESHIP_ROWS &&
+      board[cell.row + 1][cell.col].type.split('_')[0] === cell.type.split('_')[0]) ||
+      (cell.row - 1 >= 0 &&
+        board[cell.row - 1][cell.col].type.split('_')[0] === cell.type.split('_')[0]));
 
   return (
     <div

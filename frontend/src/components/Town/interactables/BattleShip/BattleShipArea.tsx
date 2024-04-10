@@ -11,6 +11,8 @@ import PlayerController from '../../../../classes/PlayerController';
 import { Button, List, ListItem, useToast } from '@chakra-ui/react';
 import BattleShipOwnBoard from './BattleShipOwnBoard';
 import BattleShipOpponentBoard from './BattleShipOpponentBoard';
+import BattleshipMenu from './BattleshipMenu';
+import BattleshipEndScreen from './BattleshipEndScreen';
 import getBattleShipData from '../../../Database';
 import { get } from 'lodash';
 
@@ -66,14 +68,11 @@ export default function BattleShipArea({
   const [greenData, setGreenData] = useState<BattleShipDatabaseEntry | undefined>(undefined);
 
   const [gameStatus, setGameStatus] = useState<GameStatus>(gameAreaController.status);
-  const [moveCount, setMoveCount] = useState<number>(gameAreaController.moveCount);
+  const [gameWon, setGameWon] = useState<boolean>(false);
   const toast = useToast();
   useEffect(() => {
     const updateGameState = () => {
-      setBlue(gameAreaController.blue);
-      setGreen(gameAreaController.green);
       setGameStatus(gameAreaController.status || 'WAITING_TO_START');
-      setMoveCount(gameAreaController.moveCount || 0);
     };
     const onGameEnd = () => {
       const winner = gameAreaController.winner;
@@ -84,6 +83,7 @@ export default function BattleShipArea({
           status: 'info',
         });
       } else if (winner === townController.ourPlayer) {
+        setGameWon(true);
         toast({
           title: 'Game over',
           description: 'You won!',
@@ -104,109 +104,25 @@ export default function BattleShipArea({
       gameAreaController.removeListener('gameEnd', onGameEnd);
     };
   }, [townController, gameAreaController, toast]);
-  let gameStatusText = <></>;
-
-  if (gameStatus === 'IN_PROGRESS') {
-    gameStatusText = (
-      <>
-        Game in progress, {moveCount} moves in, currently{' '}
-        {gameAreaController.whoseTurn === townController.ourPlayer
-          ? 'your'
-          : gameAreaController.whoseTurn?.userName + "'s"}{' '}
-        turn{' '}
-        {townController.ourPlayer === gameAreaController.blue ? "(You're Blue)" : "(You're Green)"}
-      </>
-    );
-  } else if (gameStatus == 'WAITING_TO_START') {
-    const startGameButton = (
-      <Button
-        onClick={async () => {
-          setJoiningGame(true);
-          try {
-            await gameAreaController.startGame();
-          } catch (err) {
-            toast({
-              title: 'Error starting game',
-              description: (err as Error).toString(),
-              status: 'error',
-            });
-          }
-          setJoiningGame(false);
-        }}
-        isLoading={joiningGame}
-        disabled={joiningGame}>
-        Start Game
-      </Button>
-    );
-    gameStatusText = <b>Waiting for players to press start. {startGameButton}</b>;
-  } else {
-    const joinGameButton = (
-      <Button
-        onClick={async () => {
-          setJoiningGame(true);
-          try {
-            await gameAreaController.joinGame();
-          } catch (err) {
-            toast({
-              title: 'Error joining game',
-              description: (err as Error).toString(),
-              status: 'error',
-            });
-          }
-          setJoiningGame(false);
-        }}
-        isLoading={joiningGame}
-        disabled={joiningGame}>
-        Join New Game
-      </Button>
-    );
-    let gameStatusStr;
-    if (gameStatus === 'OVER') gameStatusStr = 'over';
-    else if (gameStatus === 'WAITING_FOR_PLAYERS') gameStatusStr = 'waiting for players to join';
-    gameStatusText = (
-      <b>
-        Game {gameStatusStr}. {joinGameButton}
-      </b>
-    );
-  }
-  useEffect(() => {
-    const getBlueData = async () => {
-      if (blue) {
-        const newData = await getBattleShipData(blue.userName);
-        setBlueData(newData);
-      }
-    };
-
-    getBlueData();
-  }, [blue]);
 
   useEffect(() => {
-    const getGreenData = async () => {
-      if (green) {
-        const newData = await getBattleShipData(green.userName);
-        setGreenData(newData);
-      }
-    };
+    const delay = 5000;
+    const timeoutId = setTimeout(() => {
+      setGameWon(false);
+    }, delay);
 
-    getGreenData();
-  }, [green]);
-
+    return () => clearTimeout(timeoutId);
+  }, [gameWon]);
   return (
     <>
-      <List aria-label='list of players in the game'>
-        <ListItem>
-          Blue: {blue?.userName || '(No player yet!)'}{' '}
-          {blueData ? '(' + Math.round(blueData.elo) + ')' : ''}
-        </ListItem>
-        <ListItem>
-          Green: {green?.userName || '(No player yet!)'}{' '}
-          {greenData ? '(' + Math.round(greenData.elo) + ')' : ''}
-        </ListItem>
-      </List>
-      {['PLACING_BOATS', 'IN_PROGRESS'].includes(gameStatus) ? (
-        <BattleShipOwnBoard gameAreaController={gameAreaController} />
+      {gameWon ? (
+        <BattleshipEndScreen />
+      ) : gameStatus === 'WAITING_FOR_PLAYERS' ||
+        gameStatus === 'WAITING_TO_START' ||
+        gameStatus === 'OVER' ? (
+        <BattleshipMenu gameAreaController={gameAreaController} interactableID={interactableID} />
       ) : (
-        gameStatusText
+        <BattleShipOwnBoard gameAreaController={gameAreaController} />
       )}
     </>
   );

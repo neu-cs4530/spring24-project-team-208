@@ -45,7 +45,13 @@ export const INVALID_GAME_AREA_TYPE_MESSAGE = 'Invalid game area type';
  *  - A chat channel for the game area (@see ChatChannel.tsx), with the property interactableID set to the interactableID of the game area
  *
  */
-function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.Element {
+function GameArea({
+  interactableID,
+  areaName,
+}: {
+  interactableID: InteractableID;
+  areaName?: string;
+}): JSX.Element {
   const gameAreaController =
     useInteractableAreaController<GenericGameAreaController>(interactableID);
   const townController = useTownController();
@@ -61,67 +67,73 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
       gameAreaController.removeListener('gameUpdated', updateGameState);
     };
   }, [townController, gameAreaController]);
-  return (
+  return gameAreaController.toInteractableAreaModel().type === 'BattleShipArea' ? (
+    <ModalContent>
+      <BattleShipArea interactableID={interactableID} />
+    </ModalContent>
+  ) : (
     <>
-      <Accordion allowToggle>
-        <AccordionItem>
-          <Heading as='h3'>
-            <AccordionButton>
-              <Box flex='1' textAlign='left'>
-                Leaderboard
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-            <AccordionPanel>
-              <Leaderboard results={history} />
-            </AccordionPanel>
-          </Heading>
-        </AccordionItem>
-        <AccordionItem>
-          <Heading as='h3'>
-            <AccordionButton>
-              <Box as='span' flex='1' textAlign='left'>
-                Current Observers
+      <ModalContent>
+        <ModalHeader>{areaName}</ModalHeader>
+        <ModalCloseButton />
+        <Accordion allowToggle>
+          <AccordionItem>
+            <Heading as='h3'>
+              <AccordionButton>
+                <Box flex='1' textAlign='left'>
+                  Leaderboard
+                </Box>
                 <AccordionIcon />
-              </Box>
-            </AccordionButton>
-          </Heading>
-          <AccordionPanel>
-            <List aria-label='list of observers in the game'>
-              {observers.map(player => {
-                return <ListItem key={player.id}>{player.userName}</ListItem>;
-              })}
-            </List>
-          </AccordionPanel>
-        </AccordionItem>
-      </Accordion>
-      <Flex>
-        <Box>
-          {gameAreaController.toInteractableAreaModel().type === 'ConnectFourArea' ? (
-            <ConnectFourArea interactableID={interactableID} />
-          ) : gameAreaController.toInteractableAreaModel().type === 'TicTacToeArea' ? (
-            <TicTacToeArea interactableID={interactableID} />
-          ) : gameAreaController.toInteractableAreaModel().type === 'BattleShipArea' ? (
-            <BattleShipArea interactableID={interactableID} />
-          ) : (
-            <>{INVALID_GAME_AREA_TYPE_MESSAGE}</>
-          )}
-        </Box>
-        <Box
-          style={{
-            height: '400px',
-            overflowY: 'scroll',
-          }}>
-          <div
+              </AccordionButton>
+              <AccordionPanel>
+                <Leaderboard results={history} />
+              </AccordionPanel>
+            </Heading>
+          </AccordionItem>
+          <AccordionItem>
+            <Heading as='h3'>
+              <AccordionButton>
+                <Box as='span' flex='1' textAlign='left'>
+                  Current Observers
+                  <AccordionIcon />
+                </Box>
+              </AccordionButton>
+            </Heading>
+            <AccordionPanel>
+              <List aria-label='list of observers in the game'>
+                {observers.map(player => {
+                  return <ListItem key={player.id}>{player.userName}</ListItem>;
+                })}
+              </List>
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
+        <Flex>
+          <Box>
+            {gameAreaController.toInteractableAreaModel().type === 'ConnectFourArea' ? (
+              <ConnectFourArea interactableID={interactableID} />
+            ) : gameAreaController.toInteractableAreaModel().type === 'TicTacToeArea' ? (
+              <TicTacToeArea interactableID={interactableID} />
+            ) : (
+              <>{INVALID_GAME_AREA_TYPE_MESSAGE}</>
+            )}
+          </Box>
+          <Box
             style={{
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
+              height: '400px',
+              overflowY: 'scroll',
             }}>
-            <ChatChannel interactableID={gameAreaController.id} />
-          </div>
-        </Box>
-      </Flex>
+            <div
+              style={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+              }}>
+              <ChatChannel interactableID={gameAreaController.id} />
+            </div>
+          </Box>
+        </Flex>
+      </ModalContent>
     </>
   );
 }
@@ -145,13 +157,7 @@ export default function GameAreaWrapper(): JSX.Element {
     return (
       <Modal isOpen={true} onClose={closeModal} closeOnOverlayClick={false} size='xl'>
         <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>{gameArea.name}</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <GameArea interactableID={gameArea.id} />
-          </ModalBody>
-        </ModalContent>
+        <GameArea interactableID={gameArea.id} areaName={gameArea.name} />
       </Modal>
     );
   }

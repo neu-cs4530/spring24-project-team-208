@@ -25,6 +25,8 @@ import Game from './Game';
 
 const NOT_YOUR_BOARD_MESSAGE = 'Not your board';
 const MAX_BOAT_PIECES = 15;
+const BATTLESHIP_COLS = 10;
+const BATTLESHIP_ROWS = 10;
 const ALL_BOATS: BattleshipBoatPiece[] = [
   'Aircraft_Back',
   'Aircraft_Middle_1',
@@ -218,8 +220,8 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * to reposition their boats to start the game
    */
   protected _isValidBoard(boardCells: BattleShipCell[]): boolean {
-    const numRows = 10;
-    const numCols = 10;
+    const numRows = BATTLESHIP_ROWS;
+    const numCols = BATTLESHIP_COLS;
 
     // Convert pieces to board
     const board: (BattleShipCell | undefined)[][] = new Array(numRows);
@@ -275,11 +277,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @param player The player who is ready to start the game
    */
   public startGame(player: Player): void {
-    if (
-      this.state.status !== 'WAITING_TO_START'
-      // || (this.state.blue === player.id && !this._isValidBoard(this.state.blueBoard))
-      // || (this.state.green === player.id && !this._isValidBoard(this.state.greenBoard))
-    ) {
+    if (this.state.status !== 'WAITING_TO_START') {
       throw new InvalidParametersError(GAME_NOT_STARTABLE_MESSAGE);
     }
     if (this.state.blue !== player.id && this.state.green !== player.id) {
@@ -314,8 +312,8 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     const newBoard: Array<BattleShipCell> = Array.from({ length: 100 }, (_, index) => ({
       type: 'Ocean',
       state: 'Safe',
-      row: Math.floor(index / 10) as BattleShipRowIndex,
-      col: (index % 10) as BattleShipColIndex,
+      row: Math.floor(index / BATTLESHIP_ROWS) as BattleShipRowIndex,
+      col: (index % BATTLESHIP_COLS) as BattleShipColIndex,
     }));
 
     return newBoard;
@@ -346,11 +344,11 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       return false;
     }
     // A placement is invalid if a vertical boat would be out of bounds
-    if (vertical && placement.row + boatLength > 10) {
+    if (vertical && placement.row + boatLength > BATTLESHIP_ROWS) {
       return false;
     }
     // A placement is invalid if a horizontal boat would be out of bounds
-    if (!vertical && placement.col + boatLength > 10) {
+    if (!vertical && placement.col + boatLength > BATTLESHIP_COLS) {
       return false;
     }
 
@@ -502,8 +500,20 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     let board;
     if (removal.gamePiece === 'Blue') {
       board = this.state.blueBoard.filter(p => p.col !== removal.col || p.row !== removal.row);
+      board = this.state.blueBoard.concat({
+        row: removal.row,
+        col: removal.col,
+        type: 'Ocean',
+        state: 'Safe',
+      });
     } else {
       board = this.state.greenBoard.filter(p => p.col !== removal.col || p.row !== removal.row);
+      board = this.state.greenBoard.concat({
+        row: removal.row,
+        col: removal.col,
+        type: 'Ocean',
+        state: 'Safe',
+      });
     }
     const newState: BattleShipGameState = {
       ...this.state,
@@ -610,29 +620,17 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
   }
 
   /*
-  Returns true if the game is won by either player.
+    Returns true all the ships on the given board have been hit
   */
-  private _gameIsWon(guesses: BattleShipGuess[]): boolean {
-    // Checks if the locations of all the boats on on the board have been guessed, ignoring the gamePiece of the guesses
-    const boardIsGuessed = (board: BattleShipCell[], guessList: BattleShipGuess[]) => {
-      for (const piece of board) {
-        if (!guessList.some(guess => guess.row === piece.row && guess.col === piece.col)) {
-          return false;
-        }
+  private _gameIsWon(board: BattleShipCell[]): boolean {
+    let safeTiles = 0;
+    board.forEach((cell: BattleShipCell) => {
+      if (cell.type !== 'Ocean' && cell.state === 'Safe') {
+        safeTiles++;
       }
-      return true;
-    };
+    });
 
-    const blueWon = boardIsGuessed(
-      this.state.blueBoard,
-      guesses.filter(guess => guess.gamePiece === 'Green'),
-    );
-    const greenWon = boardIsGuessed(
-      this.state.greenBoard,
-      guesses.filter(guess => guess.gamePiece === 'Blue'),
-    );
-
-    return blueWon || greenWon;
+    return safeTiles === 0;
   }
 
   protected _applyMove(move: BattleShipGuess) {
@@ -653,7 +651,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       moves: newMoves,
     };
 
-    if (this._gameIsWon(newMoves)) {
+    if (this._gameIsWon(newBoard)) {
       newState.status = 'OVER';
       newState.winner = move.gamePiece === 'Blue' ? this.state.blue : this.state.green;
     }
@@ -673,7 +671,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    *
    * @throws InvalidParametersError if the game is not in progress (GAME_NOT_IN_PROGRESS_MESSAGE)
    * @throws InvalidParametersError if the player is not in the game (PLAYER_NOT_IN_GAME_MESSAGE)
-   * @throws INvalidParametersError if the move is not the player's turn (MOVE_NOT_YOUR_TURN_MESSAGE)
+   * @throws InvalidParametersError if the move is not the player's turn (MOVE_NOT_YOUR_TURN_MESSAGE)
    *
    */
   public applyMove(move: GameMove<BattleShipGuess>): void {
