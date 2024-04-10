@@ -24,7 +24,7 @@
     "prestart": "tsoa spec-and-routes",
     "build": "tsc -p .",
     "zip": "npm-pack-zip",
-    "build:live": "concurrently \"nodemon --watch 'src/**/*.ts' --watch 'generated/routes.ts' -r dotenv/config src/Server.ts\" \"nodemon --watch 'src/' --ext ts -x tsoa spec-and-routes\"",
+    "build:live": "concurrently \"nodemon --watch 'src/**/*.ts' --watch 'generated/routes.ts' src/Server.ts\" \"nodemon --watch 'src/' --ext ts -x tsoa spec-and-routes\"",
     "swagger": "tsoa spec",
     "format": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
