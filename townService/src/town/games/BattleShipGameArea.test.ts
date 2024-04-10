@@ -35,6 +35,7 @@ class TestingGame extends Game<BattleShipGameState, BattleShipGuess> {
       greenBoard: [],
       status: 'WAITING_TO_START',
       firstPlayer: 'Blue',
+      soloGame: false,
       theme: 'Military',
     });
   }
@@ -221,8 +222,9 @@ describe('BattleShipGameArea', () => {
         gameArea.handleCommand(
           {
             type: 'SetUpGameMove',
-            placement: { col: 0, row: 0, gamePiece: 'Blue', cell: 'Aircraft_Middle_1_Military' },
+            placement: { col: 0, row: 0, gamePiece: 'Blue', cell: 'Battleship' },
             vertical: true,
+            // placementType: 'Placement',
             gameID: nanoid(),
           },
           blue,
@@ -242,8 +244,9 @@ describe('BattleShipGameArea', () => {
           gameArea.handleCommand(
             {
               type: 'SetUpGameMove',
-              placement: { col: 0, row: 0, gamePiece: 'Blue', cell: 'Aircraft_Middle_1_Military' },
+              placement: { col: 0, row: 0, gamePiece: 'Blue', cell: 'Aircraft Carrier' },
               vertical: true,
+              // placementType: 'Placement',
               gameID: nanoid(),
             },
             blue,
@@ -262,6 +265,7 @@ describe('BattleShipGameArea', () => {
           {
             type: 'SetUpGameMove',
             placement,
+            // placementType: 'Placement',
             vertical: true,
             gameID,
           },
