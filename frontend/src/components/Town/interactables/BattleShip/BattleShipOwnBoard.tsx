@@ -8,8 +8,12 @@ import {
 import React, { useEffect, useState } from 'react';
 import BattleShipAreaController from '../../../../classes/interactable/BattleShipAreaController';
 import useTownController from '../../../../hooks/useTownController';
-import { BattleShipBoatPiece, BattleShipCell } from '../../../../types/CoveyTownSocket';
-import { battleshipLogo, crosshair, scratch, smallNotebook } from './BattleshipMenuSprites';
+import {
+  BattleShipBoatPiece,
+  BattleShipCell,
+  BattleShipDatabaseEntry,
+} from '../../../../types/CoveyTownSocket';
+import { battleshipLogo } from './BattleshipMenuSprites';
 import { BattleShipBoardCell } from './BattleshipComponents/BattleshipBoardCell';
 import { EnemyCounter } from './BattleshipComponents/EnemyCounter';
 import { CheatSheetNoteBookSmall } from './BattleshipComponents/CheatSheetNoteBookSmall';
@@ -18,6 +22,7 @@ import TurnTeller from './BattleshipComponents/TurnTeller';
 import ButtonStatus from './BattleshipComponents/ButtonStatus';
 import ActionButton from './BattleshipComponents/ActionButton';
 import VerticalSwitchButton from './BattleshipComponents/VerticalSwitch';
+import getBattleShipData from '../../../Database';
 
 export type BattleShipGameProps = {
   gameAreaController: BattleShipAreaController;
@@ -69,6 +74,8 @@ export default function BattleShipOwnBoard({
   const [isVertical, setIsVertical] = useState<boolean>(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const inPlacement = gameAreaController.status === 'PLACING_BOATS';
+  const [green, setGreen] = useState<BattleShipDatabaseEntry | null>(null);
+  const [blue, setBlue] = useState<BattleShipDatabaseEntry | null>(null);
 
   const placeBoat = () => {
     gameAreaController.placeBoatPiece(chosenBoat!, chosenCell!.row, chosenCell!.col, isVertical);
@@ -137,6 +144,15 @@ export default function BattleShipOwnBoard({
       gameAreaController.removeListener('turnChanged', setIsOurTurnMini);
     };
   }, [gameAreaController]);
+  useEffect(() => {
+    const getData = async () => {
+      const blueData = await getBattleShipData(gameAreaController.blue?.userName || '');
+      setBlue(blueData);
+      const greenData = await getBattleShipData(gameAreaController.green?.userName || '');
+      setBlue(greenData);
+    };
+    getData();
+  }, [gameAreaController.blue, gameAreaController.green]);
 
   return (
     <div
@@ -263,6 +279,18 @@ export default function BattleShipOwnBoard({
           <CheatSheetNoteBookSmall openModal={onOpen} />
         </span>
       </div>
+      <span
+        style={{
+          position: 'relative',
+          fontFamily: 'Scribble',
+          bottom: '22.5%',
+          left: '1%',
+          fontSize: '1.5rem',
+        }}>
+        {`${gameAreaController.green?.userName} (${green?.elo || '0'})  vs.  ${
+          gameAreaController.blue?.userName
+        }) (${blue?.elo || '0'})`}
+      </span>
       <ModalCloseButton />
     </div>
   );

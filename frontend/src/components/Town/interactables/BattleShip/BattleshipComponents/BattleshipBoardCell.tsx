@@ -44,7 +44,7 @@ export function BattleShipBoardCell({
       (cell.row - 1 >= 0 &&
         board[cell.row - 1][cell.col].type.split('_')[0] === cell.type.split('_')[0]));
 
-  const destroyedBoats: BattleshipBoat[] = []
+  const destroyedBoats: BattleshipBoat[] = [];
   const hitBoats = new Map<string, number>();
   board.map((row: BattleShipCell[]) =>
     row.map((col: BattleShipCell) => {
@@ -100,11 +100,15 @@ export function BattleShipBoardCell({
           rotate: shouldRotate ? '90deg' : '0deg',
           position: 'relative',
         }}>
-        {cell?.type === 'Ocean' || (controller.isOurTurn && cell.type !== 'Ocean' && hit && !destroyedBoats.includes(cell.type.split('_')[0]))
+        {cell?.type === 'Ocean' ||
+        (controller.isOurTurn &&
+          cell.type !== 'Ocean' &&
+          hit &&
+          !destroyedBoats.includes(cell.type.split('_')[0]))
           ? OCEAN_STORE[Math.floor(Math.random() * OCEAN_STORE.length)]
           : pieceStore.find(piece => piece.name === cell?.type)?.component}
       </div>
-      {(hit && cell.type !== 'Ocean') && (
+      {hit && cell.type !== 'Ocean' && (
         <div
           style={{
             position: 'absolute',
@@ -117,7 +121,7 @@ export function BattleShipBoardCell({
           {fireOverlay}
         </div>
       )}
-      {(hit && cell.type === 'Ocean') && (
+      {hit && cell.type === 'Ocean' && (
         <div
           style={{
             position: 'absolute',
@@ -129,7 +133,7 @@ export function BattleShipBoardCell({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            cursor: 'arrow'
+            cursor: 'arrow',
           }}>
           .
         </div>
