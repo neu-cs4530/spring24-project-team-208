@@ -238,7 +238,7 @@ export type BattleShipColIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 export type BattleShipColor = 'Blue' | 'Green';
 
 
-export type BattleshipBoat = "Battleship" | "Aircraft Carrier" | "Submarine" | "Cruiser" | "Destroyer";
+export type BattleshipBoat = "Battleship" | "Aircraft Carrier" | "Submarine" | "Cruiser" | "Destroyer" | "Aircraft";
 
 /**
  * Every type of individual boat piece
