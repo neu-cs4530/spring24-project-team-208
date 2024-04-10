@@ -14,7 +14,7 @@ import InvalidParametersError, {
   GAME_NOT_IN_PROGRESS_MESSAGE,
   INVALID_COMMAND_MESSAGE,
 } from '../../lib/InvalidParametersError';
-import db from '../../lib/firebaseData';
+import db from '../../lib/firebaseSetup';
 
 const DEFAULT_ELO = 1000;
 
