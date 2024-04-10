@@ -8,4 +8,5 @@ dependency to this list of esModules, so that it will be transformed into ESM
 module.exports = {
   preset: 'ts-jest/presets/js-with-ts-esm',
   transformIgnorePatterns: [`/node_modules/(?!${esModules})`],
+  setupFiles: ['dotenv/config'],
 };

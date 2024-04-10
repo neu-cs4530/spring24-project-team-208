@@ -30,6 +30,7 @@
     "cross-env": "^7.0.3",
     "d3-timer": "^3.0.1",
     "enzyme": "^3.11.0",
+    "firebase": "^10.10.0",
     "framer-motion": "^6.5.0",
     "fscreen": "^1.2.0",
     "linkify-it": "^4.0.1",
