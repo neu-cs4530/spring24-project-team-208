@@ -16,24 +16,7 @@ import { largeNotebook } from '../BattleshipMenuSprites';
 //   }
 
 export function CheatSheetNoteBookModal({ controller }: { controller: BattleShipAreaController }) {
-  const [gameData, setGameData] = useState<BattleShipDatabaseEntry | null>({
-    wins: 10,
-    losses: 10,
-    elo: 100,
-    history: [
-      {
-      opponent: 'bruh',
-      result: 'win',
-      },
-      {
-        opponent: 'bruh',
-        result: 'win',
-        },
-        {
-          opponent: 'bruh',
-          result: 'win',
-          },]
-  });
+  const [gameData, setGameData] = useState<BattleShipDatabaseEntry | null>(null);
   const username =
     controller.whatColor === 'Blue' ? controller.blue?.userName : controller.green?.userName;
 
@@ -92,10 +75,15 @@ export function CheatSheetNoteBookModal({ controller }: { controller: BattleShip
           }}>
           <p style={{ fontSize: '1.5rem', textDecoration: 'underline' }}>Previous Games</p>
           {gameData?.history && gameData?.history.length > 0 ? (
-            gameData?.history.map(
-              (result: BattleShipGameOutcome) =>
-                <p style={{ fontSize: '.7rem' }}>{`${username} vs. ${result.opponent} - ${result.result}`}</p>,
-            )
+            gameData?.history.map((result: BattleShipGameOutcome, index: number) => (
+              <p
+                key={index}
+                style={{
+                  fontSize: '.7rem',
+                }}>
+                {`${username} vs. ${result.opponent} - ${result.result}`}
+              </p>
+            ))
           ) : (
             <p>No Previous Games</p>
           )}
