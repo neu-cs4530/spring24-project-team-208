@@ -278,7 +278,6 @@ export const BARBIE_PIECE_STORE = [
   },
 ];
 
-
 export const OCEAN_STORE = [
   <Image
     key='1'

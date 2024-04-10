@@ -3,7 +3,12 @@ import BattleShipAreaController, {
   BATTLESHIP_ROWS,
 } from '../../../../../classes/interactable/BattleShipAreaController';
 import { BattleShipCell } from '../../../../../types/CoveyTownSocket';
-import { MILITARY_PIECE_STORE, BARBIE_PIECE_STORE, fireOverlay, OCEAN_STORE } from '../BattleshipCellSprites';
+import {
+  MILITARY_PIECE_STORE,
+  BARBIE_PIECE_STORE,
+  fireOverlay,
+  OCEAN_STORE,
+} from '../BattleshipCellSprites';
 import { crosshair } from '../BattleshipMenuSprites';
 
 const CELL_SIZE = 54;

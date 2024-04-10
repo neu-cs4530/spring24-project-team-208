@@ -187,7 +187,7 @@ export default function BattleshipMenu({
           width: 127,
           height: 59,
         }}>
-          {changeThemeButton}
+        {changeThemeButton}
       </span>
       <span
         style={{
@@ -196,7 +196,9 @@ export default function BattleshipMenu({
           left: '20%',
           bottom: '10%',
         }}>
-        <p style={{ rotate: '-20deg', width: 'fitContent' }}>{`Current theme - ${theme || 'None'}`}</p>
+        <p style={{ rotate: '-20deg', width: 'fitContent' }}>{`Current theme - ${
+          theme || 'None'
+        }`}</p>
       </span>
       <ModalCloseButton />
     </div>

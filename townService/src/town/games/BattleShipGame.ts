@@ -427,8 +427,10 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       newBoat.pop();
       newBoat = newBoat.join('_');
       return newBoat;
-    }
-    const boatArr = newPlacement.filter(cell => cell.type !== 'Ocean').map(cell => stripTheme(cell.type));
+    };
+    const boatArr = newPlacement
+      .filter(cell => cell.type !== 'Ocean')
+      .map(cell => stripTheme(cell.type));
 
     return ALL_BOATS.every(item => boatArr.includes(item));
   }

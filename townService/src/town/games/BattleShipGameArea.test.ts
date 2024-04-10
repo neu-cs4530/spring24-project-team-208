@@ -33,7 +33,7 @@ class TestingGame extends Game<BattleShipGameState, BattleShipGuess> {
       greenBoard: [],
       status: 'WAITING_TO_START',
       firstPlayer: 'Blue',
-      theme: 'Military'
+      theme: 'Military',
     });
   }
 

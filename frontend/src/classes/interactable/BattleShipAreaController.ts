@@ -65,7 +65,7 @@ export default class BattleShipAreaController extends GameAreaController<
 
   protected _greenBoard: BattleShipCell[][] = createEmptyBoard();
 
-  protected _theme: BattleshipTheme = 'Military'
+  protected _theme: BattleshipTheme = 'Military';
 
   /**
    * Returns the current state of the blue board.
@@ -105,7 +105,7 @@ export default class BattleShipAreaController extends GameAreaController<
    */
   get theme(): BattleshipTheme {
     return this._theme;
-  } 
+  }
 
   /**
    * Returns the player with the 'Green' board, if there is one, or undefined otherwise
@@ -296,7 +296,7 @@ export default class BattleShipAreaController extends GameAreaController<
     await this._townController.sendInteractableCommand(this.id, {
       type: 'ChangeTheme',
       theme,
-    })
+    });
   }
 
   /**
