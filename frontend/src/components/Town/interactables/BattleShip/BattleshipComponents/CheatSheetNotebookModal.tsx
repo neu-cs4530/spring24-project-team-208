@@ -40,7 +40,7 @@ export function CheatSheetNoteBookModal({ controller }: { controller: BattleShip
             top: '15%',
             left: '53%',
           }}>
-          {`Current ELO: ${gameData?.elo || 0}`}
+          {`Current ELO: ${gameData ? Math.round(gameData.elo) : 0}`}
         </span>
         <span
           style={{
