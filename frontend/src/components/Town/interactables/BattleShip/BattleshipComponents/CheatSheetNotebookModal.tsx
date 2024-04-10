@@ -7,14 +7,6 @@ import {
 import getBattleShipData from '../../../../Database';
 import { largeNotebook } from '../BattleshipMenuSprites';
 
-// .hover-shadow {
-//     transition: box-shadow 0.3s;
-//     }
-
-//   .hover-shadow:hover {
-//     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-//   }
-
 export function CheatSheetNoteBookModal({ controller }: { controller: BattleShipAreaController }) {
   const [gameData, setGameData] = useState<BattleShipDatabaseEntry | null>(null);
   const username =
@@ -33,6 +25,8 @@ export function CheatSheetNoteBookModal({ controller }: { controller: BattleShip
         style={{
           position: 'absolute',
           width: 800,
+          fontFamily: 'First Writing',
+          fontSize: '1.5rem',
         }}>
         <span
           style={{
@@ -79,7 +73,7 @@ export function CheatSheetNoteBookModal({ controller }: { controller: BattleShip
               <p
                 key={index}
                 style={{
-                  fontSize: '.7rem',
+                  fontSize: '1rem',
                 }}>
                 {`${username} vs. ${result.opponent} - ${result.result}`}
               </p>

@@ -53,6 +53,7 @@ export default function ButtonStatus({
           height: '25px',
           backgroundColor: '#1C1C1C',
           borderRadius: '10px',
+          fontFamily: 'Digital Numbers Regular',
         }}>
         <p style={{ marginLeft: 10, color: '#24FF00', fontSize: '.7rem' }}>{turnText}</p>
       </div>
