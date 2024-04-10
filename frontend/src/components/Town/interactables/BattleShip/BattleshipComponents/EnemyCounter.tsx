@@ -7,14 +7,6 @@ import {
 } from '../../../../../types/CoveyTownSocket';
 import { scratch } from '../BattleshipMenuSprites';
 
-// @import url('https://fonts.googleapis.com/css2?family=Just+Me+Again+Down+Here&display=swap');
-
-// .just-me-again-down-here {
-//   font-family: 'Just Me Again Down Here', cursive;
-//   font-weight: 400;
-//   font-style: normal;
-// }
-
 const SHIPS: BattleshipBoat[] = [
   'Battleship',
   'Aircraft Carrier',

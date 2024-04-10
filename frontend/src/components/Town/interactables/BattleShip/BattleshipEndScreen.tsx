@@ -1,5 +1,5 @@
 import React from 'react';
-import { battleshipWinnerLogo, newGameButton } from './BattleshipMenuSprites';
+import { battleshipWinnerLogo } from './BattleshipMenuSprites';
 
 export default function BattleshipEndScreen() {
   return (

@@ -1,9 +1,9 @@
-import { Button, ModalCloseButton, useToast } from '@chakra-ui/react';
+import { ModalCloseButton, useToast } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import BattleShipAreaController from '../../../../classes/interactable/BattleShipAreaController';
 import PlayerController from '../../../../classes/PlayerController';
 import useTownController from '../../../../hooks/useTownController';
-import { BattleshipTheme, GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
+import { BattleshipTheme, InteractableID } from '../../../../types/CoveyTownSocket';
 import {
   battleshipLogo,
   changeThemeButton,
@@ -14,7 +14,6 @@ import {
 
 export default function BattleshipMenu({
   gameAreaController,
-  interactableID,
 }: {
   gameAreaController: BattleShipAreaController;
   interactableID: InteractableID;
