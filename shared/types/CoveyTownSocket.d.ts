@@ -184,6 +184,8 @@ export interface BattleShipGameState extends WinnableGameState {
   firstPlayer: BattleShipColor;
   // The theme of all battleship pieces on the board
   theme: BattleShipTheme;
+  // Whether this game is a solo game against the computer
+  soloGame: boolean;
 }
 
 /**
