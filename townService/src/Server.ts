@@ -11,6 +11,7 @@ import TownsStore from './lib/TownsStore';
 import { ClientToServerEvents, ServerToClientEvents } from './types/CoveyTownSocket';
 import { TownsController } from './town/TownsController';
 import { logError } from './Utils';
+import InvalidParametersError from './lib/InvalidParametersError';
 
 // Create the server instances
 const app = Express();
@@ -53,6 +54,11 @@ app.use(
       return res.status(422).json({
         message: 'Validation Failed',
         details: err?.fields,
+      });
+    }
+    if (err instanceof InvalidParametersError) {
+      return res.status(422).json({
+        message: err.message,
       });
     }
     if (err instanceof Error) {

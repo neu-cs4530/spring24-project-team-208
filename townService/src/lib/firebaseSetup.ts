@@ -1,5 +1,6 @@
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
 const CREDENTIALS = process.env.FIREBASE_SERVICE_ACCOUNT;
 
@@ -13,3 +14,6 @@ initializeApp({
 
 const db = getFirestore();
 export default db;
+
+const auth = getAuth();
+export { auth };

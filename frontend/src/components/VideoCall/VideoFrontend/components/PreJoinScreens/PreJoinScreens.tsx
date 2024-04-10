@@ -6,9 +6,10 @@ import RoomNameScreen from './RoomNameScreen/RoomNameScreen';
 import { useAppState } from '../../state';
 import { useParams } from 'react-router-dom';
 import useVideoContext from '../../hooks/useVideoContext/useVideoContext';
-import { Heading, Text } from '@chakra-ui/react';
+import { Button, Flex, Heading, Spacer, Text } from '@chakra-ui/react';
 import TownSelection from '../../../../Login/TownSelection';
 import { TownJoinResponse } from '../../../../../types/CoveyTownSocket';
+import useUserController from '../../../../../hooks/useUserController';
 
 export enum Steps {
   roomNameStep,
@@ -20,6 +21,7 @@ export default function PreJoinScreens() {
   const { getAudioAndVideoTracks } = useVideoContext();
 
   const [mediaError, setMediaError] = useState<Error>();
+  const userController = useUserController();
 
 
   useEffect(() => {
@@ -36,7 +38,11 @@ export default function PreJoinScreens() {
   return (
     <IntroContainer>
       <MediaErrorSnackbar error={mediaError} />
+      <Flex>
       <Heading as="h2" size="xl">Welcome to Covey.Town!</Heading>
+      <Spacer />
+      <Button size="md" colorScheme="red" onClick={() => userController.logOut()}>Log Out</Button>
+      </Flex>
       <Text p="4">
         Covey.Town is a social platform that integrates a 2D game-like metaphor with video chat.
         To get started, setup your camera and microphone, choose a username, and then create a new town

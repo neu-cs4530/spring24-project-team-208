@@ -6,6 +6,7 @@
     "@chakra-ui/react": "^1.8.9",
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "^11.9.3",
+    "@firebase/util": "^1.9.5",
     "@material-ui/core": "^4.12.4",
     "@material-ui/icons": "^4.11.3",
     "@testing-library/jest-dom": "^5.16.4",
@@ -68,7 +69,7 @@
     "eject": "react-scripts eject",
     "format": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx ",
-    "client": "openapi --input ../shared/generated/swagger.json --output ./src/generated/client --client axios --name TownsServiceClient",
+    "client": "openapi --input ../shared/generated/swagger.json --output ./src/generated/client --client axios --name AppServiceClient",
     "stryker-prepare": "replace-in-file '/../../..//g' '../../../../../' src/types/CoveyTownSocket.d.ts --isRegex",
     "stryker": "stryker run"
   },

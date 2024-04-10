@@ -9,8 +9,8 @@ import Interactable from '../components/Town/Interactable';
 import ConversationArea from '../components/Town/interactables/ConversationArea';
 import GameArea from '../components/Town/interactables/GameArea';
 import ViewingArea from '../components/Town/interactables/ViewingArea';
-import { LoginController } from '../contexts/LoginControllerContext';
-import { TownsService, TownsServiceClient } from '../generated/client';
+import { TownLoginController } from '../contexts/TownLoginControllerContext';
+import { TownsService, AppServiceClient } from '../generated/client';
 import useTownController from '../hooks/useTownController';
 import {
   ChatMessage,
@@ -49,9 +49,9 @@ const CALCULATE_NEARBY_PLAYERS_DELAY_MS = 300;
 const SOCKET_COMMAND_TIMEOUT_MS = 5000;
 
 export type ConnectionProperties = {
-  userName: string;
+  authToken: string;
   townID: string;
-  loginController: LoginController;
+  townLoginController: TownLoginController;
 };
 
 /**
@@ -140,7 +140,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    * The login controller is used by the frontend application to manage logging in to a town,
    * and is also used to log out of a town.
    */
-  private _loginController: LoginController;
+  private _loginController: TownLoginController;
 
   /**
    * The current list of players in the town. Adding or removing players might replace the array
@@ -174,15 +174,21 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
   private _townIsPubliclyListedInternal = false;
 
   /**
-   * The username of the player whose browser created this TownController
+   * The authentication token of the user who created this TownController.
    */
-  private readonly _userName: string;
+  private readonly _authToken: string;
 
   /**
    * The user ID of the player whose browser created this TownController. The user ID is set by the backend townsService, and
    * is only available after the service is connected.
    */
   private _userID?: string;
+
+  /**
+   * The user name of the player whose browser created this TownController. The user name is set by the backend townsService, and
+   * is only available after the service is connected.
+   */
+  private _userName?: string;
 
   /**
    * A reference to the Player object that represents the player whose browser created this TownController.
@@ -212,11 +218,11 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
    */
   private _interactableEmitter = new EventEmitter();
 
-  public constructor({ userName, townID, loginController }: ConnectionProperties) {
+  public constructor({ authToken, townID, townLoginController }: ConnectionProperties) {
     super();
     this._townID = townID;
-    this._userName = userName;
-    this._loginController = loginController;
+    this._authToken = authToken;
+    this._loginController = townLoginController;
 
     /*
         The event emitter will show a warning if more than this number of listeners are registered, as it
@@ -227,8 +233,8 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
 
     const url = process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL;
     assert(url);
-    this._socket = io(url, { auth: { userName, townID } });
-    this._townsService = new TownsServiceClient({ BASE: url }).towns;
+    this._socket = io(url, { auth: { authToken, townID } });
+    this._townsService = new AppServiceClient({ BASE: url }).towns;
     this.registerSocketListeners();
   }
 
@@ -257,8 +263,14 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
     return token;
   }
 
+  public get authToken() {
+    return this._authToken;
+  }
+
   public get userName() {
-    return this._userName;
+    const ret = this._ourPlayer;
+    assert(ret);
+    return ret.userName;
   }
 
   public get friendlyName() {
