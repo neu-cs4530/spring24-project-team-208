@@ -325,7 +325,7 @@ describe('Town Selection', () => {
         const joinTownWithOptions = async (params: { coveyTownID: string }) => {
           fireEvent.change(townIDToJoinField, { target: { value: params.coveyTownID } });
           await waitFor(() => expect(townIDToJoinField.value).toBe(params.coveyTownID));
-          userEvent.click(joinTownByIDButton);
+          await waitFor(() => userEvent.click(joinTownByIDButton));
         };
 
         it('includes a connect button, which creates a new TownController and connects with coveyTownID', async () => {
@@ -465,7 +465,7 @@ describe('Town Selection', () => {
         } else {
           fail('Invalid config');
         }
-        userEvent.click(newTownButton);
+        await waitFor(() => userEvent.click(newTownButton));
       };
       describe('when clicking create', () => {
         describe('with invalid values', () => {
