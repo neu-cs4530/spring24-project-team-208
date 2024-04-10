@@ -32,6 +32,23 @@ To create an account and configure your local environment:
 | `TWILIO_API_KEY_SECRET` | The secret for the API key you created.   |
 | `TWILIO_API_AUTH_TOKEN` | Visible on your twilio account dashboard. |
 
+In addition, you will also need a firebase project. Follow the instructions at https://firebase.google.com/ to create a new project. Once the project is created you need to set the permissions. First go to Firestore Database and then click the rules tab. Set your rules to always allow read, but never allow writes (only the backend is allowed to write). It should look like:
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow write: if false;
+      allow read: if true
+    }
+  }
+}
+
+Next go to Authentication, click the settings tab, and then click user actions. Uncheck the boxes for enable create and enable delete. We only want our backend to be able to create users.
+
+Finally, we need to get the admin key for our firebase project. Go to project settings, and then service accounts. Click on generate new private key, and this will download a JSON file containing the service account credentials. Copy all the contents of this file and add it to the .env in the townService directory as follows:
+
+`FIREBASE_SERVICE_ACCOUNT=**PASTE_FILE_CONTENTS**`
+
 ### Starting the backend
 
 Once your backend is configured, you can start it by running `npm start` in the `townService` directory (the first time you run it, you will also need to run `npm install`).
@@ -40,9 +57,6 @@ The backend will automatically restart if you change any of the files in the `to
 ### Configuring the frontend
 
 Create a `.env` file in the `frontend` directory, with the line: `NEXT_PUBLIC_TOWNS_SERVICE_URL=http://localhost:8081` (if you deploy the towns service to another location, put that location here instead)
-
-For ease of debugging, you might also set the environmental variable `NEXT_PUBLIC_TOWN_DEV_MODE=true`. When set to `true`, the frontend will
-automatically connect to the town with the friendly name "DEBUG_TOWN" (creating one if needed), and will *not* try to connect to the Twilio API. This is useful if you want to quickly test changes to the frontend (reloading the page and re-acquiring video devices can be much slower than re-loading without Twilio).
 
 ### Running the frontend
 
