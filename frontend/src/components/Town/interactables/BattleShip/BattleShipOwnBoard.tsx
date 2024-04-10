@@ -1,9 +1,9 @@
-import { Modal, useDisclosure, useToast } from '@chakra-ui/react';
+import { Modal, ModalContent, ModalOverlay, useDisclosure } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import BattleShipAreaController from '../../../../classes/interactable/BattleShipAreaController';
 import useTownController from '../../../../hooks/useTownController';
 import { BattleshipBoatPiece, BattleShipCell } from '../../../../types/CoveyTownSocket';
-import { battleshipLogo, crosshair, scratch, smallNotebook } from './BattleshipMenuSprites';
+import { battleshipLogo } from './BattleshipMenuSprites';
 import { BattleShipBoardCell } from './BattleshipComponents/BattleshipBoardCell';
 import { EnemyCounter } from './BattleshipComponents/EnemyCounter';
 import { CheatSheetNoteBookSmall } from './BattleshipComponents/CheatSheetNoteBookSmall';
@@ -64,12 +64,6 @@ export default function BattleShipOwnBoard({
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const inPlacement = gameAreaController.status === 'PLACING_BOATS';
-  const openNotebook = () => {
-    onOpen();
-  };
-  const closeNotebook = () => {
-    onClose();
-  };
 
   const placeBoat = () => {
     gameAreaController.placeBoatPiece(chosenBoat!, chosenCell!.row, chosenCell!.col, isVertical);
@@ -135,7 +129,7 @@ export default function BattleShipOwnBoard({
           ? setOpponentBoardMini
           : setOwnBoardMini,
       );
-      gameAreaController.removeListener('turnChanged', setIsOurTurnMini); // TODO doesn't work
+      gameAreaController.removeListener('turnChanged', setIsOurTurnMini);
     };
   }, [gameAreaController]);
 
@@ -154,7 +148,12 @@ export default function BattleShipOwnBoard({
         position: 'absolute',
         left: '-20%',
       }}>
-      {isOpen && <CheatSheetNoteBookModal controller={gameAreaController} />}
+      <Modal isOpen={isOpen} onClose={onClose} size='xl'>
+        <ModalOverlay />
+        <ModalContent>
+          <CheatSheetNoteBookModal controller={gameAreaController} />
+        </ModalContent>
+      </Modal>
       <div
         style={{
           display: 'flex',
@@ -256,7 +255,7 @@ export default function BattleShipOwnBoard({
             bottom: '13%',
             left: '70%',
           }}>
-          <CheatSheetNoteBookSmall openModal={openNotebook} />
+          <CheatSheetNoteBookSmall openModal={onOpen} />
         </span>
       </div>
     </div>
