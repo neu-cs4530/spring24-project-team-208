@@ -20,6 +20,9 @@ import {
 
 const NOT_YOUR_BOARD_MESSAGE = 'Not your board';
 const NOT_IN_PLACEMENT = 'Game is not in placement phase';
+
+const BATTLESHIP_COLS = 10;
+const BATTLESHIP_ROWS = 10;
 /**
  * A helper function to apply a placement of moves to a game.
  * The pattern is a 2-d array of F, M, E, or _.
@@ -191,6 +194,38 @@ describe('BattleShipGame', () => {
       });
     });
   });
+  describe('soloGame', () => {
+    const player = createPlayerForTesting();
+    beforeEach(() => {
+      game.join(player);
+    });
+    it('should throw an error if the game is not WAITING_FOR_PLAYERS', () => {
+      const player2 = createPlayerForTesting();
+      game.join(player2);
+      expect(game.state.status).toBe('WAITING_TO_START');
+
+      expect(() => game.soloGame(player2)).toThrowError('Solo game is unavailable at this time.');
+    });
+    it('should throw an error if the player is not in the game', () => {
+      const player2 = createPlayerForTesting();
+      expect(() => game.soloGame(player2)).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
+    });
+    it('should set change the state to reflect the start of a solo game', () => {
+      expect(game.state.soloGame).toBeFalsy();
+      game.soloGame(player);
+      expect(game.state.status).toBeTruthy();
+    });
+    it('should set the other player to be AI_OPPONENT', () => {
+      expect(game.state.green).toBeUndefined();
+      game.soloGame(player);
+      expect(game.state.green).toBe('AI_OPPONENT');
+    });
+    it('should set the status to WAITING_TO_START', () => {
+      expect(game.state.status).toBe('WAITING_FOR_PLAYERS');
+      game.soloGame(player);
+      expect(game.state.status).toBe('WAITING_TO_START');
+    });
+  });
   describe('_leave', () => {
     it('should throw an error if the player is not in the game', () => {
       const player = createPlayerForTesting();
@@ -199,6 +234,15 @@ describe('BattleShipGame', () => {
       expect(() => game.leave(createPlayerForTesting())).toThrowError(PLAYER_NOT_IN_GAME_MESSAGE);
     });
     describe('when the player is in the game', () => {
+      test('if the game is in solo mode, does not declare winner', () => {
+        const player = createPlayerForTesting();
+        game.join(player);
+        game.soloGame(player);
+        game.startGame(player);
+        game.leave(player);
+        expect(game.state.winner).toBeUndefined();
+        expect(game.state.status).toBe('OVER');
+      });
       describe('when the game is in progress', () => {
         const blue = createPlayerForTesting();
         const green = createPlayerForTesting();
@@ -555,6 +599,28 @@ describe('BattleShipGame', () => {
         expect(game.state.status).toBe('WAITING_TO_START');
       });
     });
+    describe('if the game is in solo mode', () => {
+      const player = createPlayerForTesting();
+      beforeEach(() => {
+        game.join(player);
+        game.soloGame(player);
+      });
+      it('should set the set the status to IN_PROGRESS', () => {
+        expect(game.state.status).toBe('WAITING_TO_START');
+        game.startGame(player);
+        expect(game.state.status).toBe('IN_PROGRESS');
+      });
+      it('should set the player as the first one to start', () => {
+        game.startGame(player);
+        expect(game.state.blue).toBe(player.id);
+        expect(game.state.firstPlayer).toEqual('Blue');
+      });
+      it('should initialize the board for computer opponent', () => {
+        expect(game.state.greenBoard.length).toEqual(0);
+        game.startGame(player);
+        expect(game.state.greenBoard.length).toBeGreaterThan(0);
+      });
+    });
   });
   describe('removeBoat', () => {
     const blue = createPlayerForTesting();
@@ -717,6 +783,47 @@ describe('BattleShipGame', () => {
           move: { gamePiece: 'Blue', cell: 'Battleship_Middle_3_Military', col: 0, row: 0 },
         }),
       ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
+    });
+  });
+  describe('solo moves', () => {
+    const blue = createPlayerForTesting();
+    beforeEach(() => {
+      game.join(blue);
+      game.soloGame(blue);
+      game.startGame(blue);
+    });
+    it('should make a guess after the player completes a turn', () => {
+      const blueMove: BattleShipGuess = {
+        col: 4 as BattleShipColIndex,
+        row: 0 as BattleShipRowIndex,
+        gamePiece: 'Blue',
+      };
+      expect(game.state.moves.length).toEqual(0);
+      // Make a player move to trigger Computer move
+      game.applyMove({
+        gameID: game.id,
+        playerID: blue.id,
+        move: blueMove,
+      });
+      // Check that two moves have been made (player and computer)
+      expect(game.state.moves.length).toEqual(2);
+    });
+    it('should make a valid guess', () => {
+      const blueMove: BattleShipGuess = {
+        col: 4 as BattleShipColIndex,
+        row: 2 as BattleShipRowIndex,
+        gamePiece: 'Blue',
+      };
+      game.applyMove({
+        gameID: game.id,
+        playerID: blue.id,
+        move: blueMove,
+      });
+      const lastMove = game.state.moves[game.state.moves.length - 1];
+      expect(lastMove.row).toBeGreaterThanOrEqual(0);
+      expect(lastMove.row).toBeLessThan(BATTLESHIP_ROWS);
+      expect(lastMove.col).toBeGreaterThanOrEqual(0);
+      expect(lastMove.col).toBeLessThan(BATTLESHIP_COLS);
     });
   });
   describe('placeBoat', () => {
