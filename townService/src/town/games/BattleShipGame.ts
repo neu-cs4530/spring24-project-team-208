@@ -263,24 +263,29 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    */
   private _initializeAIBoard(): void {
     const aiColor = this.state.blue === 'AI_OPPONENT' ? 'Blue' : 'Green';
-    const board = aiColor === 'Blue' ? this.state.blueBoard : this.state.greenBoard;
+    const board:
+      | BattleShipCell[]
+      | {
+          type: BattleShipBoatPiece;
+          state: string;
+          row: BattleShipRowIndex;
+          col: BattleShipColIndex;
+        }[] = [];
 
     // Helper function to check if a position is valid for a boat
     const isPositionValid = (
       row: number,
       col: number,
-      length: number,
+      boatLength: number,
       vertical: boolean,
     ): boolean => {
-      if (vertical && row + length > BATTLESHIP_ROWS) return false;
-      if (!vertical && col + length > BATTLESHIP_COLS) return false;
+      if (vertical && row + boatLength > BATTLESHIP_ROWS) return false;
+      if (!vertical && col + boatLength > BATTLESHIP_COLS) return false;
 
-      for (let i = 0; i < length; i++) {
+      for (let i = 0; i < boatLength; i++) {
         const currentRow = vertical ? row + i : row;
         const currentCol = vertical ? col : col + i;
-        if (
-          board.find(cell => cell.row === currentRow && cell.col === currentCol)?.type !== 'Ocean'
-        ) {
+        if (board.some(cell => cell.row === currentRow && cell.col === currentCol)) {
           return false;
         }
       }
@@ -288,31 +293,39 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       return true;
     };
 
-    // Place each boat randomly
+    // Function to place a boat
+    const placeBoat = (boat: any, vertical: boolean, startRow: number, startCol: number): void => {
+      boat.ships.forEach((part: string, index: number) => {
+        const row = vertical ? startRow + index : startRow;
+        const col = vertical ? startCol : startCol + index;
+        board.push({
+          type: part as BattleShipBoatPiece,
+          state: 'Safe' as BattleShipCellState,
+          row: row as BattleShipRowIndex,
+          col: col as BattleShipColIndex,
+        });
+      });
+    };
+
     BOAT_MAP.forEach(boat => {
       let placed = false;
       while (!placed) {
-        const vertical = Math.random() < 0.5; // Randomly choose orientation
-        const row = Math.floor(Math.random() * BATTLESHIP_ROWS);
-        const col = Math.floor(Math.random() * BATTLESHIP_COLS);
-        const { length } = boat.ships;
+        const vertical = Math.random() < 0.5;
+        const startRow = Math.floor(Math.random() * BATTLESHIP_ROWS);
+        const startCol = Math.floor(Math.random() * BATTLESHIP_COLS);
 
-        if (isPositionValid(row, col, length, vertical)) {
-          // Place each part of the boat
-          boat.ships.forEach((shipPart, index) => {
-            const shipRow = vertical ? row + index : row;
-            const shipCol = vertical ? col : col + index;
-            this._place({
-              gamePiece: 'Green',
-              cell: shipPart as BattleShipBoatPiece,
-              row: shipRow as BattleShipRowIndex,
-              col: shipCol as BattleShipColIndex,
-            });
-          });
+        if (isPositionValid(startRow, startCol, boat.ships.length, vertical)) {
+          placeBoat(boat, vertical, startRow, startCol);
           placed = true;
         }
       }
     });
+
+    // Apply the board to the AI player
+    this.state[aiColor === 'Blue' ? 'blueBoard' : 'greenBoard'] = board.map(cell => ({
+      ...cell,
+      state: 'Safe' as BattleShipCellState,
+    }));
   }
 
   /**
