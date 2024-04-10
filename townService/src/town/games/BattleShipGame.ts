@@ -95,7 +95,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
   private _safeCellsGreen: Array<{ row: BattleShipRowIndex; col: BattleShipColIndex }>;
 
   /**
-   * Creates a new ConnectFourGame.
+   * Creates a new BattleShipGame.
    * @param priorGame If provided, the new game will be created such that if either player
    * from the prior game joins, they will be the same color. When the game begins, the default
    * first player is blue, but if either player from the prior game joins the new game
@@ -323,7 +323,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * If both players are ready, the game will start.
    *
    * The first player (blue or green) is determined as follows:
-   *   - If neither player was in the last game in this area (or there was no prior game), the first player is red.
+   *   - If neither player was in the last game in this area (or there was no prior game), the first player is blue.
    *   - If at least one player was in the last game in this area, then the first player will be the other color from last game.
    *   - If a player from the last game *left* the game and then joined this one, they will be treated as a new player (not given the same color by preference).
    *
