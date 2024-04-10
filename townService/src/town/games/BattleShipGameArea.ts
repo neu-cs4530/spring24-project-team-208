@@ -238,6 +238,15 @@ export default class BattleShipGameArea extends GameArea<BattleShipGame> {
       this._stateUpdated(game.toModel());
       return undefined as InteractableCommandReturnType<CommandType>;
     }
+    if (command.type === 'ChangeTheme') {
+      const game = this._game;
+      if (!game) {
+        throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+      }
+      game.state.theme = command.theme;
+      this._stateUpdated(game.toModel());
+      return undefined as InteractableCommandReturnType<CommandType>;
+    }
     throw new InvalidParametersError(INVALID_COMMAND_MESSAGE);
   }
 }

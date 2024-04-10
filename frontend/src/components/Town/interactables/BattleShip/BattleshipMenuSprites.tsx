@@ -87,6 +87,13 @@ export const newGameButton = (
   />
 );
 
+export const changeThemeButton = (
+  <Image
+    src='./battleship_sprites/BattleshipMenuSprites/Change_Theme_Button.png'
+    style={{ width: 127, height: 59 }}
+  />
+);
+
 export const gameOptionBackground = (
   <Image
     src='./battleship_sprites/BattleshipMenuSprites/Menu_Buttons_Background.png'

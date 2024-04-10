@@ -1,6 +1,6 @@
 import {
   BattleshipBoat,
-  BattleshipBoatPiece,
+  BattleShipBoatPiece,
   BattleShipColIndex,
   BattleShipColor,
   BattleShipGuess,
@@ -45,7 +45,7 @@ function createBoatPlacementsFromPattern(
   greenID: string,
 ) {
   type QueuedPlacement = {
-    cell: BattleshipBoatPiece | BattleshipBoat;
+    cell: BattleShipBoatPiece | BattleshipBoat;
     rowIdx: BattleShipRowIndex;
     colIdx: BattleShipColIndex;
     vertical: boolean;
@@ -85,7 +85,7 @@ function createBoatPlacementsFromPattern(
       }
 
       queues.Board.push({
-        cell: boat as BattleshipBoatPiece,
+        cell: boat as BattleShipBoatPiece,
         rowIdx: rowIdx as BattleShipRowIndex,
         colIdx: colIdx as BattleShipColIndex,
         vertical: col.includes('V'),
@@ -571,14 +571,14 @@ describe('BattleShipGame', () => {
           {
             gameID: game.id,
             playerID: green.id,
-            move: { gamePiece: 'Green', cell: 'Cruiser_Front', col: 1, row: 0 },
+            move: { gamePiece: 'Green', cell: 'Cruiser_Front_Military', col: 1, row: 0 },
           },
           false,
         );
         game.removeBoat({
           gameID: game.id,
           playerID: green.id,
-          move: { gamePiece: 'Green', cell: 'Cruiser_Front', col: 1, row: 0 },
+          move: { gamePiece: 'Green', cell: 'Cruiser_Front_Military', col: 1, row: 0 },
         });
         expect(game.state.greenBoard[1]).toEqual({
           type: 'Ocean',
@@ -592,14 +592,14 @@ describe('BattleShipGame', () => {
           {
             gameID: game.id,
             playerID: blue.id,
-            move: { gamePiece: 'Blue', cell: 'Cruiser_Front', col: 1, row: 0 },
+            move: { gamePiece: 'Blue', cell: 'Cruiser_Front_Military', col: 1, row: 0 },
           },
           false,
         );
         game.removeBoat({
           gameID: game.id,
           playerID: blue.id,
-          move: { gamePiece: 'Blue', cell: 'Cruiser_Front', col: 1, row: 0 },
+          move: { gamePiece: 'Blue', cell: 'Cruiser_Front_Military', col: 1, row: 0 },
         });
         expect(game.state.greenBoard[1]).toEqual({
           type: 'Ocean',
@@ -615,7 +615,7 @@ describe('BattleShipGame', () => {
             playerID: blue.id,
             move: {
               gamePiece: 'Blue',
-              cell: 'Aircraft_Middle_1',
+              cell: 'Aircraft_Middle_1_Military',
               col: 0,
               row: 0,
             },
@@ -627,7 +627,7 @@ describe('BattleShipGame', () => {
           playerID: blue.id,
           move: {
             gamePiece: 'Blue',
-            cell: 'Battleship_Middle_2',
+            cell: 'Battleship_Middle_2_Military',
             col: 0,
             row: 0,
           },
@@ -714,7 +714,7 @@ describe('BattleShipGame', () => {
         game.removeBoat({
           gameID: game.id,
           playerID: green.id,
-          move: { gamePiece: 'Blue', cell: 'Battleship_Middle_3', col: 0, row: 0 },
+          move: { gamePiece: 'Blue', cell: 'Battleship_Middle_3_Military', col: 0, row: 0 },
         }),
       ).toThrowError(NOT_YOUR_BOARD_MESSAGE);
     });
@@ -744,7 +744,7 @@ describe('BattleShipGame', () => {
           true,
         );
         expect(game.state.blueBoard[0]).toEqual({
-          type: 'Battleship_Back',
+          type: 'Battleship_Back_Military',
           state: 'Safe',
           row: 0,
           col: 0,

@@ -2,7 +2,7 @@ import React from 'react';
 import BattleShipAreaController from '../../../../../classes/interactable/BattleShipAreaController';
 import {
   BattleshipBoat,
-  BattleshipBoatPiece,
+  BattleShipBoatPiece,
   BattleShipCell,
 } from '../../../../../types/CoveyTownSocket';
 import { scratch } from '../BattleshipMenuSprites';
@@ -30,7 +30,7 @@ export function EnemyCounter({
 }: {
   controller: BattleShipAreaController;
   setBoat: any;
-  chosenBoat?: BattleshipBoatPiece;
+  chosenBoat?: BattleShipBoatPiece;
 }) {
   const inPlacement = controller.status === 'PLACING_BOATS';
   const scratchedBoats: BattleshipBoat[] = [];

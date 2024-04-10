@@ -3,9 +3,10 @@ import React, { useEffect, useState } from 'react';
 import BattleShipAreaController from '../../../../classes/interactable/BattleShipAreaController';
 import PlayerController from '../../../../classes/PlayerController';
 import useTownController from '../../../../hooks/useTownController';
-import { GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
+import { BattleshipTheme, GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
 import {
   battleshipLogo,
+  changeThemeButton,
   joinGameButton,
   soloGameButton,
   startGameButton,
@@ -21,21 +22,19 @@ export default function BattleshipMenu({
   const townController = useTownController();
 
   const [blue, setBlue] = useState<PlayerController | undefined>(gameAreaController.blue);
-  const [blueReady, setBlueReady] = useState(false);
   const [green, setGreen] = useState<PlayerController | undefined>(gameAreaController.green);
-  const [greenReady, setGreenReady] = useState(false);
-  const [joiningGame, setJoiningGame] = useState(false);
-
-  const [gameStatus, setGameStatus] = useState<GameStatus>(gameAreaController.status);
-  const [moveCount, setMoveCount] = useState<number>(gameAreaController.moveCount);
+  const [theme, setTheme] = useState<BattleshipTheme>(gameAreaController.theme);
   const toast = useToast();
+
+  const handleThemeSwitch = async () => {
+    // setTheme(theme === 'Military' ? 'Barbie' : 'Military');
+    await gameAreaController.changeTheme(theme === 'Military' ? 'Barbie' : 'Military');
+  };
 
   useEffect(() => {
     const updateGameState = () => {
       setBlue(gameAreaController.blue);
       setGreen(gameAreaController.green);
-      setGameStatus(gameAreaController.status || 'WAITING_TO_START');
-      setMoveCount(gameAreaController.moveCount || 0);
     };
     const onGameEnd = () => {
       const winner = gameAreaController.winner;
@@ -59,14 +58,17 @@ export default function BattleshipMenu({
         });
       }
     };
+    const updateTheme = () => {
+      setTheme(gameAreaController.theme);
+    };
     gameAreaController.addListener('gameUpdated', updateGameState);
     gameAreaController.addListener('gameEnd', onGameEnd);
+    gameAreaController.addListener('themeChanged', updateTheme);
     return () => {
       gameAreaController.removeListener('gameUpdated', updateGameState);
       gameAreaController.removeListener('gameEnd', onGameEnd);
     };
   }, [townController, gameAreaController, toast]);
-
   return (
     <div
       style={{
@@ -140,14 +142,8 @@ export default function BattleshipMenu({
         }}>
         <span
           onClick={async () => {
-            setJoiningGame(true);
             try {
               await gameAreaController.joinGame();
-              if (gameAreaController.blue === townController.ourPlayer) {
-                setBlueReady(true);
-              } else {
-                setGreenReady(false);
-              }
             } catch (err) {
               toast({
                 title: 'Error joining game',
@@ -155,14 +151,12 @@ export default function BattleshipMenu({
                 status: 'error',
               });
             }
-            setJoiningGame(false);
           }}
           style={{ cursor: 'pointer' }}>
           {joinGameButton}
         </span>
         <span
           onClick={async () => {
-            setJoiningGame(true);
             try {
               await gameAreaController.startGame();
             } catch (err) {
@@ -172,7 +166,6 @@ export default function BattleshipMenu({
                 status: 'error',
               });
             }
-            setJoiningGame(false);
           }}
           style={{ cursor: 'pointer' }}>
           {startGameButton}
@@ -184,6 +177,29 @@ export default function BattleshipMenu({
           {soloGameButton}
         </span>
       </div>
+      <span
+        onClick={handleThemeSwitch}
+        style={{
+          cursor: 'pointer',
+          position: 'absolute',
+          left: '10%',
+          bottom: '15%',
+          width: 127,
+          height: 59,
+        }}>
+        {changeThemeButton}
+      </span>
+      <span
+        style={{
+          position: 'absolute',
+          fontSize: '1.5rem',
+          left: '20%',
+          bottom: '10%',
+        }}>
+        <p style={{ rotate: '-20deg', width: 'fitContent' }}>{`Current theme - ${
+          theme || 'None'
+        }`}</p>
+      </span>
       <ModalCloseButton />
     </div>
   );

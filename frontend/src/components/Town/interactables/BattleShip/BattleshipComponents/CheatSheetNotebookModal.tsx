@@ -20,13 +20,13 @@ export function CheatSheetNoteBookModal({ controller }: { controller: BattleShip
   const username =
     controller.whatColor === 'Blue' ? controller.blue?.userName : controller.green?.userName;
 
-  // useEffect(() => {
-  //   const getData = async () => {
-  //     const data = await getBattleShipData(username || '');
-  //     setGameData(data);
-  //   };
-  //   getData();
-  // }, [username]);
+  useEffect(() => {
+    const getData = async () => {
+      const data = await getBattleShipData(username || '');
+      setGameData(data);
+    };
+    getData();
+  }, [username]);
   return (
     <>
       <span

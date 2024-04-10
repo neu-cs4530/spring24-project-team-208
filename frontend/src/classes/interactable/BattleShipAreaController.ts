@@ -6,11 +6,13 @@ import {
   BattleShipColor,
   BattleShipColIndex,
   BattleShipRowIndex,
-  // BattleShipPiece,
-  BattleshipBoatPiece,
+  BattleShipBoatPiece,
+  BarbieBoatPiece,
+  MilitaryBoatPiece,
   BattleShipPlacement,
   BattleShipCell,
   BattleShipGuess,
+  BattleshipTheme,
 } from '../../types/CoveyTownSocket';
 import PlayerController from '../PlayerController';
 import GameAreaController, {
@@ -63,6 +65,8 @@ export default class BattleShipAreaController extends GameAreaController<
 
   protected _greenBoard: BattleShipCell[][] = createEmptyBoard();
 
+  protected _theme: BattleshipTheme = 'Military';
+
   /**
    * Returns the current state of the blue board.
    *
@@ -94,6 +98,13 @@ export default class BattleShipAreaController extends GameAreaController<
       return this.occupants.find(eachOccupant => eachOccupant.id === blue);
     }
     return undefined;
+  }
+
+  /**
+   * Returns the theme of the game
+   */
+  get theme(): BattleshipTheme {
+    return this._theme;
   }
 
   /**
@@ -252,6 +263,12 @@ export default class BattleShipAreaController extends GameAreaController<
         this.emit('greenBoardChanged', this._greenBoard);
       }
     }
+
+    if (newGame?.state.theme != this.theme) {
+      this._theme = newGame?.state.theme;
+      this.emit('themeChanged', this._theme);
+    }
+
     const isOurTurn = this.isOurTurn;
     if (wasOurTurn !== isOurTurn) this.emit('turnChanged', isOurTurn);
   }
@@ -274,6 +291,14 @@ export default class BattleShipAreaController extends GameAreaController<
     });
   }
 
+  public async changeTheme(theme: string) {
+    const instanceID = this._instanceID;
+    await this._townController.sendInteractableCommand(this.id, {
+      type: 'ChangeTheme',
+      theme,
+    });
+  }
+
   /**
    * Places a boat piece in the pre-game phase based on a given row and
    * column.
@@ -283,7 +308,7 @@ export default class BattleShipAreaController extends GameAreaController<
    * @throws an error with message NO_GAME_IN_PROGRESS_ERROR if there is no game in progress
    */
   public async placeBoatPiece(
-    boat: BattleshipBoatPiece,
+    boat: BattleShipBoatPiece,
     row: BattleShipRowIndex,
     col: BattleShipColIndex,
     vertical: boolean,

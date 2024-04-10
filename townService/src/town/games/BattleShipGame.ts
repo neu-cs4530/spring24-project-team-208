@@ -18,7 +18,7 @@ import {
   BattleShipPlacement,
   GameMove,
   PlayerID,
-  BattleshipBoatPiece,
+  BattleShipBoatPiece,
   BattleShipCellState,
 } from '../../types/CoveyTownSocket';
 import Game from './Game';
@@ -27,7 +27,7 @@ const NOT_YOUR_BOARD_MESSAGE = 'Not your board';
 const MAX_BOAT_PIECES = 15;
 const BATTLESHIP_COLS = 10;
 const BATTLESHIP_ROWS = 10;
-const ALL_BOATS: BattleshipBoatPiece[] = [
+const allBoats: any = [
   'Aircraft_Back',
   'Aircraft_Middle_1',
   'Aircraft_Middle_2',
@@ -104,6 +104,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       greenBoard: [],
       status: 'WAITING_FOR_PLAYERS',
       firstPlayer: getOtherPlayerColor(priorGame?.state.firstPlayer || 'Green'),
+      theme: 'Military',
     });
     this._preferredBlue = priorGame?.state.blue;
     this._preferredGreen = priorGame?.state.green;
@@ -343,7 +344,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
     );
     const newPlacement = [...board];
     newPlacement[oldIndex] = {
-      type: placement.cell as BattleshipBoatPiece,
+      type: placement.cell as BattleShipBoatPiece,
       state: 'Safe',
       row: placement.row,
       col: placement.col,
@@ -375,9 +376,17 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
    * @param newPlacement the board to check
    */
   protected _allBoatsPlaced(newPlacement: Array<BattleShipCell>): boolean {
-    const boatArr = newPlacement.filter(cell => cell.type !== 'Ocean').map(cell => cell.type);
+    const stripTheme = (boat: string) => {
+      let newBoat: any = boat.split('_');
+      newBoat.pop();
+      newBoat = newBoat.join('_');
+      return newBoat;
+    };
+    const boatArr = newPlacement
+      .filter(cell => cell.type !== 'Ocean')
+      .map(cell => stripTheme(cell.type));
 
-    return ALL_BOATS.every(item => boatArr.includes(item));
+    return allBoats.every((item: any) => boatArr.includes(item));
   }
 
   /**
@@ -438,7 +447,7 @@ export default class BattleShipGame extends Game<BattleShipGameState, BattleShip
       BOAT_MAP.find(boatM => boatM.name === position.move.cell)?.ships.map((ship, index) =>
         this._place({
           gamePiece: position.playerID === this.state.blue ? 'Blue' : 'Green',
-          cell: ship as BattleshipBoatPiece,
+          cell: `${ship}_${this.state.theme}` as BattleShipBoatPiece,
           col: (position.move.col + (vertical ? 0 : index)) as BattleShipColIndex,
           row: (position.move.row + (vertical ? index : 0)) as BattleShipRowIndex,
         }),
