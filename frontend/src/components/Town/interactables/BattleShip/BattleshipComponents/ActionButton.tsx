@@ -1,6 +1,6 @@
 import React from 'react';
 import BattleShipAreaController from '../../../../../classes/interactable/BattleShipAreaController';
-import { BattleshipBoatPiece, BattleShipCell } from '../../../../../types/CoveyTownSocket';
+import { BattleShipBoatPiece, BattleShipCell } from '../../../../../types/CoveyTownSocket';
 
 export default function ActionButton({
   controller,
@@ -10,7 +10,7 @@ export default function ActionButton({
 }: {
   controller: BattleShipAreaController;
   chosenCell: BattleShipCell | undefined;
-  chosenBoat: BattleshipBoatPiece | undefined;
+  chosenBoat: BattleShipBoatPiece | undefined;
   doAction: any;
 }) {
   const inPlacement = controller.status === 'PLACING_BOATS';

@@ -2,7 +2,7 @@ import assert from 'assert';
 import { mock } from 'jest-mock-extended';
 import { nanoid } from 'nanoid';
 import {
-  BattleshipBoatPiece,
+  BattleShipBoatPiece,
   BattleShipCell,
   BattleShipColor,
   BattleShipGuess,
@@ -55,7 +55,7 @@ describe('BattleShipAreaController', () => {
     if (nextMove.gamePiece === 'Blue') {
       newState.blueBoard = newState.blueBoard.concat([
         {
-          type: nextMove.cell as BattleshipBoatPiece,
+          type: nextMove.cell as BattleShipBoatPiece,
           state: 'Safe',
           row: nextMove.row,
           col: nextMove.col,
@@ -65,7 +65,7 @@ describe('BattleShipAreaController', () => {
     if (nextMove.gamePiece === 'Green') {
       newState.greenBoard = newState.greenBoard.concat([
         {
-          type: nextMove.cell as BattleshipBoatPiece,
+          type: nextMove.cell as BattleShipBoatPiece,
           state: 'Safe',
           row: nextMove.row,
           col: nextMove.col,
@@ -130,6 +130,7 @@ describe('BattleShipAreaController', () => {
                 greenBoard: greenBoard || [],
                 winner: winner,
                 firstPlayer: firstPlayer || 'Blue',
+                theme: 'Military',
               },
             },
       },
@@ -355,26 +356,14 @@ describe('BattleShipAreaController', () => {
       updateGameWithPlacement(controller, {
         col: 0,
         gamePiece: 'Blue',
-        cell: 'Battleship_Front',
+        cell: 'Battleship_Front_Military',
         row: 0,
       });
-      expect(controller.blueBoard[0][0].type).toBe('Battleship_Front');
+      expect(controller.blueBoard[0][0].type).toBe('Battleship_Front_Military');
       //Also check that the rest are still undefined
       for (let i = 0; i < BATTLESHIP_ROWS; i++) {
         for (let j = 0; j < BATTLESHIP_COLS; j++) {
           if (!((i === 0 && j == 0) || (i == BATTLESHIP_ROWS - 1 && j === BATTLESHIP_COLS - 1))) {
-            // expect(controller.blueBoard[i][j]).toBe({
-            //   type: 'Ocean',
-            //   state: 'Safe',
-            //   row: i,
-            //   col: j,
-            // });
-            // expect(controller.greenBoard[i][j]).toBe({
-            //   type: 'Ocean',
-            //   state: 'Safe',
-            //   row: i,
-            //   col: j,
-            // });
             expect(controller.blueBoard[i][j].type).toBe('Ocean');
             expect(controller.greenBoard[i][j].type).toBe('Ocean');
           }

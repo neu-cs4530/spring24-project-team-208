@@ -716,7 +716,7 @@ describe('BattleShipGame', () => {
           true,
         );
         expect(game.state.blueBoard[0]).toEqual({
-          type: 'Battleship_Back',
+          type: 'Battleship_Back_Military',
           state: 'Safe',
           row: 0,
           col: 0,
@@ -891,7 +891,7 @@ describe('BattleShipGame', () => {
       });
     });
   });
-  describe('winning game', () => {
+  describe('Winning a Game', () => {
     const blue = createPlayerForTesting();
     const green = createPlayerForTesting();
     beforeEach(() => {

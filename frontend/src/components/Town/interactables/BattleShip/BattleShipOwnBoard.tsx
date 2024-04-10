@@ -2,7 +2,7 @@ import { Modal, useDisclosure, useToast } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import BattleShipAreaController from '../../../../classes/interactable/BattleShipAreaController';
 import useTownController from '../../../../hooks/useTownController';
-import { BattleshipBoatPiece, BattleShipCell } from '../../../../types/CoveyTownSocket';
+import { BattleShipBoatPiece, BattleShipCell } from '../../../../types/CoveyTownSocket';
 import { battleshipLogo, crosshair, scratch, smallNotebook } from './BattleshipMenuSprites';
 import { BattleShipBoardCell } from './BattleshipComponents/BattleshipBoardCell';
 import { EnemyCounter } from './BattleshipComponents/EnemyCounter';
@@ -59,10 +59,9 @@ export default function BattleShipOwnBoard({
   );
   const [isOurTurn, setIsOurTurn] = useState<boolean>(gameAreaController.isOurTurn);
   const [chosenCell, setChosenCell] = useState<BattleShipCell>();
-  const [chosenBoat, setChosenBoat] = useState<BattleshipBoatPiece>();
+  const [chosenBoat, setChosenBoat] = useState<BattleShipBoatPiece>();
   const [isVertical, setIsVertical] = useState<boolean>(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
-
   const inPlacement = gameAreaController.status === 'PLACING_BOATS';
   const openNotebook = () => {
     onOpen();

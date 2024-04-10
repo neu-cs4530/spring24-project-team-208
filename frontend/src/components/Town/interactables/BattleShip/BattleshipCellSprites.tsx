@@ -2,143 +2,282 @@ import React from 'react';
 import { Image } from '@chakra-ui/react';
 const CELL_SIZE = 54;
 
-export const BATTLESHIP_PIECE_STORE = [
+export const MILITARY_PIECE_STORE = [
   {
-    name: 'Aircraft_Back',
+    name: 'Aircraft_Back_Military',
     component: (
       <Image
-        src='./battleship_sprites/BattleshipCellSprites/Aircraft_Back.png'
+        src='./battleship_sprites/BattleshipCellSprites/Military/Aircraft_Back_Military.png'
         style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
   {
-    name: 'Aircraft_Middle_1',
+    name: 'Aircraft_Middle_1_Military',
     component: (
       <Image
-        src='./battleship_sprites/BattleshipCellSprites/Aircraft_Middle.png'
+        src='./battleship_sprites/BattleshipCellSprites/Military/Aircraft_Middle_Military.png'
         style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
   {
-    name: 'Aircraft_Middle_2',
+    name: 'Aircraft_Middle_2_Military',
     component: (
       <Image
-        src='./battleship_sprites/BattleshipCellSprites/Aircraft_Middle.png'
+        src='./battleship_sprites/BattleshipCellSprites/Military/Aircraft_Middle_Military.png'
         style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
   {
-    name: 'Aircraft_Front',
+    name: 'Aircraft_Front_Military',
     component: (
       <Image
-        src='./battleship_sprites/BattleshipCellSprites/Aircraft_Front.png'
+        src='./battleship_sprites/BattleshipCellSprites/Military/Aircraft_Front_Military.png'
         style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
   {
-    name: 'Battleship_Back',
+    name: 'Battleship_Back_Military',
     component: (
       <Image
-        src='./battleship_sprites/BattleshipCellSprites/Battleship_Back.png'
+        src='./battleship_sprites/BattleshipCellSprites/Military/Battleship_Back_Military.png'
         style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
   {
-    name: 'Battleship_Middle_1',
+    name: 'Battleship_Middle_1_Military',
     component: (
       <Image
-        src='./battleship_sprites/BattleshipCellSprites/Battleship_Middle_1.png'
+        src='./battleship_sprites/BattleshipCellSprites/Military/Battleship_Middle_1_Military.png'
         style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
   {
-    name: 'Battleship_Middle_2',
+    name: 'Battleship_Middle_2_Military',
     component: (
       <Image
-        src='./battleship_sprites/BattleshipCellSprites/Battleship_Middle_2.png'
+        src='./battleship_sprites/BattleshipCellSprites/Military/Battleship_Middle_2_Military.png'
         style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
   {
-    name: 'Battleship_Middle_3',
+    name: 'Battleship_Middle_3_Military',
     component: (
       <Image
-        src='./battleship_sprites/BattleshipCellSprites/Battleship_Middle_3.png'
+        src='./battleship_sprites/BattleshipCellSprites/Military/Battleship_Middle_3_Military.png'
         style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
   {
-    name: 'Battleship_Front',
+    name: 'Battleship_Front_Military',
     component: (
       <Image
-        src='./battleship_sprites/BattleshipCellSprites/Battleship_Front.png'
+        src='./battleship_sprites/BattleshipCellSprites/Military/Battleship_Front_Military.png'
         style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
   {
-    name: 'Cruiser_Back',
+    name: 'Cruiser_Back_Military',
     component: (
       <Image
-        src='./battleship_sprites/BattleshipCellSprites/Cruiser_Back.png'
+        src='./battleship_sprites/BattleshipCellSprites/Military/Cruiser_Back_Military.png'
         style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
   {
-    name: 'Cruiser_Front',
+    name: 'Cruiser_Front_Military',
     component: (
       <Image
-        src='./battleship_sprites/BattleshipCellSprites/Cruiser_Front.png'
+        src='./battleship_sprites/BattleshipCellSprites/Military/Cruiser_Front_Military.png'
         style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
   {
-    name: 'Destroyer',
+    name: 'Destroyer_Military',
     component: (
       <Image
-        src='./battleship_sprites/BattleshipCellSprites/Destroyer.png'
+        src='./battleship_sprites/BattleshipCellSprites/Military/Destroyer_Military.png'
         style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
   {
-    name: 'Submarine_Back',
+    name: 'Submarine_Back_Military',
     component: (
       <Image
-        src='./battleship_sprites/BattleshipCellSprites/Submarine_Back.png'
+        src='./battleship_sprites/BattleshipCellSprites/Military/Submarine_Back_Military.png'
         style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
   {
-    name: 'Submarine_Middle',
+    name: 'Submarine_Middle_Military',
     component: (
       <Image
-        src='./battleship_sprites/BattleshipCellSprites/Submarine_Middle.png'
+        src='./battleship_sprites/BattleshipCellSprites/Military/Submarine_Middle_Military.png'
         style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
   {
-    name: 'Submarine_Front',
+    name: 'Submarine_Front_Military',
     component: (
       <Image
-        src='./battleship_sprites/BattleshipCellSprites/Submarine_Front.png'
+        src='./battleship_sprites/BattleshipCellSprites/Military/Submarine_Front_Military.png'
         style={{ height: CELL_SIZE, width: CELL_SIZE }}
       />
     ),
   },
 ];
+
+export const BARBIE_PIECE_STORE = [
+  {
+    name: 'Aircraft_Back_Barbie',
+    component: (
+      <Image
+        src='./battleship_sprites/BattleshipCellSprites/Barbie/Aircraft_Back_Barbie.png'
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
+      />
+    ),
+  },
+  {
+    name: 'Aircraft_Middle_1_Barbie',
+    component: (
+      <Image
+        src='./battleship_sprites/BattleshipCellSprites/Barbie/Aircraft_Middle_1_Barbie.png'
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
+      />
+    ),
+  },
+  {
+    name: 'Aircraft_Middle_2_Barbie',
+    component: (
+      <Image
+        src='./battleship_sprites/BattleshipCellSprites/Barbie/Aircraft_Middle_2_Barbie.png'
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
+      />
+    ),
+  },
+  {
+    name: 'Aircraft_Front_Barbie',
+    component: (
+      <Image
+        src='./battleship_sprites/BattleshipCellSprites/Barbie/Aircraft_Front_Barbie.png'
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
+      />
+    ),
+  },
+  {
+    name: 'Battleship_Back_Barbie',
+    component: (
+      <Image
+        src='./battleship_sprites/BattleshipCellSprites/Barbie/Battleship_Back_Barbie.png'
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
+      />
+    ),
+  },
+  {
+    name: 'Battleship_Middle_1_Barbie',
+    component: (
+      <Image
+        src='./battleship_sprites/BattleshipCellSprites/Barbie/Battleship_Middle_1_Barbie.png'
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
+      />
+    ),
+  },
+  {
+    name: 'Battleship_Middle_2_Barbie',
+    component: (
+      <Image
+        src='./battleship_sprites/BattleshipCellSprites/Barbie/Battleship_Middle_2_Barbie.png'
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
+      />
+    ),
+  },
+  {
+    name: 'Battleship_Middle_3_Barbie',
+    component: (
+      <Image
+        src='./battleship_sprites/BattleshipCellSprites/Barbie/Battleship_Middle_3_Barbie.png'
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
+      />
+    ),
+  },
+  {
+    name: 'Battleship_Front_Barbie',
+    component: (
+      <Image
+        src='./battleship_sprites/BattleshipCellSprites/Barbie/Battleship_Front_Barbie.png'
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
+      />
+    ),
+  },
+  {
+    name: 'Cruiser_Back_Barbie',
+    component: (
+      <Image
+        src='./battleship_sprites/BattleshipCellSprites/Barbie/Cruiser_Back_Barbie.png'
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
+      />
+    ),
+  },
+  {
+    name: 'Cruiser_Front_Barbie',
+    component: (
+      <Image
+        src='./battleship_sprites/BattleshipCellSprites/Barbie/Cruiser_Front_Barbie.png'
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
+      />
+    ),
+  },
+  {
+    name: 'Destroyer_Barbie',
+    component: (
+      <Image
+        src='./battleship_sprites/BattleshipCellSprites/Barbie/Destroyer_Barbie.png'
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
+      />
+    ),
+  },
+  {
+    name: 'Submarine_Back_Barbie',
+    component: (
+      <Image
+        src='./battleship_sprites/BattleshipCellSprites/Barbie/Submarine_Back_Barbie.png'
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
+      />
+    ),
+  },
+  {
+    name: 'Submarine_Middle_Barbie',
+    component: (
+      <Image
+        src='./battleship_sprites/BattleshipCellSprites/Barbie/Submarine_Middle_Barbie.png'
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
+      />
+    ),
+  },
+  {
+    name: 'Submarine_Front_Barbie',
+    component: (
+      <Image
+        src='./battleship_sprites/BattleshipCellSprites/Barbie/Submarine_Front_Barbie.png'
+        style={{ height: CELL_SIZE, width: CELL_SIZE }}
+      />
+    ),
+  },
+];
+
 
 export const OCEAN_STORE = [
   <Image
