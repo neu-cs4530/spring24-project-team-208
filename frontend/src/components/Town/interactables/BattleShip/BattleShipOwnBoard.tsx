@@ -149,7 +149,7 @@ export default function BattleShipOwnBoard({
       const blueData = await getBattleShipData(gameAreaController.blue?.userName || '');
       setBlue(blueData);
       const greenData = await getBattleShipData(gameAreaController.green?.userName || '');
-      setBlue(greenData);
+      setGreen(greenData);
     };
     getData();
   }, [gameAreaController.blue, gameAreaController.green]);
@@ -287,9 +287,9 @@ export default function BattleShipOwnBoard({
           left: '1%',
           fontSize: '1.5rem',
         }}>
-        {`${gameAreaController.green?.userName} (${green?.elo || '0'})  vs.  ${
+        {`${gameAreaController.green?.userName} (${green ? Math.round(green.elo) : 0})  vs.  ${
           gameAreaController.blue?.userName
-        }) (${blue?.elo || '0'})`}
+        } (${blue ? Math.round(blue.elo) : 0})`}
       </span>
       <ModalCloseButton />
     </div>
